@@ -1,0 +1,50 @@
+id: tempest_frame_drop
+label: Frame Dropper
+category: '[Tempest]'
+templates:
+  imports: import tempest
+  make: tempest.frame_drop(${Htotal}, ${Vtotal}, ${correct_sampling}, ${max_deviation},
+    ${update_proba}, ${actual_samp_rate})
+parameters:
+- id: Htotal
+  label: Horizontal total
+  dtype: int
+- id: Vtotal
+  label: Vertical total
+  dtype: int
+- id: correct_sampling
+  label: Correct sampling?
+  dtype: enum
+  default: 1
+  options: [1, 0]
+  option_labels: ['Yes', 'No']
+- id: max_deviation
+  label: Max. deviation
+  dtype: float
+- id: update_proba
+  label: Update prob.
+  dtype: float
+- id: actual_samp_rate
+  label: Samp rate
+  dtype: real
+inputs:
+- label: in
+  domain: stream
+  dtype: complex
+- label: en
+  domain: message
+  optional: true
+- label: smpl
+  domain: message
+  optional: true
+- label: ratio
+  domain: message
+  optional: true
+outputs:
+- label: out
+  domain: stream
+  dtype: complex
+- label: ratio
+  domain: message
+  optional: true
+file_format: 1

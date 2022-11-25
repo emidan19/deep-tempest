@@ -1,0 +1,57 @@
+[
+{
+  "directory": "/home/emidan19/gr-tempest/build/lib",
+  "command": "/usr/bin/c++  -DBOOST_ALL_NO_LIB -DBOOST_ATOMIC_DYN_LINK -DBOOST_FILESYSTEM_DYN_LINK -DBOOST_PROGRAM_OPTIONS_DYN_LINK -DBOOST_REGEX_DYN_LINK -DBOOST_SYSTEM_DYN_LINK -DBOOST_THREAD_DYN_LINK -DFFTW3F_THREADS -DGR_CTRLPORT -Dgnuradio_tempest_EXPORTS -I/home/emidan19/gr-tempest/lib/../include  -O3 -DNDEBUG -fPIC   -fvisibility=hidden -std=gnu++11 -o CMakeFiles/gnuradio-tempest.dir/sampling_synchronization_impl.cc.o -c /home/emidan19/gr-tempest/lib/sampling_synchronization_impl.cc",
+  "file": "/home/emidan19/gr-tempest/lib/sampling_synchronization_impl.cc"
+},
+{
+  "directory": "/home/emidan19/gr-tempest/build/lib",
+  "command": "/usr/bin/c++  -DBOOST_ALL_NO_LIB -DBOOST_ATOMIC_DYN_LINK -DBOOST_FILESYSTEM_DYN_LINK -DBOOST_PROGRAM_OPTIONS_DYN_LINK -DBOOST_REGEX_DYN_LINK -DBOOST_SYSTEM_DYN_LINK -DBOOST_THREAD_DYN_LINK -DFFTW3F_THREADS -DGR_CTRLPORT -Dgnuradio_tempest_EXPORTS -I/home/emidan19/gr-tempest/lib/../include  -O3 -DNDEBUG -fPIC   -fvisibility=hidden -std=gnu++11 -o CMakeFiles/gnuradio-tempest.dir/framing_impl.cc.o -c /home/emidan19/gr-tempest/lib/framing_impl.cc",
+  "file": "/home/emidan19/gr-tempest/lib/framing_impl.cc"
+},
+{
+  "directory": "/home/emidan19/gr-tempest/build/lib",
+  "command": "/usr/bin/c++  -DBOOST_ALL_NO_LIB -DBOOST_ATOMIC_DYN_LINK -DBOOST_FILESYSTEM_DYN_LINK -DBOOST_PROGRAM_OPTIONS_DYN_LINK -DBOOST_REGEX_DYN_LINK -DBOOST_SYSTEM_DYN_LINK -DBOOST_THREAD_DYN_LINK -DFFTW3F_THREADS -DGR_CTRLPORT -Dgnuradio_tempest_EXPORTS -I/home/emidan19/gr-tempest/lib/../include  -O3 -DNDEBUG -fPIC   -fvisibility=hidden -std=gnu++11 -o CMakeFiles/gnuradio-tempest.dir/Hsync_impl.cc.o -c /home/emidan19/gr-tempest/lib/Hsync_impl.cc",
+  "file": "/home/emidan19/gr-tempest/lib/Hsync_impl.cc"
+},
+{
+  "directory": "/home/emidan19/gr-tempest/build/lib",
+  "command": "/usr/bin/c++  -DBOOST_ALL_NO_LIB -DBOOST_ATOMIC_DYN_LINK -DBOOST_FILESYSTEM_DYN_LINK -DBOOST_PROGRAM_OPTIONS_DYN_LINK -DBOOST_REGEX_DYN_LINK -DBOOST_SYSTEM_DYN_LINK -DBOOST_THREAD_DYN_LINK -DFFTW3F_THREADS -DGR_CTRLPORT -Dgnuradio_tempest_EXPORTS -I/home/emidan19/gr-tempest/lib/../include  -O3 -DNDEBUG -fPIC   -fvisibility=hidden -std=gnu++11 -o CMakeFiles/gnuradio-tempest.dir/normalize_flow_impl.cc.o -c /home/emidan19/gr-tempest/lib/normalize_flow_impl.cc",
+  "file": "/home/emidan19/gr-tempest/lib/normalize_flow_impl.cc"
+},
+{
+  "directory": "/home/emidan19/gr-tempest/build/lib",
+  "command": "/usr/bin/c++  -DBOOST_ALL_NO_LIB -DBOOST_ATOMIC_DYN_LINK -DBOOST_FILESYSTEM_DYN_LINK -DBOOST_PROGRAM_OPTIONS_DYN_LINK -DBOOST_REGEX_DYN_LINK -DBOOST_SYSTEM_DYN_LINK -DBOOST_THREAD_DYN_LINK -DFFTW3F_THREADS -DGR_CTRLPORT -Dgnuradio_tempest_EXPORTS -I/home/emidan19/gr-tempest/lib/../include  -O3 -DNDEBUG -fPIC   -fvisibility=hidden -std=gnu++11 -o CMakeFiles/gnuradio-tempest.dir/fine_sampling_synchronization_impl.cc.o -c /home/emidan19/gr-tempest/lib/fine_sampling_synchronization_impl.cc",
+  "file": "/home/emidan19/gr-tempest/lib/fine_sampling_synchronization_impl.cc"
+},
+{
+  "directory": "/home/emidan19/gr-tempest/build/lib",
+  "command": "/usr/bin/c++  -DBOOST_ALL_NO_LIB -DBOOST_ATOMIC_DYN_LINK -DBOOST_FILESYSTEM_DYN_LINK -DBOOST_PROGRAM_OPTIONS_DYN_LINK -DBOOST_REGEX_DYN_LINK -DBOOST_SYSTEM_DYN_LINK -DBOOST_THREAD_DYN_LINK -DFFTW3F_THREADS -DGR_CTRLPORT -Dgnuradio_tempest_EXPORTS -I/home/emidan19/gr-tempest/lib/../include  -O3 -DNDEBUG -fPIC   -fvisibility=hidden -std=gnu++11 -o CMakeFiles/gnuradio-tempest.dir/sync_detector_impl.cc.o -c /home/emidan19/gr-tempest/lib/sync_detector_impl.cc",
+  "file": "/home/emidan19/gr-tempest/lib/sync_detector_impl.cc"
+},
+{
+  "directory": "/home/emidan19/gr-tempest/build/lib",
+  "command": "/usr/bin/c++  -DBOOST_ALL_NO_LIB -DBOOST_ATOMIC_DYN_LINK -DBOOST_FILESYSTEM_DYN_LINK -DBOOST_PROGRAM_OPTIONS_DYN_LINK -DBOOST_REGEX_DYN_LINK -DBOOST_SYSTEM_DYN_LINK -DBOOST_THREAD_DYN_LINK -DFFTW3F_THREADS -DGR_CTRLPORT -Dgnuradio_tempest_EXPORTS -I/home/emidan19/gr-tempest/lib/../include  -O3 -DNDEBUG -fPIC   -fvisibility=hidden -std=gnu++11 -o CMakeFiles/gnuradio-tempest.dir/frame_drop_impl.cc.o -c /home/emidan19/gr-tempest/lib/frame_drop_impl.cc",
+  "file": "/home/emidan19/gr-tempest/lib/frame_drop_impl.cc"
+},
+{
+  "directory": "/home/emidan19/gr-tempest/build/lib",
+  "command": "/usr/bin/c++  -DBOOST_ALL_NO_LIB -DBOOST_ATOMIC_DYN_LINK -DBOOST_FILESYSTEM_DYN_LINK -DBOOST_PROGRAM_OPTIONS_DYN_LINK -DBOOST_REGEX_DYN_LINK -DBOOST_SYSTEM_DYN_LINK -DBOOST_THREAD_DYN_LINK -DFFTW3F_THREADS -DGR_CTRLPORT -Dgnuradio_tempest_EXPORTS -I/home/emidan19/gr-tempest/lib/../include  -O3 -DNDEBUG -fPIC   -fvisibility=hidden -std=gnu++11 -o CMakeFiles/gnuradio-tempest.dir/fft_peak_fine_sampling_sync_impl.cc.o -c /home/emidan19/gr-tempest/lib/fft_peak_fine_sampling_sync_impl.cc",
+  "file": "/home/emidan19/gr-tempest/lib/fft_peak_fine_sampling_sync_impl.cc"
+},
+{
+  "directory": "/home/emidan19/gr-tempest/build/lib",
+  "command": "/usr/bin/c++  -DBOOST_ALL_NO_LIB -DBOOST_ATOMIC_DYN_LINK -DBOOST_FILESYSTEM_DYN_LINK -DBOOST_PROGRAM_OPTIONS_DYN_LINK -DBOOST_REGEX_DYN_LINK -DBOOST_SYSTEM_DYN_LINK -DBOOST_THREAD_DYN_LINK -DFFTW3F_THREADS -DGR_CTRLPORT -Dgnuradio_tempest_EXPORTS -I/home/emidan19/gr-tempest/lib/../include  -O3 -DNDEBUG -fPIC   -fvisibility=hidden -std=gnu++11 -o CMakeFiles/gnuradio-tempest.dir/infer_screen_resolution_impl.cc.o -c /home/emidan19/gr-tempest/lib/infer_screen_resolution_impl.cc",
+  "file": "/home/emidan19/gr-tempest/lib/infer_screen_resolution_impl.cc"
+},
+{
+  "directory": "/home/emidan19/gr-tempest/build/lib",
+  "command": "/usr/bin/c++  -DBOOST_ALL_NO_LIB -DBOOST_ATOMIC_DYN_LINK -DBOOST_FILESYSTEM_DYN_LINK -DBOOST_PROGRAM_OPTIONS_DYN_LINK -DBOOST_REGEX_DYN_LINK -DBOOST_SYSTEM_DYN_LINK -DBOOST_THREAD_DYN_LINK -DFFTW3F_THREADS -DGR_CTRLPORT -Dgnuradio_tempest_EXPORTS -I/home/emidan19/gr-tempest/lib/../include  -O3 -DNDEBUG -fPIC   -fvisibility=hidden -std=gnu++11 -o CMakeFiles/gnuradio-tempest.dir/ssamp_correction_impl.cc.o -c /home/emidan19/gr-tempest/lib/ssamp_correction_impl.cc",
+  "file": "/home/emidan19/gr-tempest/lib/ssamp_correction_impl.cc"
+},
+{
+  "directory": "/home/emidan19/gr-tempest/build/swig",
+  "command": "/usr/bin/c++  -DBOOST_ALL_NO_LIB -DBOOST_ATOMIC_DYN_LINK -DBOOST_FILESYSTEM_DYN_LINK -DBOOST_PROGRAM_OPTIONS_DYN_LINK -DBOOST_REGEX_DYN_LINK -DBOOST_SYSTEM_DYN_LINK -DBOOST_THREAD_DYN_LINK -DFFTW3F_THREADS -DGR_CTRLPORT -Dtempest_swig_EXPORTS -I/home/emidan19/gr-tempest/build/swig -I/home/emidan19/gr-tempest/swig -I/usr/include/gnuradio/swig -I/home/emidan19/gr-tempest/lib/../include -isystem /usr/include/python3.8  -O3 -DNDEBUG -fPIC   -fvisibility=hidden -std=gnu++11 -o CMakeFiles/tempest_swig.dir/CMakeFiles/tempest_swig.dir/tempest_swigPYTHON_wrap.cxx.o -c /home/emidan19/gr-tempest/build/swig/CMakeFiles/tempest_swig.dir/tempest_swigPYTHON_wrap.cxx",
+  "file": "/home/emidan19/gr-tempest/build/swig/CMakeFiles/tempest_swig.dir/tempest_swigPYTHON_wrap.cxx"
+}
+]

@@ -1,0 +1,21 @@
+id: tempest_message_to_var
+label: message_to_var
+category: '[Tempest]'
+
+parameters:
+-   id: target
+    label: Variable
+    dtype: string
+    default: 'delay_0'
+    optional: true
+inputs:
+-   label: port0
+    domain: message
+    optional: true
+
+
+templates:
+    imports: import tempest
+    make: tempest.message_to_var(${ 'self.set_' + context.get('target')() })
+
+file_format: 1

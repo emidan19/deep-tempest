@@ -1,0 +1,37 @@
+id: tempest_fine_sampling_synchronization
+label: Fine sampling synchronization
+category: '[Tempest]'
+templates:
+  imports: import tempest
+  make: tempest.fine_sampling_synchronization(${Htotal}, ${Vtotal}, ${correct_sampling},
+    ${max_deviation}, ${update_proba})
+  callbacks: 
+  - set_Htotal_Vtotal(${Htotal}, ${Vtotal})
+parameters:
+- id: Htotal
+  label: Horizontal px
+  dtype: int
+- id: Vtotal
+  label: Vertical px
+  dtype: int
+- id: correct_sampling
+  label: Correct sampling?
+  dtype: enum
+  default: 1
+  options: [1, 0]
+  option_labels: ['Yes', 'No']
+- id: max_deviation
+  label: Max. deviation (%)
+  dtype: float
+- id: update_proba
+  label: Update proba.
+  dtype: float
+inputs:
+- label: in
+  domain: stream
+  dtype: complex
+outputs:
+- label: out
+  domain: stream
+  dtype: complex
+file_format: 1

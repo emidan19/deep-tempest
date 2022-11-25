@@ -1,0 +1,25 @@
+id: tempest_sampling_synchronization
+label: Sampling synchronization
+category: '[Tempest]'
+templates:
+  imports: import tempest
+  make: tempest.sampling_synchronization(${Htotal}, ${manual_correction})
+  callbacks: 
+  - set_Htotal(${Htotal})
+  - set_manual_correction(${manual_correction})
+parameters:
+- id: Htotal
+  label: Horizontal px (total)
+  dtype: int
+- id: manual_correction
+  label: Manual correction
+  dtype: real
+inputs:
+- label: in
+  domain: stream
+  dtype: complex
+outputs:
+- label: out
+  domain: stream
+  dtype: complex
+file_format: 1
