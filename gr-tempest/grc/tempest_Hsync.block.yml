@@ -1,0 +1,22 @@
+id: tempest_Hsync
+label: Horizontal Sync
+category: '[Tempest]'
+templates:
+  imports: from gnuradio import tempest
+  make: tempest.Hsync(${Htotal}, ${delay})
+parameters:
+- id: Htotal
+  label: Htotal
+  dtype: int
+- id: delay
+  label: Delay
+  dtype: int
+inputs:
+- label: in
+  domain: stream
+  dtype: complex
+outputs:
+- label: out
+  domain: stream
+  dtype: complex
+file_format: 1
