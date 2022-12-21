@@ -454,7 +454,7 @@ def TMDS_serial(I):
     Iserials.append(channel_list)
 
   # Digital to analog value mapping: [0,1]-->[-A,A] (A=1)
-  Iserials = 2*np.array(Iserials,dtype='int32') - 1
+  Iserials = np.sum(2*np.array(Iserials,dtype='int32') - 1, axis=0)
 
   del(channel_list)
 
