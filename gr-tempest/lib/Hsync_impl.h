@@ -1,6 +1,10 @@
 /* -*- c++ -*- */
 /* 
  * Copyright 2020 <+YOU OR YOUR COMPANY+>.
+ *   Adapted to 3.10 by Santiago Fernandez <santiago.fernandez.rovira@fing.edu.uy>
+ 
+ *   Instituto de Ingenieria Electrica, Facultad de Ingenieria,
+ *   Universidad de la Republica, Uruguay.
  * 
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by

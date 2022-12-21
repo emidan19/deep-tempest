@@ -1,0 +1,16 @@
+build/
+examples/*.py
+draft
+viejos
+old
+logs
+*.bak
+*.log
+*.pyc
+*.bin
+*.hex
+*.py~
+*.txt~
+*.sh~
+*~
+*.swp
