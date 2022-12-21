@@ -287,11 +287,11 @@ def TMDS_blanking (h_total, v_total, h_active, v_active, h_front_porch, v_front_
 
   # (C1,C0)=(0,1) region
   img_blank[:v_front_porch,h_front_porch:h_blank-h_back_porch] = 0b0010101011
-  img_blank[v_blank-v_back_porch:v_blank,h_front_porch:h_blank-h_back_porch] = 0b0010101011
+  img_blank[v_blank-v_back_porch:,h_front_porch:h_blank-h_back_porch] = 0b0010101011
 
   # (C1,C0)=(1,0) region
   img_blank[v_front_porch:v_blank-v_back_porch,:h_front_porch] = 0b0101010100
-  img_blank[v_front_porch:v_blank-v_back_porch,h_blank-h_back_porch] = 0b0101010100
+  img_blank[v_front_porch:v_blank-v_back_porch,h_blank-h_back_porch:] = 0b0101010100
 
   # (C1,C0)=(1,1) region
   img_blank[v_front_porch:v_blank-v_back_porch,v_front_porch:h_blank-h_back_porch] = 0b1010101011
