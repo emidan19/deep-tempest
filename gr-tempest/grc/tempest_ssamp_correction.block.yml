@@ -1,0 +1,49 @@
+id: tempest_ssamp_correction
+label: Sampling Correction Interpolator
+category: '[Tempest]'
+
+templates:
+  imports: import tempest
+  make: tempest.ssamp_correction(${Htotal}, ${Vtotal}, ${correct_sampling}, ${max_deviation})
+
+  callbacks: 
+  - set_Htotal_Vtotal(${Htotal}, ${Vtotal})
+#  Make one 'parameters' list entry for every parameter you want settable from the GUI.
+#     Keys include:
+#     * id (makes the value accessible as \$keyname, e.g. in the make entry)
+#     * label (label shown in the GUI)
+#     * dtype (e.g. int, float, complex, byte, short, xxx_vector, ...)
+
+parameters:
+- id: Htotal
+  label: Horizontal px
+  dtype: int
+- id: Vtotal
+  label: Vertical px
+  dtype: int
+- id: correct_sampling
+  label: Correct sampling?
+  dtype: enum
+  default: 1
+  options: [1, 0]
+  option_labels: ['Yes', 'No']
+- id: max_deviation
+  label: Max. deviation (%)
+  dtype: float
+  default: 10
+inputs:
+- label: in
+  domain: stream
+  dtype: complex
+- label: ratio
+  domain: message
+  optional: true
+- label: en
+  domain: message
+  optional: true
+outputs:
+- label: out
+  domain: stream
+  dtype: complex
+
+file_format: 1

@@ -1,0 +1,24 @@
+id: tempest_Hsync
+label: Horizontal Sync
+category: '[Tempest]'
+templates:
+  imports: import tempest
+  make: tempest.Hsync(${Htotal}, ${delay})
+  callbacks:
+  - set_Htotal_and_delay(${Htotal},${delay}) 
+parameters:
+- id: Htotal
+  label: Horizontal px (total)
+  dtype: int
+- id: delay
+  label: Delay
+  dtype: int
+inputs:
+- label: in
+  domain: stream
+  dtype: complex
+outputs:
+- label: out
+  domain: stream
+  dtype: complex
+file_format: 1

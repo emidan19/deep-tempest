@@ -1,0 +1,53 @@
+id: tempest_fft_peak_fine_sampling_sync
+label: fft_peak_fine_sampling_sync
+category: '[Tempest]'
+
+templates:
+  imports: import tempest
+  make: tempest.fft_peak_fine_sampling_sync(${sample_rate}, ${size}, ${refresh_rate}, ${Vvisible}, ${Hvisible}, ${automatic_mode})
+
+#  Make one 'parameters' list entry for every parameter you want settable from the GUI.
+#     Keys include:
+#     * id (makes the value accessible as \$keyname, e.g. in the make entry)
+#     * label (label shown in the GUI)
+#     * dtype (e.g. int, float, complex, byte, short, xxx_vector, ...)
+parameters:
+- id: sample_rate
+  label: Samp_rate
+  dtype: int
+- id: size
+  label: Fft_size
+  dtype: int
+- id: refresh_rate
+  label: Refresh_rate
+  dtype: int
+- id: Vvisible
+  label: vvisible
+  dtype: int
+- id: Hvisible
+  label: hvisible
+  dtype: int
+- id: automatic_mode
+  label: automatic_mode
+  dtype: bool
+inputs:
+- label: in
+  domain: stream
+  dtype: float
+- label: en
+  domain: message
+  optional: true
+outputs:
+- label: out
+  domain: stream
+  dtype: float
+- label: en
+  domain: message
+  optional: true
+- label: ratio
+  domain: message
+  optional: true
+- label: rate
+  domain: message
+  optional: true
+file_format: 1

@@ -1,0 +1,30 @@
+id: tempest_framing
+label: Framing
+category: '[Tempest]'
+templates:
+  imports: import tempest
+  make: tempest.framing(${Htotal}, ${Vtotal}, ${Hdisplay}, ${Vdisplay})
+  callbacks: 
+  - set_Htotal_and_Vtotal(${Htotal},${Vtotal})
+parameters:
+- id: Htotal
+  label: Horizontal px (total)
+  dtype: int
+- id: Vtotal
+  label: Vertical px (total)
+  dtype: int
+- id: Hdisplay
+  label: Horizontal px (display)
+  dtype: int
+- id: Vdisplay
+  label: Vertical px (display)
+  dtype: int
+inputs:
+- label: in
+  domain: stream
+  dtype: float
+outputs:
+- label: out
+  domain: stream
+  dtype: float
+file_format: 1
