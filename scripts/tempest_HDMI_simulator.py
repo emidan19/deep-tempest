@@ -20,7 +20,8 @@ from DTutils import TMDS_encoding, TMDS_serial
 #%%
 
 # Cargar imagen prueba
-I=imread('../images/VAMO!!.png')
+# I=imread('../images/VAMO!!.png')
+I=imread('../images/test.jpeg')
 # I=imread('../images/black_cube_800x600.jpg')
 # I=imread('../images/1920x1080_test.png')
 # I=imread('../images/1920x1080_test2.png')
@@ -61,7 +62,7 @@ bit_rate = 10*px_rate
 t_continuous = np.arange(len(I_TMDS_Tx))/bit_rate
 
 # Armónico elegido para centrar el espectro
-N_harm = 1
+N_harm = 3
 harm = N_harm*px_rate
 
 # Llevada a bandabase
@@ -83,8 +84,8 @@ plt.imshow(np.abs(I_reconst_px), cmap='gray')
 plt.show()
 
 #%%
-
-I_reconst_px_norm = I_reconst_px - np.min(I_reconst_px)
+I_reconst_px_norm = np.abs(I_reconst_px)
+I_reconst_px_norm = I_reconst_px_norm - np.min(I_reconst_px_norm)
 I_reconst_px_norm = 255*I_reconst_px_norm/np.max(I_reconst_px_norm)
 
 im = Image.fromarray(I_reconst_px_norm.astype('uint8'))
