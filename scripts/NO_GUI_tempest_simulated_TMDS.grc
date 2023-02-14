@@ -1,0 +1,361 @@
+options:
+  parameters:
+    author: ''
+    category: '[GRC Hier Blocks]'
+    cmake_opt: ''
+    comment: ''
+    copyright: ''
+    description: ''
+    gen_cmake: 'On'
+    gen_linking: dynamic
+    generate_options: no_gui
+    hier_block_src_path: '.:'
+    id: NO_GUI_tempest_simulated_TMDS
+    max_nouts: '0'
+    output_language: python
+    placement: (0,0)
+    qt_qss_theme: ''
+    realtime_scheduling: ''
+    run: 'True'
+    run_command: '{python} -u {filename}'
+    run_options: prompt
+    sizing_mode: fixed
+    thread_safe_setters: ''
+    title: Manual  Simulated Tempest TMDS Example
+    window_size: ''
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [8, 8]
+    rotation: 0
+    state: enabled
+
+blocks:
+- name: Hsize
+  id: variable
+  parameters:
+    comment: ''
+    value: '1056'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [440, 20]
+    rotation: 0
+    state: enabled
+- name: Hvisible
+  id: variable
+  parameters:
+    comment: ''
+    value: '800'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [352, 20]
+    rotation: 0
+    state: enabled
+- name: Vsize
+  id: variable
+  parameters:
+    comment: ''
+    value: '628'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [440, 84]
+    rotation: 0
+    state: enabled
+- name: Vvisible
+  id: variable
+  parameters:
+    comment: ''
+    value: '600'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [352, 84]
+    rotation: 0
+    state: enabled
+- name: harmonic
+  id: variable
+  parameters:
+    comment: ''
+    value: '3'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [528, 20.0]
+    rotation: 0
+    state: true
+- name: px_rate
+  id: variable
+  parameters:
+    comment: ''
+    value: Hsize*Vsize*refresh_rate
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [8, 76.0]
+    rotation: 0
+    state: enabled
+- name: refresh_rate
+  id: variable
+  parameters:
+    comment: ''
+    value: '60'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [248, 20]
+    rotation: 0
+    state: enabled
+- name: samp_rate
+  id: variable
+  parameters:
+    comment: ''
+    value: int(10*px_rate)
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [8, 196.0]
+    rotation: 0
+    state: enabled
+- name: usrp_rate
+  id: variable
+  parameters:
+    comment: ''
+    value: int(50e6)
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [8, 140]
+    rotation: 0
+    state: enabled
+- name: analog_sig_source_x_0
+  id: analog_sig_source_x
+  parameters:
+    affinity: ''
+    alias: ''
+    amp: '1'
+    comment: "Bajar a bandabase\ncierto arm\xF3nico"
+    freq: px_rate*harmonic
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    offset: '0'
+    phase: '0'
+    samp_rate: samp_rate
+    type: complex
+    waveform: analog.GR_COS_WAVE
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [808, 420.0]
+    rotation: 0
+    state: enabled
+- name: binary_serializer_0
+  id: binary_serializer
+  parameters:
+    M: '10'
+    N: '16'
+    affinity: ''
+    alias: ''
+    comment: ''
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    offset: '0'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [216, 220.0]
+    rotation: 0
+    state: enabled
+- name: binary_serializer_0_0
+  id: binary_serializer
+  parameters:
+    M: '10'
+    N: '16'
+    affinity: ''
+    alias: ''
+    comment: ''
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    offset: '0'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [216, 268.0]
+    rotation: 0
+    state: enabled
+- name: binary_serializer_0_0_0
+  id: binary_serializer
+  parameters:
+    M: '10'
+    N: '16'
+    affinity: ''
+    alias: ''
+    comment: 'Serializar cada
+
+      pixel codificado'
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    offset: '0'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [216, 308.0]
+    rotation: 0
+    state: enabled
+- name: blocks_add_const_vxx_0
+  id: blocks_add_const_vxx
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: 'Hacer que los bits valgan
+
+      -1 o 1 para cada canal'
+    const: '3'
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    type: float
+    vlen: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [624, 332.0]
+    rotation: 0
+    state: true
+- name: blocks_add_xx_0
+  id: blocks_add_xx
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: "Superposici\xF3n de\n canales\n(captaci\xF3n \nde antena)"
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    num_inputs: '3'
+    type: float
+    vlen: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [488, 256.0]
+    rotation: 0
+    state: enabled
+- name: blocks_float_to_complex_0
+  id: blocks_float_to_complex
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    vlen: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [824, 336.0]
+    rotation: 0
+    state: true
+- name: blocks_multiply_const_vxx_0
+  id: blocks_multiply_const_vxx
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    const: '2'
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    type: float
+    vlen: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [616, 284.0]
+    rotation: 0
+    state: true
+- name: blocks_multiply_xx_0
+  id: blocks_multiply_xx
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    num_inputs: '2'
+    type: complex
+    vlen: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1056, 352.0]
+    rotation: 0
+    state: enabled
+- name: blocks_null_sink_0
+  id: blocks_null_sink
+  parameters:
+    affinity: ''
+    alias: ''
+    bus_structure_sink: '[[0,],]'
+    comment: ''
+    num_inputs: '1'
+    type: complex
+    vlen: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1232, 368.0]
+    rotation: 0
+    state: true
+- name: tempest_TMDS_image_source_0
+  id: tempest_TMDS_image_source
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: "Levantar imagen y \ncodificarla TMDS"
+    image_file: /home/emidan19/Desktop/deep-tempest/Codigo Menoni Octave/black_cube_800x600.jpg
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    mode: '3'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [8, 256.0]
+    rotation: 0
+    state: enabled
+
+connections:
+- [analog_sig_source_x_0, '0', blocks_multiply_xx_0, '1']
+- [binary_serializer_0, '0', blocks_add_xx_0, '0']
+- [binary_serializer_0_0, '0', blocks_add_xx_0, '1']
+- [binary_serializer_0_0_0, '0', blocks_add_xx_0, '2']
+- [blocks_add_const_vxx_0, '0', blocks_float_to_complex_0, '0']
+- [blocks_add_xx_0, '0', blocks_multiply_const_vxx_0, '0']
+- [blocks_float_to_complex_0, '0', blocks_multiply_xx_0, '0']
+- [blocks_multiply_const_vxx_0, '0', blocks_add_const_vxx_0, '0']
+- [blocks_multiply_xx_0, '0', blocks_null_sink_0, '0']
+- [tempest_TMDS_image_source_0, '0', binary_serializer_0, '0']
+- [tempest_TMDS_image_source_0, '1', binary_serializer_0_0, '0']
+- [tempest_TMDS_image_source_0, '2', binary_serializer_0_0_0, '0']
+
+metadata:
+  file_format: 1

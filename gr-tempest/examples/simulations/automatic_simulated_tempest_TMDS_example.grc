@@ -176,27 +176,6 @@ blocks:
     coordinate: [226, 244]
     rotation: 0
     state: true
-- name: freq_error_norm
-  id: variable_qtgui_range
-  parameters:
-    comment: ''
-    gui_hint: tab_m@0
-    label: Error en frecuencia normalizado
-    min_len: '300'
-    orient: Qt.Horizontal
-    rangeType: float
-    start: '-0.1'
-    step: '0.00001'
-    stop: '0.1'
-    value: '0'
-    widget: counter
-  states:
-    bus_sink: false
-    bus_source: false
-    bus_structure: null
-    coordinate: [848, 156.0]
-    rotation: 0
-    state: enabled
 - name: harmonic
   id: variable_qtgui_range
   parameters:
@@ -300,7 +279,7 @@ blocks:
   id: variable
   parameters:
     comment: ''
-    value: Hsize*Vsize*refresh_rate
+    value: Hsize*Vsize*refresh_rate/100
   states:
     bus_sink: false
     bus_source: false
@@ -345,7 +324,7 @@ blocks:
   id: variable
   parameters:
     comment: ''
-    value: int(50e6)
+    value: int(50e6/100)
   states:
     bus_sink: false
     bus_source: false
@@ -406,7 +385,7 @@ blocks:
     alias: ''
     amp: '1'
     comment: ''
-    freq: px_rate*harmonic*(1-freq_error_norm)
+    freq: px_rate*harmonic
     maxoutbuf: '0'
     minoutbuf: '0'
     offset: '0'
@@ -595,7 +574,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [344, 660.0]
+    coordinate: [352, 676.0]
     rotation: 0
     state: enabled
 - name: import_0
@@ -791,11 +770,10 @@ blocks:
     affinity: ''
     alias: ''
     comment: ''
-    image_file: /home/emidan19/Pictures/capturas_gr-tempest2.0/WhatsApp Image 2022-11-10
-      at 21.06.15.jpeg
+    image_file: /home/emidan19/deep-tempest/images/1600x900_test1.jpeg
     maxoutbuf: '0'
     minoutbuf: '0'
-    mode: '2'
+    mode: '1'
   states:
     bus_sink: false
     bus_source: false

@@ -112,6 +112,7 @@ def TMDS_pixel (pix,cnt=0):
     else:
       qout.append(0)
       qout[8] = qm[8]
+      qout[:8] = qm[:8]
       cnt += -2*(not(qm[8])) + N1_qm - N0_qm
 
   # Return the TMDS coded pixel as uint and 0's y 1's balance
@@ -129,11 +130,11 @@ def TMDS_encoding_original (I, blanking = False):
 
   """ 
 
-  # Create "ghost dimension" if gray-scale image (not RGB)
+  # Create "ghost dimension" if I is gray-scale image (not RGB)
   if len(I.shape)!= 3:
-    chs = 1
-  else:
-    chs = I.shape[2]
+    I = np.repeat(I[:, :, np.newaxis], 3, axis=2).astype('uint8')
+    
+  chs = 3
 
   # Get image resolution
   v_in, h_in = I.shape[:2]
@@ -152,8 +153,8 @@ def TMDS_encoding_original (I, blanking = False):
     I_c = 852*np.ones((v,h,chs)).astype('uint16')
     
   else:
-    vdiff = 0
-    hdiff = 0
+    v_diff = 0
+    h_diff = 0
     I_c = np.zeros((v_in,h_in,chs)).astype('uint16')
 
   # Iterate over channels and pixels
@@ -163,7 +164,7 @@ def TMDS_encoding_original (I, blanking = False):
       for j in range(h_in):
         # Get pixel and code it TMDS between blanking
         pix = I[i,j,c]
-        I_c[i + vdiff//2 , j + hdiff//2, c], cnt[c] = TMDS_pixel (pix,cnt[c])
+        I_c[i + v_diff//2 , j + h_diff//2, c], cnt[c] = TMDS_pixel (pix,cnt[c])
 
   return I_c
 
@@ -229,6 +230,7 @@ def TMDS_pixel_cntdiff (pix,cnt=0):
     else:
       qout.append(0)
       qout[8]=qm[8]
+      qout[:8] = qm[:8]
       cnt_diff = -2*(not(qm[8])) + N1_qm - N0_qm
 
   # Return the TMDS coded pixel as uint and 0's y 1's balance difference
@@ -342,8 +344,8 @@ def TMDS_encoding (I, blanking = False):
                     h_front_porch=h_front_porch, v_front_porch=v_front_porch, h_back_porch=h_back_porch, v_back_porch=v_back_porch)
     
   else:
-    vdiff = 0
-    hdiff = 0
+    v_diff = 0
+    h_diff = 0
     I_c = 255*np.ones((v_in,h_in,chs)).astype('uint16')
 
   # Iterate over channels and pixels
@@ -446,10 +448,9 @@ def TMDS_serial(I):
         binstring = '0'*(10-len(binstring))+binstring
         # Re-order string for LSB first
         binstring = binstring[::-1]
-        binarray  = [bin for bin in binstring]
-        # Append every bit in the string
-        for binary in binarray:
-          channel_list.append(binary)
+        binarray  = list(binstring)
+        # Extend the bit stream
+        channel_list.extend(binarray)
 
     Iserials.append(channel_list)
 

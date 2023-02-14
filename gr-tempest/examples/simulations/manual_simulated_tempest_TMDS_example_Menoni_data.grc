@@ -48,7 +48,7 @@ blocks:
   id: variable
   parameters:
     comment: ''
-    value: '1056'
+    value: '1800'
   states:
     bus_sink: false
     bus_source: false
@@ -60,7 +60,7 @@ blocks:
   id: variable
   parameters:
     comment: ''
-    value: '800'
+    value: '1600'
   states:
     bus_sink: false
     bus_source: false
@@ -84,7 +84,7 @@ blocks:
   id: variable
   parameters:
     comment: ''
-    value: '628'
+    value: '1000'
   states:
     bus_sink: false
     bus_source: false
@@ -96,7 +96,7 @@ blocks:
   id: variable
   parameters:
     comment: ''
-    value: '600'
+    value: '900'
   states:
     bus_sink: false
     bus_source: false
@@ -312,7 +312,7 @@ blocks:
   id: variable
   parameters:
     comment: ''
-    value: '[0.7/255/128]*inter'
+    value: '[0.7/255]*inter'
   states:
     bus_sink: false
     bus_source: false
@@ -336,7 +336,7 @@ blocks:
   id: variable
   parameters:
     comment: ''
-    value: int(10*px_rate*inter/2)
+    value: int(10*px_rate*inter/3)
   states:
     bus_sink: false
     bus_source: false
@@ -348,7 +348,7 @@ blocks:
   id: variable
   parameters:
     comment: ''
-    value: int(50e6/100)
+    value: int(40e6/100)
   states:
     bus_sink: false
     bus_source: false
@@ -439,7 +439,7 @@ blocks:
     alias: ''
     begin_tag: pmt.PMT_NIL
     comment: ''
-    file: /home/emidan19/Desktop/deep-tempest/Codigo Menoni Octave/imagen_TDMS__red800600.dat
+    file: /home/emidan19/Desktop/deep-tempest/Codigo Menoni Octave/imagen_Digital_red1600900.dat
     length: '0'
     maxoutbuf: '0'
     minoutbuf: '0'
@@ -562,7 +562,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [264, 404.0]
+    coordinate: [320, 428.0]
     rotation: 0
     state: enabled
 - name: qtgui_freq_sink_x_0
@@ -752,8 +752,8 @@ blocks:
     alias: ''
     comment: "Enable this path when you are sure what the \nresolution is (and defaut\
       \ to those values on \nthe chooser)."
-    display_height: 2*Vsize
-    display_width: 2*Hsize
+    display_height: Vsize
+    display_width: Hsize
     fps: '0'
     height: Vsize
     num_channels: '1'

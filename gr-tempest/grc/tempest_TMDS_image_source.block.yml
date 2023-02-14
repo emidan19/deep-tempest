@@ -45,9 +45,11 @@ outputs:
 - label: G
   domain: stream
   dtype: float
+  optional: true
 - label: B
   domain: stream
   dtype: float
+  optional: true
 
 
 #  'file_format' specifies the version of the GRC yml format used in the file

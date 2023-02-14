@@ -105,7 +105,7 @@ class NO_GUI_tempest_simulated_TMDS(gr.top_block):
         self.data_sink_0 = blocks.vector_sink_c(1)
         self.tempest_TMDS_image_source_0 = tempest.TMDS_image_source(FILEPATH, 3)
         self.rational_resampler_xxx_0 = filter.rational_resampler_ccc(
-                interpolation=1,
+                interpolation=inter,
                 decimation=10*inter,
                 taps=None,
                 fractional_bw=0.4)

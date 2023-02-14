@@ -48,7 +48,7 @@ def uint16_to_binarray(integer):
   return b_array
 
 def binarray_to_uint(binarray):
-    
+  
   array = binarray[::-1]
   num = array[0]
   for n in range(1,len(binarray)):
@@ -114,10 +114,11 @@ def TMDS_pixel (pix,cnt=0):
       qout.append(1)
       qout[8] = qm[8]
       qout[:8] = np.logical_not(qm[:8])
-      cnt += 2*qm[8] +N0_qm -N1_qm
+      cnt += 2*qm[8] + N0_qm - N1_qm
     else:
       qout.append(0)
       qout[8] = qm[8]
+      qout[:8] = qm[:8]
       cnt += -2*(not(qm[8])) + N1_qm - N0_qm
 
   # Return the TMDS coded pixel as uint and 0's y 1's balance
@@ -186,6 +187,7 @@ def TMDS_pixel_cntdiff (pix,cnt=0):
     else:
       qout.append(0)
       qout[8]=qm[8]
+      qout[:8] = qm[:8]
       cnt_diff = -2*(not(qm[8])) + N1_qm - N0_qm
 
   # Return the TMDS coded pixel as uint and 0's y 1's balance difference
@@ -300,8 +302,8 @@ def TMDS_encoding (I, blanking = False):
                     h_front_porch=h_front_porch, v_front_porch=v_front_porch, h_back_porch=h_back_porch, v_back_porch=v_back_porch)
     
   else:
-    vdiff = 0
-    hdiff = 0
+    v_diff = 0
+    h_diff = 0
     I_c = 255*np.ones((v_in,h_in,chs)).astype('uint16')
 
   # Iterate over channels and pixels
@@ -373,11 +375,14 @@ class TMDS_image_source(gr.sync_block):
         self.image_len = len(self.image_data)
         self.line_num = 0
 
+    def get_image_shape(self):
+      return (self.image_height,self.image_width)
+
 
     def work(self, input_items, output_items):
 
         if (self.line_num >= self.image_height) and (self.mode==3 or self.mode==4):
-            print('Work done. Now you should stop the flowgraph ;)')
+            print('[TMDS image source] Last image line transmitted')
             return(-1)
 
         out_red = output_items[0]
