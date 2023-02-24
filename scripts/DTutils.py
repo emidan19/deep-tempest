@@ -304,19 +304,22 @@ def TMDS_encoding (I, blanking = False):
   """TMDS image coding
 
   Inputs: 
-  - I: 3-D image array (v_size, h_size, channels)
+  - I: 2D/3D image array (v_size, h_size, channels)
   - blanking: Boolean that specifies if horizontal and vertical blanking is applied or not
 
   Output:
-  - I_c: TDMS coded 16-bit image (only 10 useful)
+  - I_c: 3D TDMS coded 16-bit (only 10 useful) image array 
 
   """ 
 
   # Create "ghost dimension" if I is gray-scale image (not RGB)
   if len(I.shape)!= 3:
+    # Gray-scale image
     I = np.repeat(I[:, :, np.newaxis], 3, axis=2).astype('uint8')
-    
-  chs = 3
+    chs = 1
+  else:
+    # RGB image
+    chs = 3
 
   # Get image resolution
   v_in, h_in = I.shape[:2]
@@ -346,7 +349,7 @@ def TMDS_encoding (I, blanking = False):
   else:
     v_diff = 0
     h_diff = 0
-    I_c = 255*np.ones((v_in,h_in,chs)).astype('uint16')
+    I_c = np.zeros((v_in,h_in,chs)).astype('uint16')
 
   # Iterate over channels and pixels
   for c in range(chs):
