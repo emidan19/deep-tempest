@@ -4,7 +4,7 @@ category: '[Tempest]'
 
 templates:
   imports: import tempest
-  make: tempest.TMDS_image_source(${image_file}, ${mode})
+  make: tempest.TMDS_image_source(${image_file}, ${mode}, ${blanking})
 
 #  Make one 'parameters' list entry for every parameter you want settable from the GUI.
 #     Keys include:
@@ -22,6 +22,11 @@ parameters:
   options: ['1', '2','3','4']
   option_labels: ['Repeat with TMDS', 'Repeat, no TMDS','No repeat with TMDS','No repeat, no TMDS']
 
+- id: blanking
+  label: Use blanking
+  dtype: bool
+  options: ['True', 'False']
+  option_labels: ['True', 'False']
 
 #  Make one 'inputs' list entry per input and one 'outputs' list entry per output.
 #  Keys include:
