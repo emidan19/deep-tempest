@@ -25,7 +25,7 @@ import sys
 
 #%%
 
-# Currently supporting png, jpg, jpeg, tif, tiff and gif extentions only
+# Currently supporting png, jpg, jpeg, tif and gif extentions only
 def get_images_names_from_folder (folder):
     images_list = [image for image in os.listdir(folder) \
                    if image.endswith('.png') or image.endswith('.jpg') or image.endswith('.jpeg') or \
@@ -46,7 +46,7 @@ def image_transmition_simulation(I, blanking=False):
     
     return I_TMDS_Tx, I_TMDS.shape
 
-def image_capture_simulation(I_Tx, h_total, v_total, N_harmonic, SNR, 
+def image_capture_simulation(I_Tx, h_total, v_total, N_harmonic, noise_std, 
                              fps=60):
     
     # Compute pixelrate and bitrate
@@ -62,11 +62,10 @@ def image_capture_simulation(I_Tx, h_total, v_total, N_harmonic, SNR,
     else:
         I_Tx_continuous = I_Tx
     
-    # Add Gaussian noise according to SNR
-    if SNR > 0:
-        signal_power = np.sum(np.abs(np.fft.fft(I_Tx_continuous))**2/Nsamples)
-        noise_sigma = np.sqrt(signal_power/(10**(SNR/10)))
-        I_Tx_noisy = I_Tx_continuous + np.random.normal(0, noise_sigma, Nsamples)
+    # Add Gaussian noise
+    if noise_std > 0:
+        noise_sigma = noise_std/15.968719423 # sqrt(255)~15.968719423
+        I_Tx_noisy = I_Tx_continuous + np.random.normal(0, noise_sigma, Nsamples) + 1j*np.random.normal(0, noise_sigma,N_samples)
     else:
         I_Tx_noisy = I_Tx_continuous
         
@@ -148,8 +147,8 @@ def main():
         I_Tx, resolution = image_transmition_simulation(I)
         v_res, h_res, _ = resolution
         
-        # Possible SNR simulation values
-        SNRs = np.array([ 0, 60,  65,  70,  75,  80,  85,  90,  95, 100])
+        # Possible std dev noise simulation values
+        noise_stds = np.array([ 0, 5,  10,  15,  20,  25,  40, 50])
         
         
         # Make five simulations for each image
@@ -159,11 +158,11 @@ def main():
             N_harmonic = np.random.randint(1,10)
             
             # Choose random SNR value (SNR=0 for no noise)
-            SNR = np.random.choice(SNRs)
+            noise_std = np.random.choice(noise_stds)
             
-            I_capture = image_capture_simulation(I_Tx, h_res, v_res, N_harmonic, SNR)
+            I_capture = image_capture_simulation(I_Tx, h_res, v_res, N_harmonic, noise_std)
             
-            path = subfolder_path+'/'+imagename+'_'+str(N_harmonic)+'harm_'+str(SNR)+"dB.png"
+            path = subfolder_path+'/'+imagename+'_'+str(N_harmonic)+'harm_'+str(noise_std)+"std.png"
             
             save_simulation_image(I_capture,path)
             
@@ -176,7 +175,7 @@ def main():
         
         t_image = t2_image-t1_image
         
-        print('Tiempo de simulación para '+image+':','{:.2f}'.format(t_image)+'s')
+        print('Tiempo de la primer simulación de '+image+':','{:.2f}'.format(t_image)+'s\n')
         
 if __name__ == "__main__":    
     main()
