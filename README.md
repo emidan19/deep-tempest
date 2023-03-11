@@ -42,6 +42,7 @@ For a system wide installation:
 
     git clone https://github.com/git-artes/gr-tempest.git  
     cd gr-tempest
+    bash bindings.sh
     mkdir build  
     cd build  
     cmake ../  

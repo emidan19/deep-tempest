@@ -26,6 +26,8 @@ if(NOT PYTHONINTERP_FOUND)
     return()
 endif()
 
+add_subdirectory(bindings)
+
 ########################################################################
 # Install python sources
 ########################################################################
@@ -35,8 +37,8 @@ GR_PYTHON_INSTALL(
     image_source.py
     message_to_var.py
     tempest_msgbtn.py
-    TMDS_image_source.py
-    DTutils.py DESTINATION ${GR_PYTHON_DIR}/gnuradio/tempest
+    DTutils.py
+    TMDS_image_source.py DESTINATION ${GR_PYTHON_DIR}/gnuradio/tempest
 )
 
 ########################################################################
@@ -44,8 +46,15 @@ GR_PYTHON_INSTALL(
 ########################################################################
 include(GrTest)
 
+# Create a package directory that tests can import. It includes everything
+# from `python/`.
+add_custom_target(
+  copy_module_for_tests ALL
+  COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}
+          ${CMAKE_BINARY_DIR}/test_modules/gnuradio/tempest/
+)
+
 set(GR_TEST_TARGET_DEPS gnuradio-tempest)
-set(GR_TEST_PYTHON_DIRS ${CMAKE_BINARY_DIR}/swig)
 GR_ADD_TEST(qa_sampling_synchronization ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/qa_sampling_synchronization.py)
 GR_ADD_TEST(qa_framing ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/qa_framing.py)
 GR_ADD_TEST(qa_Hsync ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/qa_Hsync.py)
@@ -59,4 +68,5 @@ GR_ADD_TEST(qa_fft_peak_fine_sampling_sync ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_
 GR_ADD_TEST(qa_infer_screen_resolution ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/qa_infer_screen_resolution.py)
 GR_ADD_TEST(qa_tempest_msgbtn ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/qa_tempest_msgbtn.py)
 GR_ADD_TEST(qa_ssamp_correction ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/qa_ssamp_correction.py)
+GR_ADD_TEST(qa_TMDS_image_source ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/qa_TMDS_image_source.py)
 GR_ADD_TEST(qa_TMDS_image_source ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/qa_TMDS_image_source.py)

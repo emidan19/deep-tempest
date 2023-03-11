@@ -1,0 +1,10 @@
+gr_modtool bind Hsync
+gr_modtool bind fft_peak_fine_sampling_sync
+gr_modtool bind fine_sampling_synchronization
+gr_modtool bind frame_drop
+gr_modtool bind framing
+gr_modtool bind infer_screen_resolution
+gr_modtool bind normalize_flow
+gr_modtool bind sampling_synchronization
+gr_modtool bind ssamp_correction
+gr_modtool bind sync_detector
