@@ -51,7 +51,8 @@ For a system wide installation:
 For a user space installation, or GNU Radio installed in a location different from the default location /usr/local:
 
     git clone https://github.com/git-artes/gr-tempest.git  
-    cd gr-tempest 
+    cd gr-tempest
+    bash bindings.sh 
     mkdir build  
     cd build  
     cmake -DCMAKE_INSTALL_PREFIX=<your_GNURadio_install_dir> ../

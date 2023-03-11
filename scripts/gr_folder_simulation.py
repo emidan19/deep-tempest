@@ -393,10 +393,14 @@ def main():
             # Choose random SNR value (SNR=0 for no noise)
             noise_std = np.random.choice(noise_stds)
 
-            path = subfolder_path+'/'+imagename+'_'+str(N_harmonic)+'harm_'+str(noise_std)+"std.png"
+            # Choose path and name for saving simulation image
+            path = foldername+'/'+ imagename+'_'+str(N_harmonic)+'harm_'+str(noise_std)+"std.png"
+            ## path = subfolder_path+'/'+imagename+'_'+str(N_harmonic)+'harm_'+str(noise_std)+"std.png"
 
+            # Start simulation
             I_capture = run_simulation_flowgraph(top_block, N_harmonic, noise_std)
 
+            # Save simulation image
             save_simulation_image(I_capture,path)
 
             if i==0:
