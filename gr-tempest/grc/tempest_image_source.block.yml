@@ -3,7 +3,7 @@ label: Image Source
 category: '[Tempest]'
 
 templates:
-  imports: import tempest
+  imports: from gnuradio import tempest
   make: tempest.image_source(${image_file}, ${Hvisible}, ${Vvisible}, ${Htotal}, ${Vtotal}, ${repeatmode})
 
 parameters:

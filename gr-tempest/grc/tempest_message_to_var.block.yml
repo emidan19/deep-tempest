@@ -15,7 +15,7 @@ inputs:
 
 
 templates:
-    imports: import tempest
+    imports: from gnuradio import tempest
     make: tempest.message_to_var(${ 'self.set_' + context.get('target')() })
 
 file_format: 1

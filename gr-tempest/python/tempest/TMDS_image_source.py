@@ -27,7 +27,7 @@
 
 import numpy as np
 from PIL import Image
-from tempest.DTutils import TMDS_pix_table, TMDS_cntdiff_table, pixel_fastencoding, TMDS_encoding
+from gnuradio.tempest.DTutils import TMDS_pix_table, TMDS_cntdiff_table, pixel_fastencoding, TMDS_encoding
 from gnuradio import gr
 
 

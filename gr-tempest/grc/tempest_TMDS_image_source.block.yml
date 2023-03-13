@@ -3,7 +3,7 @@ label: TMDS_image_source
 category: '[Tempest]'
 
 templates:
-  imports: import tempest
+  imports: from gnuradio import tempest
   make: tempest.TMDS_image_source(${image_file}, ${mode}, ${blanking})
 
 #  Make one 'parameters' list entry for every parameter you want settable from the GUI.
