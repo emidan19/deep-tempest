@@ -49,21 +49,33 @@ class DatasetFFDNet(data.Dataset):
             # ---------------------------------
             # randomly crop the patch
             # ---------------------------------
-            rnd_h = random.randint(0, max(0, H - self.patch_size))
-            rnd_w = random.randint(0, max(0, W - self.patch_size))
-            patch_H = img_H[rnd_h:rnd_h + self.patch_size, rnd_w:rnd_w + self.patch_size, :]
+
+            # # Comment because using one only channel to train as ground-truth
+            # patch_H = img_H[rnd_h:rnd_h + self.patch_size, rnd_w:rnd_w + self.patch_size, :]
+
+            # Ground-truth as channels mean
+            patch_H = np.mean(img_H[rnd_h:rnd_h + self.patch_size, rnd_w:rnd_w + self.patch_size, :],axis=2)
+
+
+            # Tempest attack simulation
+            N_harmonic = random.randint(1, 9)
+            img_L = image_simulation(H_path, N_harmonic, noise_std=0, blanking=False)
+            patch_L = img_L[rnd_h:rnd_h + self.patch_size, rnd_w:rnd_w + self.patch_size, :]
+
+
+            # # Commented augmentation with rotating because of TMDS encoding
 
             # ---------------------------------
             # augmentation - flip, rotate
             # ---------------------------------
-            mode = random.randint(0, 7)
-            patch_H = util.augment_img(patch_H, mode=mode)
+            # mode = random.randint(0, 7)
+            # patch_L = util.augment_img(patch_H, mode=mode)
 
             # ---------------------------------
             # HWC to CHW, numpy(uint) to tensor
             # ---------------------------------
             img_H = util.uint2tensor3(patch_H)
-            img_L = img_H.clone()
+            img_L = util.uint2tensor3(patch_L)
 
             # ---------------------------------
             # get noise level
