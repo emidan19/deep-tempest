@@ -1,10 +1,11 @@
 {
   "task": "drunet"  //  root/task/images-models-options
   , "model": "plain" // "plain"
-  , "gpu_ids": [0]
+  , "gpu_ids": []
 
   , "scale": 1       // broadcast to "netG" if SISR
-  , "n_channels": 3  // broadcast to "datasets", 1 for grayscale, 3 for color
+  , "n_channels": 2  // broadcast to "datasets", 1 for grayscale, 3 for color
+  , "n_channels_datasetload": 3 // broadcast to image training set
   , "sigma": [0, 50]      // 15, 25, 50 for DnCNN | [0, 75] for FFDNet and FDnCNN
   , "sigma_test": 25 // 15, 25, 50 for DnCNN and ffdnet
 
@@ -16,7 +17,7 @@
   , "datasets": {
     "train": {
       "name": "train_dataset"           // just name
-      , "dataset_type": "fdncnn"         // "dncnn" | "dnpatch" for dncnn,  | "fdncnn" | "ffdnet" | "sr" | "srmd" | "dpsr" | "plain" | "plainpatch"
+      , "dataset_type": "ffdnet"         // "dncnn" | "dnpatch" for dncnn,  | "fdncnn" | "ffdnet" | "sr" | "srmd" | "dpsr" | "plain" | "plainpatch"
       , "dataroot_H": "trainsets/trainH"// path of H training dataset
       , "dataroot_L": null              // path of L training dataset
       , "H_size": 128                    // patch size 40 | 64 | 96 | 128 | 192
@@ -26,7 +27,7 @@
     }
     , "test": {
       "name": "test_dataset"            // just name
-      , "dataset_type": "fdncnn"         // "dncnn" | "dnpatch" for dncnn,  | "fdncnn" | "ffdnet" | "sr" | "srmd" | "dpsr" | "plain" | "plainpatch"
+      , "dataset_type": "ffdnet"         // "dncnn" | "dnpatch" for dncnn,  | "fdncnn" | "ffdnet" | "sr" | "srmd" | "dpsr" | "plain" | "plainpatch"
       , "dataroot_H": "testsets/set12"  // path of H testing dataset
       , "dataroot_L": null              // path of L testing dataset
     }
@@ -34,8 +35,8 @@
 
   , "netG": {
     "net_type": "drunet" // "dncnn" | "fdncnn" | "ffdnet" | "srmd" | "dpsr" | "srresnet0" |  "srresnet1" | "rrdbnet" 
-    , "in_nc": 4        // input channel number
-    , "out_nc": 3       // ouput channel number
+    , "in_nc": 2        // input channel number
+    , "out_nc": 1       // ouput channel number
     , "nc": [64, 128, 256, 512]          // 64 for "dncnn"
     , "nb": 4          // 17 for "dncnn", 20 for dncnn3, 16 for "srresnet"
     , "gc": 32          // unused
