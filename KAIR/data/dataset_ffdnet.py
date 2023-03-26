@@ -20,7 +20,7 @@ class DatasetFFDNet(data.Dataset):
         super(DatasetFFDNet, self).__init__()
         self.opt = opt
         self.n_channels = opt['n_channels'] if opt['n_channels'] else 3
-        self.n_channels_datasetload = opt['n_channels_datasetload']
+        self.n_channels_datasetload = opt['n_channels_datasetload'] if opt['n_channels_datasetload'] else 3
         self.patch_size = self.opt['H_size'] if opt['H_size'] else 64
         self.sigma = opt['sigma'] if opt['sigma'] else [0, 75]
         self.sigma_min, self.sigma_max = self.sigma[0], self.sigma[1]
@@ -53,6 +53,7 @@ class DatasetFFDNet(data.Dataset):
             # ---------------------------------
             rnd_h = random.randint(0, max(0, H - self.patch_size))
             rnd_w = random.randint(0, max(0, W - self.patch_size))
+
             # # Comment because using one only channel to train as ground-truth
             # patch_H = img_H[rnd_h:rnd_h + self.patch_size, rnd_w:rnd_w + self.patch_size, :]
 
@@ -61,12 +62,17 @@ class DatasetFFDNet(data.Dataset):
 
             # HDMI coding and transmitting
             img_H_Tx, Tx_size = image_transmition_simulation(img_H, blanking=False)
-            v_total, h_total = Tx_size
+            v_total, h_total = Tx_size[0], Tx_size[1]
 
             # Tempest attack simulation
             N_harmonic = random.randint(1, 9)
-            img_L = image_capture_simulation(img_H_Tx, h_total, v_total, 
+            img_L_tmp = image_capture_simulation(img_H_Tx, h_total, v_total, 
                                              N_harmonic, noise_std=0, fps=60)
+            
+            img_L = np.zeros((v_total,h_total,2))
+
+            img_L[:,:,0] = np.real(img_L_tmp)
+            img_L[:,:,1] = np.imag(img_L_tmp)
             
             # Get the patch from the simulation
             patch_L = img_L[rnd_h:rnd_h + self.patch_size, rnd_w:rnd_w + self.patch_size, :]
@@ -106,12 +112,17 @@ class DatasetFFDNet(data.Dataset):
 
             # HDMI coding and transmitting
             img_H_Tx, Tx_size = image_transmition_simulation(img_H, blanking=False)
-            v_total, h_total = Tx_size
+            v_total, h_total = Tx_size[0], Tx_size[1]
 
             # Tempest attack simulation
             N_harmonic = random.randint(1, 9)
-            img_L = image_capture_simulation(img_H_Tx, h_total, v_total, 
+            img_L_tmp = image_capture_simulation(img_H_Tx, h_total, v_total, 
                                              N_harmonic, noise_std=0, fps=60)
+            
+            img_L = np.zeros((v_total,h_total,2))
+
+            img_L[:,:,0] = np.real(img_L_tmp)
+            img_L[:,:,1] = np.imag(img_L_tmp)
 
             # Ground-truth as mean value of RGB channels
             img_H = np.mean(img_H,axis=2)
