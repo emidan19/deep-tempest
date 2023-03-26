@@ -1,7 +1,6 @@
 import numpy as np
-from matplotlib import pyplot as plt
 from scipy import signal
-from scipy.fft import fft, ifft, fftshift
+from numba import jit, uint8, int8, prange
 
 def autocorr(x):
 	"""Compute autocorrelation function of 1-D array
@@ -49,6 +48,108 @@ def binarray_to_uint(binarray):
     num = (num << 1) + array[n]
 
   return num
+
+def TMDS_pixel_rare (pix):
+  """8bit pixel TMDS coding
+
+  Inputs: 
+  - pix: 8-bit pixel
+  - cnt: 0's and 1's balance. Default in 0 (balanced)
+
+  Outputs:
+  - pix_out: TDMS coded 16-bit pixel (only 10 useful)
+  - cnt: 0's and 1's balance updated with new pixel coding
+
+  """ 
+  # Convert 8-bit pixel to binary list D
+  D = uint8_to_binarray(pix)
+
+  # Initialize output q
+  qm = [D[0]]
+
+  # 1's unbalanced condition at current pixel
+  N1_D = np.sum(D)
+
+  if N1_D>4 or (N1_D==4 and not(D[0])):
+
+    # XNOR of consecutive bits
+    for k in range(1,8):
+      qm.append( not(qm[k-1] ^ D[k]) )
+    qm.append(0)
+
+  else:
+    # XOR of consecutive bits
+    for k in range(1,8):
+      qm.append( qm[k-1] ^ D[k] )
+    qm.append(1)
+
+  qm.append(np.random.choice([0,1]))
+
+  
+
+  # Return the TMDS coded pixel as uint and 0's y 1's balance
+  return binarray_to_uint(qm)
+
+@jit(nopython=True)
+def TMDS_pixel_numba(pix:uint8, cnt:int8)->tuple:
+    
+  D = np.zeros(8, dtype=np.uint8)
+  for i in range(8):
+      D[i] = (pix >> i) & 1
+
+  qm = np.zeros(9, dtype=np.uint8)
+  qm[0] = D[0]
+
+  N1_D = np.sum(D)
+
+  if N1_D > 4 or (N1_D == 4 and not D[0]):
+      for k in range(1, 8):
+          qm[k] = not (qm[k-1] ^ D[k])
+      qm[8] = 0
+  else:
+      for k in range(1, 8):
+          qm[k] = qm[k-1] ^ D[k]
+      qm[8] = 1
+
+  qout = np.zeros(10, dtype=np.uint8)
+  N1_qm = np.sum(qm[:8])
+  N0_qm = 8 - N1_qm
+
+  if cnt == 0 or N1_qm == 4:
+      
+      qout[9] = not(qm[8])
+      qout[8] = qm[8]
+      if qm[8]:
+        qout[:8] = qm[:8]  
+      else: 
+        qout[:8] = np.logical_not(qm[:8])
+
+      if not qm[8]:
+          cnt += N0_qm - N1_qm
+      else:
+          cnt += N1_qm - N0_qm
+
+  else:
+      
+      if (cnt > 0 and N1_qm > 4) or (cnt < 0 and N1_qm < 4):
+          qout[9] = 1
+          qout[8] = qm[8]
+          qout[:8] = np.logical_not(qm[:8])
+          cnt += 2*qm[8] + N0_qm - N1_qm
+      else:
+          qout[9] = 0
+          qout[8] = qm[8]
+          qout[:8] = qm[:8]
+          cnt += -2*(not(qm[8])) + N1_qm - N0_qm
+
+  # Convert binary array to unsigned int
+  pix_tmds = 0
+  for bit in qout[::-1]:
+      pix_tmds = (pix_tmds << 1) | bit
+
+  # Return the TMDS coded pixel as uint and 0's y 1's balance
+  return pix_tmds, cnt
+
 
 def TMDS_pixel (pix,cnt=0):
   """8bit pixel TMDS coding
@@ -118,6 +219,7 @@ def TMDS_pixel (pix,cnt=0):
   # Return the TMDS coded pixel as uint and 0's y 1's balance
   return binarray_to_uint(qout), cnt
 
+@jit(parallel=True)
 def TMDS_encoding_original (I, blanking = False):
   """TMDS image coding
 
@@ -132,9 +234,10 @@ def TMDS_encoding_original (I, blanking = False):
 
   # Create "ghost dimension" if I is gray-scale image (not RGB)
   if len(I.shape)!= 3:
-    I = np.repeat(I[:, :, np.newaxis], 3, axis=2).astype('uint8')
-    
-  chs = 3
+    I = I[:, :, np.newaxis]
+    chs = 1
+  else:    
+    chs = 3
 
   # Get image resolution
   v_in, h_in = I.shape[:2]
@@ -158,13 +261,13 @@ def TMDS_encoding_original (I, blanking = False):
     I_c = np.zeros((v_in,h_in,chs)).astype('uint16')
 
   # Iterate over channels and pixels
-  for c in range(chs):
+  for c in prange(chs):
     for i in range(v_in):
       cnt=[0,0,0]
       for j in range(h_in):
         # Get pixel and code it TMDS between blanking
         pix = I[i,j,c]
-        I_c[i + v_diff//2 , j + h_diff//2, c], cnt[c] = TMDS_pixel (pix,cnt[c])
+        I_c[i + v_diff//2 , j + h_diff//2, c], cnt[c] = TMDS_pixel_numba (pix,cnt[c])
 
   return I_c
 
@@ -242,6 +345,7 @@ def TMDS_pixel_cntdiff (pix,cnt=0):
 byte_range = np.arange(256)
 # Initialize pixel coding and cnt-difference arrays
 TMDS_pix_table = np.zeros((256,3),dtype='uint16')
+TMDS_rare_pix_table = np.zeros((256),dtype='uint16')
 TMDS_cntdiff_table = np.zeros((256,3),dtype='int8')
 
 for byte in byte_range:
@@ -252,6 +356,8 @@ for byte in byte_range:
   TMDS_cntdiff_table[byte,0] = p0[1]
   TMDS_cntdiff_table[byte,1] = p_null[1]
   TMDS_cntdiff_table[byte,2] = p1[1]
+
+  TMDS_rare_pix_table[byte] = TMDS_pixel_rare(byte)
 
 def pixel_fastencoding(pix,cnt_prev=0):
   """8bit pixel TMDS fast coding
@@ -314,11 +420,9 @@ def TMDS_encoding (I, blanking = False):
 
   # Create "ghost dimension" if I is gray-scale image (not RGB)
   if len(I.shape)!= 3:
-    # Gray-scale image
-    I = np.repeat(I[:, :, np.newaxis], 3, axis=2).astype('uint8')
+    I = I[:, :, np.newaxis]
     chs = 1
-  else:
-    # RGB image
+  else:    
     chs = 3
 
   # Get image resolution
@@ -343,7 +447,8 @@ def TMDS_encoding (I, blanking = False):
     # Assuming the blanking corresponds to 10bit number 
     # [0, 0, 1, 0, 1, 0, 1, 0, 1, 1] (LSB first) for channels R and G
     I_c = 852*np.ones((v,h,chs)).astype('uint16')
-    I_c[:,:,2] = TMDS_blanking(h_total=h, v_total=v, h_active=h_in, v_active=v_in, 
+    if chs==3:
+      I_c[:,:,2] = TMDS_blanking(h_total=h, v_total=v, h_active=h_in, v_active=v_in, 
                     h_front_porch=h_front_porch, v_front_porch=v_front_porch, h_back_porch=h_back_porch, v_back_porch=v_back_porch)
     
   else:
@@ -359,6 +464,61 @@ def TMDS_encoding (I, blanking = False):
             # Get pixel and code it TMDS between blanking
             pix = I[i,j,c]
             I_c[i + v_diff, j + h_diff, c], cnt[c] = pixel_fastencoding (pix,cnt[c])
+
+  return I_c
+
+def TMDS_encoding_rare (I, blanking = False):
+  """TMDS image coding
+
+  Inputs: 
+  - I: 2-D image array
+  - blanking: Boolean that specifies if horizontal and vertical blanking is applied
+
+  Output:
+  - I_c: TDMS coded 16-bit image (only 10 useful)
+
+  """ 
+
+  # Create "ghost dimension" if I is gray-scale image (not RGB)
+  if len(I.shape)!= 3:
+    I = I[:, :, np.newaxis]
+    chs = 1
+  else:    
+    chs = 3
+
+  # Get image resolution
+  v_in, h_in = I.shape[:2]
+
+  # Get image resolution
+  v_in, h_in = I.shape[:2]
+  
+  if blanking:
+    # Get blanking resolution for input image
+    
+    v = (v_in==1080)*1125 + (v_in==720)*750   + (v_in==600)*628  + (v_in==480)*525
+    h = (h_in==1920)*2200 + (h_in==1280)*1650 + (h_in==800)*1056 + (h_in==640)*800 
+
+    vdiff = v - v_in
+    hdiff = h - h_in
+
+    # Create image with blanking and change type to uint16
+    # Assuming the blanking corresponds to 10bit number [0, 0, 1, 0, 1, 0, 1, 0, 1, 1] (LSB first)
+
+    I_c = 852*np.ones((v,h,chs)).astype('uint16')
+    
+  else:
+    v_diff = 0
+    h_diff = 0
+    I_c = I.copy()
+    I_c = I_c.astype('uint16')
+
+  # Iterate over channels and pixels
+  for c in range(chs):
+    for i in range(v_in):
+      for j in range(h_in):
+        # Get pixel and code it TMDS between blanking
+        pix = I[i,j,c]
+        I_c[i + v_diff//2 , j + h_diff//2, c] = TMDS_rare_pix_table[pix]
 
   return I_c
 
