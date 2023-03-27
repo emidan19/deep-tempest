@@ -159,7 +159,7 @@ def main(json_path='options/train_drunet.json'):
     # ----------------------------------------
     '''
 
-    for epoch in range(1000000):  # keep running
+    for epoch in range(opt['train']['epochs']):  # keep running
         if opt['dist']:
             train_sampler.set_epoch(epoch)
 

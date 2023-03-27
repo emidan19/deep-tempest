@@ -6,7 +6,7 @@ from torch.optim import Adam
 
 from models.select_network import define_G
 from models.model_base import ModelBase
-from models.loss import CharbonnierLoss
+from models.loss import CharbonnierLoss, TVLoss
 from models.loss_ssim import SSIMLoss
 
 from utils.utils_model import test_mode
@@ -97,6 +97,8 @@ class ModelPlain(ModelBase):
             self.G_lossfn = SSIMLoss().to(self.device)
         elif G_lossfn_type == 'charbonnier':
             self.G_lossfn = CharbonnierLoss(self.opt_train['G_charbonnier_eps']).to(self.device)
+        elif G_lossfn_type == 'tv':
+            self.G_lossfn = TVLoss(self.opt_train['G_tvloss_weight']).to(self.device)
         else:
             raise NotImplementedError('Loss type [{:s}] is not found.'.format(G_lossfn_type))
         self.G_lossfn_weight = self.opt_train['G_lossfn_weight']
