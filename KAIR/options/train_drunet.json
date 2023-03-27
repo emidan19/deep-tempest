@@ -4,7 +4,7 @@
   , "gpu_ids": [0]
 
   , "scale": 1       // broadcast to "netG" if SISR
-  , "n_channels": 2  // broadcast to "datasets", 1 for grayscale, 3 for color
+  , "n_channels": 3  // broadcast to "datasets", 1 for grayscale, 3 for color
   , "n_channels_datasetload": 3 // broadcast to image training set
   , "sigma": [0, 50]      // 15, 25, 50 for DnCNN | [0, 75] for FFDNet and FDnCNN
   , "sigma_test": 25 // 15, 25, 50 for DnCNN and ffdnet
@@ -35,7 +35,7 @@
 
   , "netG": {
     "net_type": "drunet" // "dncnn" | "fdncnn" | "ffdnet" | "srmd" | "dpsr" | "srresnet0" |  "srresnet1" | "rrdbnet" 
-    , "in_nc": 2        // input channel number
+    , "in_nc": 1        // input channel number
     , "out_nc": 1       // ouput channel number
     , "nc": [64, 128, 256, 512]          // 64 for "dncnn"
     , "nb": 4          // 17 for "dncnn", 20 for dncnn3, 16 for "srresnet"
@@ -52,8 +52,8 @@
   }
 
   , "train": {
-      "epochs": 1000                      // number of epochs to train
-    , "G_lossfn_type": "l1"               // "l1" preferred | "l2sum" | "l2" | "ssim" 
+      "epochs": 50                      // number of epochs to train
+    , "G_lossfn_type": "tv"               // "l1" preferred | "l2sum" | "l2" | "ssim" 
     , "G_lossfn_weight": 1.0            // default
     , "G_tvloss_weight": 1.0            // total variation weight
 
@@ -69,8 +69,8 @@
     , "G_regularizer_clipstep": null    // unused
     
     // iteration (batch step) checkpoints
-    , "checkpoint_test": 1000           // for testing
-    , "checkpoint_save": 1000           // for saving model
+    , "checkpoint_test": 180           // for testing
+    , "checkpoint_save": 270           // for saving model
     , "checkpoint_print": 100           // for print
   }
 }

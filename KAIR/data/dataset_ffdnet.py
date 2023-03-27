@@ -36,6 +36,12 @@ class DatasetFFDNet(data.Dataset):
         H_path = self.paths_H[index]
         img_H = util.imread_uint(H_path, self.n_channels)
 
+        # Take mean array from the 2nd axis (channel axis)
+        img_H = np.mean(img_H, axis=2)
+
+        # Create the channel axis for training consistance
+        img_H = img_H[:,:,np.newaxis]
+
         L_path = H_path
 
         if self.opt['phase'] == 'train':
@@ -56,8 +62,8 @@ class DatasetFFDNet(data.Dataset):
             # ---------------------------------
             # augmentation - flip, rotate
             # ---------------------------------
-            mode = random.randint(0, 7)
-            patch_H = util.augment_img(patch_H, mode=mode)
+            # mode = random.randint(0, 7)
+            # patch_H = util.augment_img(patch_H, mode=mode)
 
             # ---------------------------------
             # HWC to CHW, numpy(uint) to tensor
@@ -79,7 +85,7 @@ class DatasetFFDNet(data.Dataset):
 
         else:
             """
-            # --------------------------------
+            # -------------------train_loader-------------
             # get L/H/sigma image pairs
             # --------------------------------
             """
