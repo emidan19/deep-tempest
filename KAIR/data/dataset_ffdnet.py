@@ -3,7 +3,6 @@ import numpy as np
 import torch
 import torch.utils.data as data
 import utils.utils_image as util
-from utils.folder_simulation import image_transmition_simulation, image_capture_simulation
 
 
 class DatasetFFDNet(data.Dataset):
@@ -30,15 +29,26 @@ class DatasetFFDNet(data.Dataset):
         # get the path of H, return None if input is None
         # -------------------------------------
         self.paths_H = util.get_image_paths(opt['dataroot_H'])
+        self.paths_L = util.get_image_paths(opt['dataroot_L'])
 
     def __getitem__(self, index):
+
         # -------------------------------------
-        # get H image
+        # get H and L image
         # -------------------------------------
         H_path = self.paths_H[index]
-        img_H = util.imread_uint(H_path, self.n_channels_datasetload)
+        L_path = self.paths_L[index]
 
-        L_path = H_path
+        H_file, L_file = H_path.split('/')[-1], L_path.split('/')[-1]
+        H_name, L_name = H_file.split('.')[0], L_file.split('.')[0]
+        
+        assert H_name==L_name, 'Both high and low quality images MUST have same name'
+
+        img_H = util.imread_uint(H_path, self.n_channels_datasetload)       
+
+        # L_path = H_path
+        
+        img_L = util.imread_uint(L_path, self.n_channels_datasetload)[:,:,:2]       
 
         if self.opt['phase'] == 'train':
             """
@@ -59,20 +69,6 @@ class DatasetFFDNet(data.Dataset):
 
             # Ground-truth as channels mean
             patch_H = np.mean(img_H[rnd_h:rnd_h + self.patch_size, rnd_w:rnd_w + self.patch_size, :],axis=2)
-
-            # HDMI coding and transmitting
-            img_H_Tx, Tx_size = image_transmition_simulation(img_H, blanking=False)
-            v_total, h_total = Tx_size[0], Tx_size[1]
-
-            # Tempest attack simulation
-            N_harmonic = random.randint(1, 9)
-            img_L_tmp = image_capture_simulation(img_H_Tx, h_total, v_total, 
-                                             N_harmonic, noise_std=0, fps=60)
-            
-            img_L = np.zeros((v_total,h_total,2))
-
-            img_L[:,:,0] = np.real(img_L_tmp)
-            img_L[:,:,1] = np.imag(img_L_tmp)
             
             # Get the patch from the simulation
             patch_L = img_L[rnd_h:rnd_h + self.patch_size, rnd_w:rnd_w + self.patch_size, :]
@@ -110,26 +106,13 @@ class DatasetFFDNet(data.Dataset):
             # --------------------------------
             """
 
-            # HDMI coding and transmitting
-            img_H_Tx, Tx_size = image_transmition_simulation(img_H, blanking=False)
-            v_total, h_total = Tx_size[0], Tx_size[1]
-
-            # Tempest attack simulation
-            N_harmonic = random.randint(1, 9)
-            img_L_tmp = image_capture_simulation(img_H_Tx, h_total, v_total, 
-                                             N_harmonic, noise_std=0, fps=60)
-            
-            img_L = np.zeros((v_total,h_total,2))
-
-            img_L[:,:,0] = np.real(img_L_tmp)
-            img_L[:,:,1] = np.imag(img_L_tmp)
-
             # Ground-truth as mean value of RGB channels
             img_H = np.mean(img_H,axis=2)
+            img_H = img_H[:,:,np.newaxis]
             img_H = util.uint2single(img_H)
 
             np.random.seed(seed=0)
-            img_L += np.random.normal(0, self.sigma_test/255.0, img_L.shape)
+            img_L = img_L + np.random.normal(0, self.sigma_test/255.0, img_L.shape)
             noise_level = torch.FloatTensor([self.sigma_test/255.0])
 
             # ---------------------------------
