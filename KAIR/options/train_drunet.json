@@ -19,6 +19,7 @@
       "name": "train_dataset"           // just name
       , "dataset_type": "ffdnet"         // "dncnn" | "dnpatch" for dncnn,  | "fdncnn" | "ffdnet" | "sr" | "srmd" | "dpsr" | "plain" | "plainpatch"
       , "dataroot_H": "trainsets/web_images_train"// path of H training dataset
+      , "num_patches_per_image": 10   // number of random patches of training image
       , "dataroot_L": "trainsets/simulations" // path of L training dataset, if using noisy H type: null
       , "H_size": 128                    // patch size 40 | 64 | 96 | 128 | 192
       , "dataloader_shuffle": true

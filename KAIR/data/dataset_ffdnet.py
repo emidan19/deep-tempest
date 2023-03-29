@@ -3,6 +3,7 @@ import numpy as np
 import torch
 import torch.utils.data as data
 import utils.utils_image as util
+import itertools
 
 
 class DatasetFFDNet(data.Dataset):
@@ -24,12 +25,19 @@ class DatasetFFDNet(data.Dataset):
         self.sigma = opt['sigma'] if opt['sigma'] else [0, 75]
         self.sigma_min, self.sigma_max = self.sigma[0], self.sigma[1]
         self.sigma_test = opt['sigma_test'] if opt['sigma_test'] else 25
+        self.num_patches_per_image = opt['num_patches_per_image']
 
         # -------------------------------------
         # get the path of H, return None if input is None
         # -------------------------------------
         self.paths_H = util.get_image_paths(opt['dataroot_H'])
         self.paths_L = util.get_image_paths(opt['dataroot_L'])
+        if self.opt['phase'] == 'train':
+            listOfLists = [list(itertools.repeat(path, self.num_patches_per_image)) for path in self.paths_H]
+            self.paths_H = list(itertools.chain.from_iterable(listOfLists))
+
+            listOfLists = [list(itertools.repeat(path, self.num_patches_per_image)) for path in self.paths_L]
+            self.paths_L = list(itertools.chain.from_iterable(listOfLists))
 
     def __getitem__(self, index):
 
