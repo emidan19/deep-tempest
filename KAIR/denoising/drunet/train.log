@@ -5531,3 +5531,658 @@ UNetRes(
 23-03-25 23:09:54.077 : <epoch: 11, iter:     140, lr:1.000e-04> G_loss: 4.483e-01 
 23-03-26 00:13:39.315 : <epoch: 13, iter:     160, lr:1.000e-04> G_loss: 4.610e-01 
 23-03-26 00:59:39.362 : <epoch: 14, iter:     180, lr:1.000e-04> G_loss: 4.139e-01 
+23-03-29 16:31:47.255 :   task: drunet
+  model: plain
+  gpu_ids: [0]
+  scale: 1
+  n_channels: 1
+  n_channels_datasetload: 3
+  sigma: [0, 50]
+  sigma_test: 25
+  path:[
+    root: denoising
+    pretrained_netG: None
+    task: denoising/drunet
+    log: denoising/drunet
+    options: denoising/drunet/options
+    models: denoising/drunet/models
+    images: denoising/drunet/images
+    pretrained_optimizerG: None
+  ]
+  datasets:[
+    train:[
+      name: train_dataset
+      dataset_type: ffdnet
+      dataroot_H: trainsets/web_images_train
+      num_patches_per_image: 10
+      dataroot_L: trainsets/simulations
+      H_size: 128
+      dataloader_shuffle: True
+      dataloader_num_workers: 8
+      dataloader_batch_size: 64
+      phase: train
+      scale: 1
+      n_channels: 1
+    ]
+    test:[
+      name: test_dataset
+      dataset_type: ffdnet
+      dataroot_H: testsets/web_images_test
+      dataroot_L: testsets/simulations
+      phase: test
+      scale: 1
+      n_channels: 1
+    ]
+  ]
+  netG:[
+    net_type: drunet
+    in_nc: 1
+    out_nc: 1
+    nc: [64, 128, 256, 512]
+    nb: 4
+    gc: 32
+    ng: 2
+    reduction: 16
+    act_mode: R
+    upsample_mode: convtranspose
+    downsample_mode: strideconv
+    bias: False
+    init_type: orthogonal
+    init_bn_type: uniform
+    init_gain: 0.2
+    scale: 1
+  ]
+  train:[
+    epochs: 1000
+    G_lossfn_type: tv
+    G_lossfn_weight: 1.0
+    G_tvloss_weight: 1.0
+    G_optimizer_type: adam
+    G_optimizer_lr: 0.0001
+    G_optimizer_clipgrad: None
+    G_scheduler_type: MultiStepLR
+    G_scheduler_milestones: [100000, 200000, 300000, 400000]
+    G_scheduler_gamma: 0.5
+    G_regularizer_orthstep: None
+    G_regularizer_clipstep: None
+    checkpoint_test: 500
+    checkpoint_save: 780
+    checkpoint_print: 16
+    F_feature_layer: 34
+    F_weights: 1.0
+    F_lossfn_type: l1
+    F_use_input_norm: True
+    F_use_range_norm: False
+    G_optimizer_betas: [0.9, 0.999]
+    G_scheduler_restart_weights: 1
+    G_optimizer_wd: 0
+    G_optimizer_reuse: False
+    G_param_strict: True
+    E_param_strict: True
+    E_decay: 0
+  ]
+  opt_path: options/train_drunet.json
+  is_train: True
+  merge_bn: False
+  merge_bn_startpoint: -1
+  find_unused_parameters: True
+  use_static_graph: False
+  dist: False
+  num_gpu: 1
+  rank: 0
+  world_size: 1
+
+23-03-29 16:31:47.259 : Number of train images: 500, iters: 8
+23-03-29 16:31:47.968 : 
+Networks name: UNetRes
+Params number: 32638080
+Net structure:
+UNetRes(
+  (m_head): Conv2d(1, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+  (m_down1): Sequential(
+    (0): ResBlock(
+      (res): Sequential(
+        (0): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+        (1): ReLU(inplace=True)
+        (2): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      )
+    )
+    (1): ResBlock(
+      (res): Sequential(
+        (0): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+        (1): ReLU(inplace=True)
+        (2): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      )
+    )
+    (2): ResBlock(
+      (res): Sequential(
+        (0): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+        (1): ReLU(inplace=True)
+        (2): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      )
+    )
+    (3): ResBlock(
+      (res): Sequential(
+        (0): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+        (1): ReLU(inplace=True)
+        (2): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      )
+    )
+    (4): Conv2d(64, 128, kernel_size=(2, 2), stride=(2, 2), bias=False)
+  )
+  (m_down2): Sequential(
+    (0): ResBlock(
+      (res): Sequential(
+        (0): Conv2d(128, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+        (1): ReLU(inplace=True)
+        (2): Conv2d(128, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      )
+    )
+    (1): ResBlock(
+      (res): Sequential(
+        (0): Conv2d(128, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+        (1): ReLU(inplace=True)
+        (2): Conv2d(128, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      )
+    )
+    (2): ResBlock(
+      (res): Sequential(
+        (0): Conv2d(128, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+        (1): ReLU(inplace=True)
+        (2): Conv2d(128, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      )
+    )
+    (3): ResBlock(
+      (res): Sequential(
+        (0): Conv2d(128, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+        (1): ReLU(inplace=True)
+        (2): Conv2d(128, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      )
+    )
+    (4): Conv2d(128, 256, kernel_size=(2, 2), stride=(2, 2), bias=False)
+  )
+  (m_down3): Sequential(
+    (0): ResBlock(
+      (res): Sequential(
+        (0): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+        (1): ReLU(inplace=True)
+        (2): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      )
+    )
+    (1): ResBlock(
+      (res): Sequential(
+        (0): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+        (1): ReLU(inplace=True)
+        (2): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      )
+    )
+    (2): ResBlock(
+      (res): Sequential(
+        (0): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+        (1): ReLU(inplace=True)
+        (2): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      )
+    )
+    (3): ResBlock(
+      (res): Sequential(
+        (0): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+        (1): ReLU(inplace=True)
+        (2): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      )
+    )
+    (4): Conv2d(256, 512, kernel_size=(2, 2), stride=(2, 2), bias=False)
+  )
+  (m_body): Sequential(
+    (0): ResBlock(
+      (res): Sequential(
+        (0): Conv2d(512, 512, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+        (1): ReLU(inplace=True)
+        (2): Conv2d(512, 512, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      )
+    )
+    (1): ResBlock(
+      (res): Sequential(
+        (0): Conv2d(512, 512, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+        (1): ReLU(inplace=True)
+        (2): Conv2d(512, 512, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      )
+    )
+    (2): ResBlock(
+      (res): Sequential(
+        (0): Conv2d(512, 512, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+        (1): ReLU(inplace=True)
+        (2): Conv2d(512, 512, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      )
+    )
+    (3): ResBlock(
+      (res): Sequential(
+        (0): Conv2d(512, 512, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+        (1): ReLU(inplace=True)
+        (2): Conv2d(512, 512, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      )
+    )
+  )
+  (m_up3): Sequential(
+    (0): ConvTranspose2d(512, 256, kernel_size=(2, 2), stride=(2, 2), bias=False)
+    (1): ResBlock(
+      (res): Sequential(
+        (0): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+        (1): ReLU(inplace=True)
+        (2): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      )
+    )
+    (2): ResBlock(
+      (res): Sequential(
+        (0): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+        (1): ReLU(inplace=True)
+        (2): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      )
+    )
+    (3): ResBlock(
+      (res): Sequential(
+        (0): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+        (1): ReLU(inplace=True)
+        (2): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      )
+    )
+    (4): ResBlock(
+      (res): Sequential(
+        (0): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+        (1): ReLU(inplace=True)
+        (2): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      )
+    )
+  )
+  (m_up2): Sequential(
+    (0): ConvTranspose2d(256, 128, kernel_size=(2, 2), stride=(2, 2), bias=False)
+    (1): ResBlock(
+      (res): Sequential(
+        (0): Conv2d(128, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+        (1): ReLU(inplace=True)
+        (2): Conv2d(128, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      )
+    )
+    (2): ResBlock(
+      (res): Sequential(
+        (0): Conv2d(128, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+        (1): ReLU(inplace=True)
+        (2): Conv2d(128, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      )
+    )
+    (3): ResBlock(
+      (res): Sequential(
+        (0): Conv2d(128, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+        (1): ReLU(inplace=True)
+        (2): Conv2d(128, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      )
+    )
+    (4): ResBlock(
+      (res): Sequential(
+        (0): Conv2d(128, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+        (1): ReLU(inplace=True)
+        (2): Conv2d(128, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      )
+    )
+  )
+  (m_up1): Sequential(
+    (0): ConvTranspose2d(128, 64, kernel_size=(2, 2), stride=(2, 2), bias=False)
+    (1): ResBlock(
+      (res): Sequential(
+        (0): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+        (1): ReLU(inplace=True)
+        (2): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      )
+    )
+    (2): ResBlock(
+      (res): Sequential(
+        (0): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+        (1): ReLU(inplace=True)
+        (2): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      )
+    )
+    (3): ResBlock(
+      (res): Sequential(
+        (0): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+        (1): ReLU(inplace=True)
+        (2): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      )
+    )
+    (4): ResBlock(
+      (res): Sequential(
+        (0): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+        (1): ReLU(inplace=True)
+        (2): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      )
+    )
+  )
+  (m_tail): Conv2d(64, 1, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+)
+
+23-03-29 16:31:47.987 : 
+ |  mean  |  min   |  max   |  std   || shape               
+ | -0.000 | -0.074 |  0.075 |  0.025 | torch.Size([64, 1, 3, 3]) || m_head.weight
+ |  0.000 | -0.033 |  0.033 |  0.008 | torch.Size([64, 64, 3, 3]) || m_down1.0.res.0.weight
+ |  0.000 | -0.034 |  0.034 |  0.008 | torch.Size([64, 64, 3, 3]) || m_down1.0.res.2.weight
+ |  0.000 | -0.031 |  0.035 |  0.008 | torch.Size([64, 64, 3, 3]) || m_down1.1.res.0.weight
+ |  0.000 | -0.034 |  0.034 |  0.008 | torch.Size([64, 64, 3, 3]) || m_down1.1.res.2.weight
+ |  0.000 | -0.033 |  0.033 |  0.008 | torch.Size([64, 64, 3, 3]) || m_down1.2.res.0.weight
+ | -0.000 | -0.035 |  0.034 |  0.008 | torch.Size([64, 64, 3, 3]) || m_down1.2.res.2.weight
+ |  0.000 | -0.034 |  0.033 |  0.008 | torch.Size([64, 64, 3, 3]) || m_down1.3.res.0.weight
+ |  0.000 | -0.035 |  0.032 |  0.008 | torch.Size([64, 64, 3, 3]) || m_down1.3.res.2.weight
+ |  0.000 | -0.055 |  0.050 |  0.012 | torch.Size([128, 64, 2, 2]) || m_down1.4.weight
+ | -0.000 | -0.026 |  0.026 |  0.006 | torch.Size([128, 128, 3, 3]) || m_down2.0.res.0.weight
+ | -0.000 | -0.026 |  0.026 |  0.006 | torch.Size([128, 128, 3, 3]) || m_down2.0.res.2.weight
+ | -0.000 | -0.026 |  0.025 |  0.006 | torch.Size([128, 128, 3, 3]) || m_down2.1.res.0.weight
+ | -0.000 | -0.026 |  0.025 |  0.006 | torch.Size([128, 128, 3, 3]) || m_down2.1.res.2.weight
+ | -0.000 | -0.025 |  0.025 |  0.006 | torch.Size([128, 128, 3, 3]) || m_down2.2.res.0.weight
+ |  0.000 | -0.025 |  0.029 |  0.006 | torch.Size([128, 128, 3, 3]) || m_down2.2.res.2.weight
+ | -0.000 | -0.028 |  0.028 |  0.006 | torch.Size([128, 128, 3, 3]) || m_down2.3.res.0.weight
+ | -0.000 | -0.026 |  0.025 |  0.006 | torch.Size([128, 128, 3, 3]) || m_down2.3.res.2.weight
+ | -0.000 | -0.042 |  0.037 |  0.009 | torch.Size([256, 128, 2, 2]) || m_down2.4.weight
+ | -0.000 | -0.020 |  0.020 |  0.004 | torch.Size([256, 256, 3, 3]) || m_down3.0.res.0.weight
+ |  0.000 | -0.019 |  0.019 |  0.004 | torch.Size([256, 256, 3, 3]) || m_down3.0.res.2.weight
+ | -0.000 | -0.021 |  0.020 |  0.004 | torch.Size([256, 256, 3, 3]) || m_down3.1.res.0.weight
+ | -0.000 | -0.020 |  0.020 |  0.004 | torch.Size([256, 256, 3, 3]) || m_down3.1.res.2.weight
+ |  0.000 | -0.018 |  0.019 |  0.004 | torch.Size([256, 256, 3, 3]) || m_down3.2.res.0.weight
+ |  0.000 | -0.020 |  0.021 |  0.004 | torch.Size([256, 256, 3, 3]) || m_down3.2.res.2.weight
+ | -0.000 | -0.019 |  0.020 |  0.004 | torch.Size([256, 256, 3, 3]) || m_down3.3.res.0.weight
+ | -0.000 | -0.020 |  0.020 |  0.004 | torch.Size([256, 256, 3, 3]) || m_down3.3.res.2.weight
+ |  0.000 | -0.028 |  0.029 |  0.006 | torch.Size([512, 256, 2, 2]) || m_down3.4.weight
+ |  0.000 | -0.014 |  0.015 |  0.003 | torch.Size([512, 512, 3, 3]) || m_body.0.res.0.weight
+ |  0.000 | -0.015 |  0.014 |  0.003 | torch.Size([512, 512, 3, 3]) || m_body.0.res.2.weight
+ | -0.000 | -0.015 |  0.015 |  0.003 | torch.Size([512, 512, 3, 3]) || m_body.1.res.0.weight
+ | -0.000 | -0.015 |  0.015 |  0.003 | torch.Size([512, 512, 3, 3]) || m_body.1.res.2.weight
+ |  0.000 | -0.014 |  0.016 |  0.003 | torch.Size([512, 512, 3, 3]) || m_body.2.res.0.weight
+ |  0.000 | -0.015 |  0.014 |  0.003 | torch.Size([512, 512, 3, 3]) || m_body.2.res.2.weight
+ | -0.000 | -0.014 |  0.015 |  0.003 | torch.Size([512, 512, 3, 3]) || m_body.3.res.0.weight
+ |  0.000 | -0.015 |  0.014 |  0.003 | torch.Size([512, 512, 3, 3]) || m_body.3.res.2.weight
+ | -0.000 | -0.028 |  0.027 |  0.006 | torch.Size([512, 256, 2, 2]) || m_up3.0.weight
+ | -0.000 | -0.019 |  0.021 |  0.004 | torch.Size([256, 256, 3, 3]) || m_up3.1.res.0.weight
+ | -0.000 | -0.020 |  0.018 |  0.004 | torch.Size([256, 256, 3, 3]) || m_up3.1.res.2.weight
+ |  0.000 | -0.020 |  0.021 |  0.004 | torch.Size([256, 256, 3, 3]) || m_up3.2.res.0.weight
+ | -0.000 | -0.018 |  0.019 |  0.004 | torch.Size([256, 256, 3, 3]) || m_up3.2.res.2.weight
+ |  0.000 | -0.019 |  0.021 |  0.004 | torch.Size([256, 256, 3, 3]) || m_up3.3.res.0.weight
+ |  0.000 | -0.019 |  0.019 |  0.004 | torch.Size([256, 256, 3, 3]) || m_up3.3.res.2.weight
+ | -0.000 | -0.020 |  0.022 |  0.004 | torch.Size([256, 256, 3, 3]) || m_up3.4.res.0.weight
+ | -0.000 | -0.019 |  0.019 |  0.004 | torch.Size([256, 256, 3, 3]) || m_up3.4.res.2.weight
+ | -0.000 | -0.036 |  0.040 |  0.009 | torch.Size([256, 128, 2, 2]) || m_up2.0.weight
+ |  0.000 | -0.030 |  0.026 |  0.006 | torch.Size([128, 128, 3, 3]) || m_up2.1.res.0.weight
+ | -0.000 | -0.024 |  0.025 |  0.006 | torch.Size([128, 128, 3, 3]) || m_up2.1.res.2.weight
+ |  0.000 | -0.025 |  0.030 |  0.006 | torch.Size([128, 128, 3, 3]) || m_up2.2.res.0.weight
+ | -0.000 | -0.027 |  0.026 |  0.006 | torch.Size([128, 128, 3, 3]) || m_up2.2.res.2.weight
+ |  0.000 | -0.029 |  0.025 |  0.006 | torch.Size([128, 128, 3, 3]) || m_up2.3.res.0.weight
+ |  0.000 | -0.028 |  0.030 |  0.006 | torch.Size([128, 128, 3, 3]) || m_up2.3.res.2.weight
+ |  0.000 | -0.025 |  0.027 |  0.006 | torch.Size([128, 128, 3, 3]) || m_up2.4.res.0.weight
+ |  0.000 | -0.027 |  0.025 |  0.006 | torch.Size([128, 128, 3, 3]) || m_up2.4.res.2.weight
+ | -0.000 | -0.049 |  0.049 |  0.012 | torch.Size([128, 64, 2, 2]) || m_up1.0.weight
+ | -0.000 | -0.032 |  0.034 |  0.008 | torch.Size([64, 64, 3, 3]) || m_up1.1.res.0.weight
+ | -0.000 | -0.033 |  0.035 |  0.008 | torch.Size([64, 64, 3, 3]) || m_up1.1.res.2.weight
+ |  0.000 | -0.039 |  0.035 |  0.008 | torch.Size([64, 64, 3, 3]) || m_up1.2.res.0.weight
+ |  0.000 | -0.034 |  0.032 |  0.008 | torch.Size([64, 64, 3, 3]) || m_up1.2.res.2.weight
+ | -0.000 | -0.034 |  0.034 |  0.008 | torch.Size([64, 64, 3, 3]) || m_up1.3.res.0.weight
+ |  0.000 | -0.033 |  0.040 |  0.008 | torch.Size([64, 64, 3, 3]) || m_up1.3.res.2.weight
+ |  0.000 | -0.033 |  0.040 |  0.008 | torch.Size([64, 64, 3, 3]) || m_up1.4.res.0.weight
+ |  0.000 | -0.035 |  0.032 |  0.008 | torch.Size([64, 64, 3, 3]) || m_up1.4.res.2.weight
+ | -0.000 | -0.030 |  0.021 |  0.008 | torch.Size([1, 64, 3, 3]) || m_tail.weight
+
+23-03-29 16:32:34.394 : <epoch:  2, iter:      16, lr:1.000e-04> G_loss: 6.949e-01 
+23-03-29 16:33:10.165 : <epoch:  4, iter:      32, lr:1.000e-04> G_loss: 7.753e-01 
+23-03-29 16:33:46.061 : <epoch:  6, iter:      48, lr:1.000e-04> G_loss: 7.726e-01 
+23-03-29 16:34:36.657 : <epoch:  9, iter:      64, lr:1.000e-04> G_loss: 1.860e-01 
+23-03-29 16:35:14.507 : <epoch: 11, iter:      80, lr:1.000e-04> G_loss: 2.613e-01 
+23-03-29 16:35:52.766 : <epoch: 13, iter:      96, lr:1.000e-04> G_loss: 1.826e-01 
+23-03-29 16:36:31.566 : <epoch: 15, iter:     112, lr:1.000e-04> G_loss: 1.701e-01 
+23-03-29 16:37:23.497 : <epoch: 18, iter:     128, lr:1.000e-04> G_loss: 1.647e-01 
+23-03-29 16:38:00.729 : <epoch: 20, iter:     144, lr:1.000e-04> G_loss: 1.608e-01 
+23-03-29 16:38:41.727 : <epoch: 22, iter:     160, lr:1.000e-04> G_loss: 1.480e-01 
+23-03-29 16:39:34.785 : <epoch: 25, iter:     176, lr:1.000e-04> G_loss: 1.530e-01 
+23-03-29 16:40:13.959 : <epoch: 27, iter:     192, lr:1.000e-04> G_loss: 1.378e-01 
+23-03-29 16:40:51.615 : <epoch: 29, iter:     208, lr:1.000e-04> G_loss: 1.273e-01 
+23-03-29 16:41:30.969 : <epoch: 31, iter:     224, lr:1.000e-04> G_loss: 1.282e-01 
+23-03-29 16:42:25.068 : <epoch: 34, iter:     240, lr:1.000e-04> G_loss: 1.080e-01 
+23-03-29 16:43:02.496 : <epoch: 36, iter:     256, lr:1.000e-04> G_loss: 1.196e-01 
+23-03-29 16:43:43.206 : <epoch: 38, iter:     272, lr:1.000e-04> G_loss: 1.017e-01 
+23-03-29 16:44:33.739 : <epoch: 41, iter:     288, lr:1.000e-04> G_loss: 1.004e-01 
+23-03-29 16:45:13.981 : <epoch: 43, iter:     304, lr:1.000e-04> G_loss: 9.401e-02 
+23-03-29 16:45:51.188 : <epoch: 45, iter:     320, lr:1.000e-04> G_loss: 9.004e-02 
+23-03-29 16:46:30.564 : <epoch: 47, iter:     336, lr:1.000e-04> G_loss: 9.985e-02 
+23-03-29 16:47:25.445 : <epoch: 50, iter:     352, lr:1.000e-04> G_loss: 9.280e-02 
+23-03-29 16:48:04.575 : <epoch: 52, iter:     368, lr:1.000e-04> G_loss: 9.237e-02 
+23-03-29 16:48:45.999 : <epoch: 54, iter:     384, lr:1.000e-04> G_loss: 9.082e-02 
+23-03-29 16:49:38.930 : <epoch: 57, iter:     400, lr:1.000e-04> G_loss: 9.076e-02 
+23-03-29 16:50:20.771 : <epoch: 59, iter:     416, lr:1.000e-04> G_loss: 9.092e-02 
+23-03-29 16:50:59.966 : <epoch: 61, iter:     432, lr:1.000e-04> G_loss: 8.740e-02 
+23-03-29 16:51:37.775 : <epoch: 63, iter:     448, lr:1.000e-04> G_loss: 8.498e-02 
+23-03-29 16:52:32.279 : <epoch: 66, iter:     464, lr:1.000e-04> G_loss: 8.878e-02 
+23-03-29 16:53:11.601 : <epoch: 68, iter:     480, lr:1.000e-04> G_loss: 7.787e-02 
+23-03-29 16:53:51.581 : <epoch: 70, iter:     496, lr:1.000e-04> G_loss: 7.546e-02 
+23-03-29 16:54:11.246 : ---1-->  10094.png | 9.65dB
+23-03-29 16:54:11.559 : ---2-->  10231.png | 17.40dB
+23-03-29 16:54:11.864 : ---3-->   1037.png | 11.91dB
+23-03-29 16:54:12.170 : ---4-->  10379.png | 9.05dB
+23-03-29 16:54:12.499 : ---5-->  10420.png | 12.16dB
+23-03-29 16:54:12.796 : ---6-->  10436.png | 12.01dB
+23-03-29 16:54:13.109 : ---7-->  10534.png | 5.50dB
+23-03-29 16:54:13.419 : ---8-->  11054.png | 16.01dB
+23-03-29 16:54:13.742 : ---9-->  11143.png | 11.91dB
+23-03-29 16:54:14.059 : --10-->  11294.png | 14.80dB
+23-03-29 16:54:14.371 : --11-->  11404.png | 11.51dB
+23-03-29 16:54:14.684 : --12-->  11604.png | 10.64dB
+23-03-29 16:54:15.022 : --13-->  11708.png | 12.26dB
+23-03-29 16:54:15.327 : --14-->  11712.png | 12.32dB
+23-03-29 16:54:15.644 : --15-->  11880.png | 13.44dB
+23-03-29 16:54:15.962 : --16-->   1190.png | 12.41dB
+23-03-29 16:54:16.284 : --17-->  12009.png | 14.28dB
+23-03-29 16:54:16.603 : --18-->  12248.png | 13.83dB
+23-03-29 16:54:16.920 : --19-->  12449.png | 7.12dB
+23-03-29 16:54:17.227 : --20-->  12460.png | 13.67dB
+23-03-29 16:54:17.561 : --21-->    125.png | 15.13dB
+23-03-29 16:54:17.873 : --22-->  12539.png | 12.14dB
+23-03-29 16:54:18.186 : --23-->    134.png | 12.03dB
+23-03-29 16:54:18.508 : --24-->  13450.png | 14.38dB
+23-03-29 16:54:18.831 : --25-->  13902.png | 10.25dB
+23-03-29 16:54:19.148 : --26-->  14107.png | 17.18dB
+23-03-29 16:54:19.470 : --27-->   1421.png | 14.20dB
+23-03-29 16:54:19.779 : --28-->  14305.png | 14.49dB
+23-03-29 16:54:20.118 : --29-->   1431.png | 10.44dB
+23-03-29 16:54:20.438 : --30-->  14926.png | 9.74dB
+23-03-29 16:54:20.746 : --31-->  15307.png | 14.49dB
+23-03-29 16:54:21.069 : --32-->  15387.png | 11.28dB
+23-03-29 16:54:21.400 : --33-->  15612.png | 13.46dB
+23-03-29 16:54:21.711 : --34-->  15661.png | 10.46dB
+23-03-29 16:54:22.034 : --35-->  15681.png | 9.71dB
+23-03-29 16:54:22.345 : --36-->    159.png | 13.11dB
+23-03-29 16:54:22.680 : --37-->  15930.png | 16.83dB
+23-03-29 16:54:23.003 : --38-->  16028.png | 12.36dB
+23-03-29 16:54:23.311 : --39-->   1619.png | 6.96dB
+23-03-29 16:54:23.632 : --40-->    168.png | 5.82dB
+23-03-29 16:54:23.969 : --41-->    174.png | 14.65dB
+23-03-29 16:54:24.278 : --42-->    188.png | 12.15dB
+23-03-29 16:54:24.601 : --43-->   1928.png | 12.17dB
+23-03-29 16:54:24.919 : --44-->   1942.png | 16.18dB
+23-03-29 16:54:25.245 : --45-->    209.png | 13.01dB
+23-03-29 16:54:25.568 : --46-->   2179.png | 14.64dB
+23-03-29 16:54:25.884 : --47-->   2541.png | 10.54dB
+23-03-29 16:54:26.196 : --48-->   3164.png | 16.26dB
+23-03-29 16:54:26.535 : --49-->   3259.png | 15.55dB
+23-03-29 16:54:26.848 : --50-->   3410.png | 12.70dB
+23-03-29 16:54:26.864 : <epoch: 71, iter:     500, Average PSNR : 12.48dB
+
+23-03-29 16:55:02.101 : <epoch: 73, iter:     512, lr:1.000e-04> G_loss: 7.442e-02 
+23-03-29 16:55:42.482 : <epoch: 75, iter:     528, lr:1.000e-04> G_loss: 7.871e-02 
+23-03-29 16:56:22.887 : <epoch: 77, iter:     544, lr:1.000e-04> G_loss: 7.816e-02 
+23-03-29 16:57:01.732 : <epoch: 79, iter:     560, lr:1.000e-04> G_loss: 6.419e-02 
+23-03-29 16:57:58.773 : <epoch: 82, iter:     576, lr:1.000e-04> G_loss: 7.175e-02 
+23-03-29 16:58:35.552 : <epoch: 84, iter:     592, lr:1.000e-04> G_loss: 7.002e-02 
+23-03-29 16:59:14.209 : <epoch: 86, iter:     608, lr:1.000e-04> G_loss: 6.030e-02 
+23-03-29 17:00:07.515 : <epoch: 89, iter:     624, lr:1.000e-04> G_loss: 5.338e-02 
+23-03-29 17:00:49.419 : <epoch: 91, iter:     640, lr:1.000e-04> G_loss: 6.444e-02 
+23-03-29 17:01:27.112 : <epoch: 93, iter:     656, lr:1.000e-04> G_loss: 5.047e-02 
+23-03-29 17:02:08.205 : <epoch: 95, iter:     672, lr:1.000e-04> G_loss: 5.530e-02 
+23-03-29 17:03:01.214 : <epoch: 98, iter:     688, lr:1.000e-04> G_loss: 5.210e-02 
+23-03-29 17:03:39.950 : <epoch:100, iter:     704, lr:1.000e-04> G_loss: 6.532e-02 
+23-03-29 17:04:20.319 : <epoch:102, iter:     720, lr:1.000e-04> G_loss: 5.286e-02 
+23-03-29 17:05:16.892 : <epoch:105, iter:     736, lr:1.000e-04> G_loss: 5.812e-02 
+23-03-29 17:05:55.978 : <epoch:107, iter:     752, lr:1.000e-04> G_loss: 5.830e-02 
+23-03-29 17:06:34.905 : <epoch:109, iter:     768, lr:1.000e-04> G_loss: 4.957e-02 
+23-03-29 17:07:12.708 : Saving the model.
+23-03-29 17:07:15.324 : <epoch:111, iter:     784, lr:1.000e-04> G_loss: 4.438e-02 
+23-03-29 17:08:08.412 : <epoch:114, iter:     800, lr:1.000e-04> G_loss: 5.813e-02 
+23-03-29 17:08:49.452 : <epoch:116, iter:     816, lr:1.000e-04> G_loss: 7.021e-02 
+23-03-29 17:09:26.953 : <epoch:118, iter:     832, lr:1.000e-04> G_loss: 4.102e-02 
+23-03-29 17:10:22.610 : <epoch:121, iter:     848, lr:1.000e-04> G_loss: 5.057e-02 
+23-03-29 17:11:01.744 : <epoch:123, iter:     864, lr:1.000e-04> G_loss: 3.676e-02 
+23-03-29 17:11:39.760 : <epoch:125, iter:     880, lr:1.000e-04> G_loss: 4.955e-02 
+23-03-29 17:12:20.226 : <epoch:127, iter:     896, lr:1.000e-04> G_loss: 5.992e-02 
+23-03-29 17:13:13.404 : <epoch:130, iter:     912, lr:1.000e-04> G_loss: 6.342e-02 
+23-03-29 17:13:54.321 : <epoch:132, iter:     928, lr:1.000e-04> G_loss: 4.831e-02 
+23-03-29 17:14:32.044 : <epoch:134, iter:     944, lr:1.000e-04> G_loss: 5.070e-02 
+23-03-29 17:15:25.343 : <epoch:137, iter:     960, lr:1.000e-04> G_loss: 4.835e-02 
+23-03-29 17:16:04.863 : <epoch:139, iter:     976, lr:1.000e-04> G_loss: 6.285e-02 
+23-03-29 17:16:42.031 : <epoch:141, iter:     992, lr:1.000e-04> G_loss: 5.670e-02 
+23-03-29 17:17:02.768 : ---1-->  10094.png | 9.65dB
+23-03-29 17:17:03.085 : ---2-->  10231.png | 17.40dB
+23-03-29 17:17:03.394 : ---3-->   1037.png | 11.91dB
+23-03-29 17:17:03.717 : ---4-->  10379.png | 9.05dB
+23-03-29 17:17:04.031 : ---5-->  10420.png | 12.16dB
+23-03-29 17:17:04.338 : ---6-->  10436.png | 12.01dB
+23-03-29 17:17:04.655 : ---7-->  10534.png | 5.50dB
+23-03-29 17:17:04.988 : ---8-->  11054.png | 16.01dB
+23-03-29 17:17:05.291 : ---9-->  11143.png | 11.91dB
+23-03-29 17:17:05.609 : --10-->  11294.png | 14.80dB
+23-03-29 17:17:05.922 : --11-->  11404.png | 11.51dB
+23-03-29 17:17:06.243 : --12-->  11604.png | 10.64dB
+23-03-29 17:17:06.561 : --13-->  11708.png | 12.26dB
+23-03-29 17:17:06.870 : --14-->  11712.png | 12.32dB
+23-03-29 17:17:07.180 : --15-->  11880.png | 13.44dB
+23-03-29 17:17:07.510 : --16-->   1190.png | 12.41dB
+23-03-29 17:17:07.819 : --17-->  12009.png | 14.28dB
+23-03-29 17:17:08.135 : --18-->  12248.png | 13.83dB
+23-03-29 17:17:08.451 : --19-->  12449.png | 7.12dB
+23-03-29 17:17:08.772 : --20-->  12460.png | 13.67dB
+23-03-29 17:17:09.089 : --21-->    125.png | 15.13dB
+23-03-29 17:17:09.401 : --22-->  12539.png | 12.14dB
+23-03-29 17:17:09.708 : --23-->    134.png | 12.03dB
+23-03-29 17:17:10.041 : --24-->  13450.png | 14.38dB
+23-03-29 17:17:10.349 : --25-->  13902.png | 10.25dB
+23-03-29 17:17:10.662 : --26-->  14107.png | 17.18dB
+23-03-29 17:17:10.979 : --27-->   1421.png | 14.20dB
+23-03-29 17:17:11.298 : --28-->  14305.png | 14.49dB
+23-03-29 17:17:11.615 : --29-->   1431.png | 10.44dB
+23-03-29 17:17:11.930 : --30-->  14926.png | 9.74dB
+23-03-29 17:17:12.237 : --31-->  15307.png | 14.49dB
+23-03-29 17:17:12.572 : --32-->  15387.png | 11.28dB
+23-03-29 17:17:12.883 : --33-->  15612.png | 13.46dB
+23-03-29 17:17:13.191 : --34-->  15661.png | 10.46dB
+23-03-29 17:17:13.509 : --35-->  15681.png | 9.71dB
+23-03-29 17:17:13.832 : --36-->    159.png | 13.11dB
+23-03-29 17:17:14.145 : --37-->  15930.png | 16.83dB
+23-03-29 17:17:14.461 : --38-->  16028.png | 12.36dB
+23-03-29 17:17:14.765 : --39-->   1619.png | 6.96dB
+23-03-29 17:17:15.100 : --40-->    168.png | 5.82dB
+23-03-29 17:17:15.415 : --41-->    174.png | 14.65dB
+23-03-29 17:17:15.728 : --42-->    188.png | 12.15dB
+23-03-29 17:17:16.051 : --43-->   1928.png | 12.17dB
+23-03-29 17:17:16.382 : --44-->   1942.png | 16.18dB
+23-03-29 17:17:16.697 : --45-->    209.png | 13.01dB
+23-03-29 17:17:17.021 : --46-->   2179.png | 14.64dB
+23-03-29 17:17:17.332 : --47-->   2541.png | 10.54dB
+23-03-29 17:17:17.669 : --48-->   3164.png | 16.26dB
+23-03-29 17:17:17.987 : --49-->   3259.png | 15.55dB
+23-03-29 17:17:18.293 : --50-->   3410.png | 12.70dB
+23-03-29 17:17:18.310 : <epoch:142, iter:   1,000, Average PSNR : 12.48dB
+
+23-03-29 17:17:37.826 : <epoch:143, iter:   1,008, lr:1.000e-04> G_loss: 4.532e-02 
+23-03-29 17:18:30.295 : <epoch:146, iter:   1,024, lr:1.000e-04> G_loss: 5.543e-02 
+23-03-29 17:19:09.790 : <epoch:148, iter:   1,040, lr:1.000e-04> G_loss: 6.241e-02 
+23-03-29 17:19:49.234 : <epoch:150, iter:   1,056, lr:1.000e-04> G_loss: 6.542e-02 
+23-03-29 17:20:44.484 : <epoch:153, iter:   1,072, lr:1.000e-04> G_loss: 5.574e-02 
+23-03-29 17:21:23.848 : <epoch:155, iter:   1,088, lr:1.000e-04> G_loss: 4.075e-02 
+23-03-29 17:22:04.922 : <epoch:157, iter:   1,104, lr:1.000e-04> G_loss: 5.010e-02 
+23-03-29 17:22:42.915 : <epoch:159, iter:   1,120, lr:1.000e-04> G_loss: 5.169e-02 
+23-03-29 17:23:40.444 : <epoch:162, iter:   1,136, lr:1.000e-04> G_loss: 5.905e-02 
+23-03-29 17:24:18.205 : <epoch:164, iter:   1,152, lr:1.000e-04> G_loss: 8.263e-02 
+23-03-29 17:24:57.677 : <epoch:166, iter:   1,168, lr:1.000e-04> G_loss: 5.444e-02 
+23-03-29 17:25:54.289 : <epoch:169, iter:   1,184, lr:1.000e-04> G_loss: 4.735e-02 
+23-03-29 17:26:31.933 : <epoch:171, iter:   1,200, lr:1.000e-04> G_loss: 5.968e-02 
+23-03-29 17:27:13.487 : <epoch:173, iter:   1,216, lr:1.000e-04> G_loss: 3.609e-02 
+23-03-29 17:27:51.289 : <epoch:175, iter:   1,232, lr:1.000e-04> G_loss: 5.952e-02 
+23-03-29 17:28:46.803 : <epoch:178, iter:   1,248, lr:1.000e-04> G_loss: 5.702e-02 
+23-03-29 17:29:25.998 : <epoch:180, iter:   1,264, lr:1.000e-04> G_loss: 5.872e-02 
+23-03-29 17:30:05.369 : <epoch:182, iter:   1,280, lr:1.000e-04> G_loss: 5.911e-02 
+23-03-29 17:31:00.711 : <epoch:185, iter:   1,296, lr:1.000e-04> G_loss: 7.604e-02 
+23-03-29 17:31:39.758 : <epoch:187, iter:   1,312, lr:1.000e-04> G_loss: 4.435e-02 
+23-03-29 17:32:21.881 : <epoch:189, iter:   1,328, lr:1.000e-04> G_loss: 3.991e-02 
+23-03-29 17:32:59.768 : <epoch:191, iter:   1,344, lr:1.000e-04> G_loss: 5.020e-02 
+23-03-29 17:33:55.127 : <epoch:194, iter:   1,360, lr:1.000e-04> G_loss: 4.906e-02 
+23-03-29 17:34:33.967 : <epoch:196, iter:   1,376, lr:1.000e-04> G_loss: 6.111e-02 
+23-03-29 17:35:12.875 : <epoch:198, iter:   1,392, lr:1.000e-04> G_loss: 4.522e-02 
+23-03-29 17:36:07.905 : <epoch:201, iter:   1,408, lr:1.000e-04> G_loss: 4.585e-02 
+23-03-29 17:36:46.948 : <epoch:203, iter:   1,424, lr:1.000e-04> G_loss: 5.055e-02 
+23-03-29 17:37:29.556 : <epoch:205, iter:   1,440, lr:1.000e-04> G_loss: 7.818e-02 
+23-03-29 17:38:06.350 : <epoch:207, iter:   1,456, lr:1.000e-04> G_loss: 6.179e-02 
+23-03-29 17:39:02.029 : <epoch:210, iter:   1,472, lr:1.000e-04> G_loss: 4.973e-02 
+23-03-29 17:39:43.017 : <epoch:212, iter:   1,488, lr:1.000e-04> G_loss: 5.012e-02 
+23-03-29 17:40:19.689 : ---1-->  10094.png | 9.65dB
+23-03-29 17:40:20.021 : ---2-->  10231.png | 17.40dB
+23-03-29 17:40:20.323 : ---3-->   1037.png | 11.91dB
+23-03-29 17:40:20.647 : ---4-->  10379.png | 9.05dB
+23-03-29 17:40:20.959 : ---5-->  10420.png | 12.16dB
+23-03-29 17:40:21.258 : ---6-->  10436.png | 12.01dB
+23-03-29 17:40:21.573 : ---7-->  10534.png | 5.50dB
+23-03-29 17:40:21.902 : ---8-->  11054.png | 16.01dB
+23-03-29 17:40:22.209 : ---9-->  11143.png | 11.91dB
+23-03-29 17:40:22.530 : --10-->  11294.png | 14.80dB
+23-03-29 17:40:22.843 : --11-->  11404.png | 11.51dB
+23-03-29 17:40:23.173 : --12-->  11604.png | 10.64dB
+23-03-29 17:40:23.494 : --13-->  11708.png | 12.26dB
+23-03-29 17:40:23.799 : --14-->  11712.png | 12.32dB
+23-03-29 17:40:24.116 : --15-->  11880.png | 13.44dB
+23-03-29 17:40:24.446 : --16-->   1190.png | 12.41dB
+23-03-29 17:40:24.752 : --17-->  12009.png | 14.28dB
+23-03-29 17:40:25.068 : --18-->  12248.png | 13.83dB
+23-03-29 17:40:25.384 : --19-->  12449.png | 7.12dB
+23-03-29 17:40:25.716 : --20-->  12460.png | 13.67dB
+23-03-29 17:40:26.038 : --21-->    125.png | 15.13dB
+23-03-29 17:40:26.349 : --22-->  12539.png | 12.14dB
+23-03-29 17:40:26.664 : --23-->    134.png | 12.03dB
+23-03-29 17:40:27.002 : --24-->  13450.png | 14.38dB
+23-03-29 17:40:27.310 : --25-->  13902.png | 10.25dB
+23-03-29 17:40:27.628 : --26-->  14107.png | 17.18dB
+23-03-29 17:40:27.950 : --27-->   1421.png | 14.20dB
+23-03-29 17:40:28.273 : --28-->  14305.png | 14.49dB
+23-03-29 17:40:28.594 : --29-->   1431.png | 10.44dB
+23-03-29 17:40:28.911 : --30-->  14926.png | 9.74dB
+23-03-29 17:40:29.221 : --31-->  15307.png | 14.49dB
+23-03-29 17:40:29.559 : --32-->  15387.png | 11.28dB
+23-03-29 17:40:29.873 : --33-->  15612.png | 13.46dB
+23-03-29 17:40:30.185 : --34-->  15661.png | 10.46dB
+23-03-29 17:40:30.507 : --35-->  15681.png | 9.71dB
+23-03-29 17:40:30.832 : --36-->    159.png | 13.11dB
+23-03-29 17:40:31.145 : --37-->  15930.png | 16.83dB
+23-03-29 17:40:31.462 : --38-->  16028.png | 12.36dB
+23-03-29 17:40:31.767 : --39-->   1619.png | 6.96dB
+23-03-29 17:40:32.100 : --40-->    168.png | 5.82dB
+23-03-29 17:40:32.411 : --41-->    174.png | 14.65dB
+23-03-29 17:40:32.715 : --42-->    188.png | 12.15dB
+23-03-29 17:40:33.030 : --43-->   1928.png | 12.17dB
+23-03-29 17:40:33.352 : --44-->   1942.png | 16.18dB
+23-03-29 17:40:33.666 : --45-->    209.png | 13.01dB
+23-03-29 17:40:33.987 : --46-->   2179.png | 14.64dB
+23-03-29 17:40:34.295 : --47-->   2541.png | 10.54dB
+23-03-29 17:40:34.633 : --48-->   3164.png | 16.26dB
+23-03-29 17:40:34.952 : --49-->   3259.png | 15.55dB
+23-03-29 17:40:35.260 : --50-->   3410.png | 12.70dB
+23-03-29 17:40:35.275 : <epoch:214, iter:   1,500, Average PSNR : 12.48dB
+
+23-03-29 17:40:37.820 : <epoch:214, iter:   1,504, lr:1.000e-04> G_loss: 5.758e-02 
+23-03-29 17:41:33.715 : <epoch:217, iter:   1,520, lr:1.000e-04> G_loss: 5.188e-02 
+23-03-29 17:42:12.658 : <epoch:219, iter:   1,536, lr:1.000e-04> G_loss: 4.340e-02 
+23-03-29 17:42:53.851 : <epoch:221, iter:   1,552, lr:1.000e-04> G_loss: 6.086e-02 
+23-03-29 17:43:13.205 : Saving the model.
+23-03-29 17:43:31.899 : <epoch:223, iter:   1,568, lr:1.000e-04> G_loss: 5.254e-02 
+23-03-29 17:44:27.625 : <epoch:226, iter:   1,584, lr:1.000e-04> G_loss: 7.720e-02 
+23-03-29 17:45:07.172 : <epoch:228, iter:   1,600, lr:1.000e-04> G_loss: 4.633e-02 
+23-03-29 17:45:46.833 : <epoch:230, iter:   1,616, lr:1.000e-04> G_loss: 4.168e-02 
+23-03-29 17:46:43.425 : <epoch:233, iter:   1,632, lr:1.000e-04> G_loss: 7.391e-02 
+23-03-29 17:47:21.518 : <epoch:235, iter:   1,648, lr:1.000e-04> G_loss: 6.206e-02 
