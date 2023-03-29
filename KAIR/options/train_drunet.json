@@ -4,7 +4,7 @@
   , "gpu_ids": [0]
 
   , "scale": 1       // broadcast to "netG" if SISR
-  , "n_channels": 3  // broadcast to "datasets", 1 for grayscale, 3 for color
+  , "n_channels": 1  // broadcast to "datasets", 1 for grayscale, 3 for color
   , "n_channels_datasetload": 3 // broadcast to image training set
   , "sigma": [0, 50]      // 15, 25, 50 for DnCNN | [0, 75] for FFDNet and FDnCNN
   , "sigma_test": 25 // 15, 25, 50 for DnCNN and ffdnet
@@ -19,6 +19,7 @@
       "name": "train_dataset"           // just name
       , "dataset_type": "ffdnet"         // "dncnn" | "dnpatch" for dncnn,  | "fdncnn" | "ffdnet" | "sr" | "srmd" | "dpsr" | "plain" | "plainpatch"
       , "dataroot_H": "trainsets/web_images_train"// path of H training dataset
+      , "num_patches_per_image": 10   // number of random patches of training image
       , "dataroot_L": "trainsets/simulations" // path of L training dataset, if using noisy H type: null
       , "H_size": 128                    // patch size 40 | 64 | 96 | 128 | 192
       , "dataloader_shuffle": true
@@ -52,10 +53,10 @@
   }
 
   , "train": {
-      "epochs": 50                      // number of epochs to train
+      "epochs": 1000                      // number of epochs to train
     , "G_lossfn_type": "tv"               // "l1" preferred | "l2sum" | "l2" | "ssim" 
     , "G_lossfn_weight": 1.0            // default
-    , "G_tvloss_weight": 1.0            // total variation weight
+    , "G_tvloss_weight": 0.001            // total variation weight
 
     , "G_optimizer_type": "adam"        // fixed, adam is enough
     , "G_optimizer_lr": 1e-4           // learning rate
@@ -69,8 +70,8 @@
     , "G_regularizer_clipstep": null    // unused
     
     // iteration (batch step) checkpoints
-    , "checkpoint_test": 180           // for testing
-    , "checkpoint_save": 270           // for saving model
-    , "checkpoint_print": 100           // for print
+    , "checkpoint_test": 400           // for testing
+    , "checkpoint_save": 800           // for saving model
+    , "checkpoint_print": 16           // for print
   }
 }

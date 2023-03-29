@@ -185,8 +185,9 @@ class TVLoss(nn.Module):
         """
         super(TVLoss, self).__init__()
         self.tv_loss_weight = tv_loss_weight
+        self.MSEloss = nn.MSELoss()
 
-    def forward(self, x):
+    def forward(self, x, gt):
         batch_size = x.size()[0]
         h_x = x.size()[2]
         w_x = x.size()[3]
@@ -194,7 +195,7 @@ class TVLoss(nn.Module):
         count_w = self.tensor_size(x[:, :, :, 1:])
         h_tv = torch.pow((x[:, :, 1:, :] - x[:, :, :h_x - 1, :]), 2).sum()
         w_tv = torch.pow((x[:, :, :, 1:] - x[:, :, :, :w_x - 1]), 2).sum()
-        return self.tv_loss_weight * 2 * (h_tv / count_h + w_tv / count_w) / batch_size
+        return self.MSEloss(x,gt) + self.tv_loss_weight * 2 * (h_tv / count_h + w_tv / count_w) / batch_size
 
     @staticmethod
     def tensor_size(t):

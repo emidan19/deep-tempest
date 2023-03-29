@@ -3,6 +3,7 @@ import numpy as np
 import torch
 import torch.utils.data as data
 import utils.utils_image as util
+import itertools
 
 
 class DatasetFFDNet(data.Dataset):
@@ -23,24 +24,25 @@ class DatasetFFDNet(data.Dataset):
         self.sigma = opt['sigma'] if opt['sigma'] else [0, 75]
         self.sigma_min, self.sigma_max = self.sigma[0], self.sigma[1]
         self.sigma_test = opt['sigma_test'] if opt['sigma_test'] else 25
+        self.num_patches_per_image = opt['num_patches_per_image']
 
         # -------------------------------------
         # get the path of H, return None if input is None
         # -------------------------------------
-        self.paths_H = util.get_image_paths(opt['dataroot_H'])
+        self.paths_H = util.get_image_paths(opt['dataroot_H'])[:50]   # Edit: overfittear con las primeras 50 imagenes
+        self.paths_L = util.get_image_paths(opt['dataroot_L'])[:50]   # Edit: las primeras 9 imagenes pertenecen a test
+
+        if self.opt['phase'] == 'train':
+            listOfLists = [list(itertools.repeat(path, self.num_patches_per_image)) for path in self.paths_H]
+            self.paths_H = list(itertools.chain.from_iterable(listOfLists))
 
     def __getitem__(self, index):
+
         # -------------------------------------
         # get H image
         # -------------------------------------
         H_path = self.paths_H[index]
         img_H = util.imread_uint(H_path, self.n_channels)
-
-        # Take mean array from the 2nd axis (channel axis)
-        img_H = np.mean(img_H, axis=2)
-
-        # Create the channel axis for training consistance
-        img_H = img_H[:,:,np.newaxis]
 
         L_path = H_path
 
@@ -63,7 +65,7 @@ class DatasetFFDNet(data.Dataset):
             # augmentation - flip, rotate
             # ---------------------------------
             # mode = random.randint(0, 7)
-            # patch_H = util.augment_img(patch_H, mode=mode)
+            # patch_L = util.augment_img(patch_H, mode=mode)
 
             # ---------------------------------
             # HWC to CHW, numpy(uint) to tensor
