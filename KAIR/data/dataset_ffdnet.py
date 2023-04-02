@@ -33,7 +33,7 @@ class DatasetFFDNet(data.Dataset):
         self.paths_H = util.get_image_paths(opt['dataroot_H'])[:50]   # Edit: overfittear con las primeras 50 imagenes
         self.paths_L = util.get_image_paths(opt['dataroot_L'])[:50]   # Edit: las primeras 9 imagenes pertenecen a test
 
-        # print('\nNum patches:',self.num_patches_per_image,'\n')
+        # Repeat every image in path list to get more than one patch per image
         if self.opt['phase'] == 'train':
             listOfLists = [list(itertools.repeat(path, self.num_patches_per_image)) for path in self.paths_H]
             self.paths_H = list(itertools.chain.from_iterable(listOfLists))
@@ -60,6 +60,12 @@ class DatasetFFDNet(data.Dataset):
         
         img_L = util.imread_uint(L_path, self.n_channels_datasetload)[:,:,:2]       
 
+        # Get module of complex image, stretch and to uint8
+        img_L = img_L.astype('float')
+        img_L = np.abs(img_L[:,:,0]+1j*img_L[:,:,1])
+        img_L = 255*(img_L - img_L.min())/(img_L.max() - img_L.min())
+        img_L = img_L.astype('uint8')
+
         if self.opt['phase'] == 'train':
             """
             # --------------------------------
@@ -81,12 +87,7 @@ class DatasetFFDNet(data.Dataset):
             patch_H = np.mean(img_H[rnd_h:rnd_h + self.patch_size, rnd_w:rnd_w + self.patch_size, :],axis=2)
             
             # Get the patch from the simulation
-            patch_L = img_L[rnd_h:rnd_h + self.patch_size, rnd_w:rnd_w + self.patch_size, :]
-
-            # Get module of complex image
-            patch_L = patch_L.astype('float')
-            patch_L = np.abs(patch_L[:,:,0]+1j*patch_L[:,:,1]).astype('uint8')
-
+            patch_L = img_L[rnd_h:rnd_h + self.patch_size, rnd_w:rnd_w + self.patch_size]
 
             # # Commented augmentation with rotating because of TMDS encoding
 
@@ -126,9 +127,6 @@ class DatasetFFDNet(data.Dataset):
             img_H = img_H[:,:,np.newaxis]
             img_H = util.uint2single(img_H)
 
-            # Get module of complex image
-            img_L = img_L.astype('float')
-            img_L = np.abs(img_L[:,:,0]+1j*img_L[:,:,1]).astype('uint8')
             img_L = img_L[:,:,np.newaxis]
 
             np.random.seed(seed=0)
