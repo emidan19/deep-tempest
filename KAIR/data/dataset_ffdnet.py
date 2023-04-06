@@ -30,8 +30,8 @@ class DatasetFFDNet(data.Dataset):
         # -------------------------------------
         # get the path of H, return None if input is None
         # -------------------------------------
-        self.paths_H = util.get_image_paths(opt['dataroot_H'])[:50]   # Edit: overfittear con las primeras 50 imagenes
-        self.paths_L = util.get_image_paths(opt['dataroot_L'])[:50]   # Edit: las primeras 9 imagenes pertenecen a test
+        self.paths_H = util.get_image_paths(opt['dataroot_H'])[:100]   # Edit: overfittear con las primeras 50 imagenes
+        self.paths_L = util.get_image_paths(opt['dataroot_L'])[:100]   # Edit: las primeras 9 imagenes pertenecen a test
 
         # Repeat every image in path list to get more than one patch per image
         if self.opt['phase'] == 'train':
@@ -61,10 +61,10 @@ class DatasetFFDNet(data.Dataset):
         img_L = util.imread_uint(L_path, self.n_channels_datasetload)[:,:,:2]       
 
         # Get module of complex image, stretch and to uint8
-        img_L = img_L.astype('float')
-        img_L = np.abs(img_L[:,:,0]+1j*img_L[:,:,1])
-        img_L = 255*(img_L - img_L.min())/(img_L.max() - img_L.min())
-        img_L = img_L.astype('uint8')
+        # img_L = img_L.astype('float')
+        # img_L = np.abs(img_L[:,:,0]+1j*img_L[:,:,1])
+        # img_L = 255*(img_L - img_L.min())/(img_L.max() - img_L.min())
+        # img_L = img_L.astype('uint8')
 
         if self.opt['phase'] == 'train':
             """
@@ -87,7 +87,7 @@ class DatasetFFDNet(data.Dataset):
             patch_H = np.mean(img_H[rnd_h:rnd_h + self.patch_size, rnd_w:rnd_w + self.patch_size, :],axis=2)
             
             # Get the patch from the simulation
-            patch_L = img_L[rnd_h:rnd_h + self.patch_size, rnd_w:rnd_w + self.patch_size]
+            patch_L = img_L[rnd_h:rnd_h + self.patch_size, rnd_w:rnd_w + self.patch_size,:]
 
             # # Commented augmentation with rotating because of TMDS encoding
 
@@ -127,7 +127,7 @@ class DatasetFFDNet(data.Dataset):
             img_H = img_H[:,:,np.newaxis]
             img_H = util.uint2single(img_H)
 
-            img_L = img_L[:,:,np.newaxis]
+            # img_L = img_L[:,:,np.newaxis]
 
             np.random.seed(seed=0)
             img_L = img_L + np.random.normal(0, self.sigma_test/255.0, img_L.shape)
