@@ -127,7 +127,7 @@ class DatasetFFDNet(data.Dataset):
             img_H = img_H[:,:,np.newaxis]
             img_H = util.uint2single(img_H)
 
-            # img_L = img_L[:,:,np.newaxis]
+            img_L = util.uint2single(img_L)
 
             np.random.seed(seed=0)
             img_L = img_L + np.random.normal(0, self.sigma_test/255.0, img_L.shape)
