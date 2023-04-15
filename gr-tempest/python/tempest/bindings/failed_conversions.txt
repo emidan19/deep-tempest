@@ -1,0 +1,3 @@
+./include/gnuradio/tempest/Hsync.hError occurred while running CASTXML xml file does not exist
+./include/gnuradio/tempest/sampling_synchronization.hError occurred while running CASTXML xml file does not exist
+./include/gnuradio/tempest/sync_detector.hError occurred while running CASTXML xml file does not exist
