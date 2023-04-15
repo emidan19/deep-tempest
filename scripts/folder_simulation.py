@@ -6,7 +6,7 @@ Created on Tue Dec 20 2022
 @author: Emilio Martínez <emilio.martinez@fing.edu.uy>
 
 Script that reads all images in folder and simulates HDMI tempest capture 
-if there is no subfolder with it's name. 
+
 """
 
 #%%
@@ -20,7 +20,7 @@ import numpy as np
 from skimage.io import imread
 from scipy import signal
 from PIL import Image
-from DTutils import TMDS_encoding, TMDS_serial
+from DTutils import TMDS_encoding_original, TMDS_serial
 import sys
 
 #%%
@@ -39,14 +39,14 @@ def get_subfolders_names_from_folder(folder):
 def image_transmition_simulation(I, blanking=False):
     
     # Encode image for TMDS
-    I_TMDS = TMDS_encoding (I, blanking = blanking)
+    I_TMDS = TMDS_encoding_original (I, blanking = blanking)
     
     # Serialize pixel bits and sum channel signals
     I_TMDS_Tx = TMDS_serial(I_TMDS)
     
     return I_TMDS_Tx, I_TMDS.shape
 
-def image_capture_simulation(I_Tx, h_total, v_total, N_harmonic, noise_std, 
+def image_capture_simulation(I_Tx, h_total, v_total, N_harmonic, noise_std=0, 
                              fps=60):
     
     # Compute pixelrate and bitrate
@@ -54,7 +54,7 @@ def image_capture_simulation(I_Tx, h_total, v_total, N_harmonic, noise_std,
     bit_rate = 10*px_rate
 
     # Continuous samples (interpolate)
-    interpolator = 1
+    interpolator = int(np.ceil(N_harmonic/5)) # Condition for sampling rate and
     sample_rate = interpolator*bit_rate
     Nsamples = interpolator*(10*h_total*v_total)
     if interpolator > 1:
@@ -65,7 +65,7 @@ def image_capture_simulation(I_Tx, h_total, v_total, N_harmonic, noise_std,
     # Add Gaussian noise
     if noise_std > 0:
         noise_sigma = noise_std/15.968719423 # sqrt(255)~15.968719423
-        I_Tx_noisy = I_Tx_continuous + np.random.normal(0, noise_sigma, Nsamples) + 1j*np.random.normal(0, noise_sigma,N_samples)
+        I_Tx_noisy = I_Tx_continuous + np.random.normal(0, noise_sigma, Nsamples) + 1j*np.random.normal(0, noise_sigma,Nsamples)
     else:
         I_Tx_noisy = I_Tx_continuous
         
@@ -115,67 +115,40 @@ def main():
     foldername = sys.argv[-1]
     
     # Get images and subfolders names
-    images_tmp = get_images_names_from_folder(foldername)
-    old_subfolders = get_subfolders_names_from_folder(foldername)
+    images = get_images_names_from_folder(foldername)
     
-    # Keep images without dedicated folders only
-    images = []
-    new_subfolders = []
-    for image in images_tmp:
-        image_name = image.split('.')[0]
-        if image_name not in old_subfolders:
-            images.append(image)
-            new_subfolders.append(image_name)
+    simulations_folder = foldername+'/simulations/'
+
+    os.mkdir(simulations_folder)
     
+    # timestamp for simulation starting
+    t1_image = time.time()
     
-    for image, subfolder in zip(images,new_subfolders):
-        
-        
-        # Create new directory for simulations
-        subfolder_path = foldername+'/'+subfolder
-        os.mkdir(subfolder_path)
-        
-        # timestamp for simulation starting
-        t1_image = time.time()
+    for image in images:
         
         # Read image
         image_path = foldername+'/'+image
-        imagename = image.split('.')[0]
         I = imread(image_path)
         
         # TMDS coding and bit serialization
         I_Tx, resolution = image_transmition_simulation(I)
         v_res, h_res, _ = resolution
-        
-        # Possible std dev noise simulation values
-        noise_stds = np.array([ 0, 5,  10,  15,  20,  25,  40, 50])
-        
-        
-        # Make five simulations for each image
-        for i in range(5):
-            
-            # Choose random pixelrate harmonic number
-            N_harmonic = np.random.randint(1,10)
-            
-            # Choose random SNR value (SNR=0 for no noise)
-            noise_std = np.random.choice(noise_stds)
-            
-            I_capture = image_capture_simulation(I_Tx, h_res, v_res, N_harmonic, noise_std)
-            
-            path = subfolder_path+'/'+imagename+'_'+str(N_harmonic)+'harm_'+str(noise_std)+"std.png"
-            
-            save_simulation_image(I_capture,path)
-            
-            if i==0:
-                # timestamp for simulation ending
-                t2_image = time.time()                
-            
 
+        # Choose random pixelrate harmonic number
+        N_harmonic = np.random.randint(1,10)
         
+        I_capture = image_capture_simulation(I_Tx, h_res, v_res, N_harmonic)
         
-        t_image = t2_image-t1_image
+        path = simulations_folder+image
         
-        print('Tiempo de la primer simulación de '+image+':','{:.2f}'.format(t_image)+'s\n')
+        save_simulation_image(I_capture,path)
+
+    # timestamp for simulation ending
+    t2_image = time.time()                
+
+    t_images = t2_image-t1_image
+        
+    print('\nTiempo total de las '+str(len(images))+' simulaciones:','{:.2f}'.format(t_images)+'s\n')
         
 if __name__ == "__main__":    
     main()
