@@ -56,7 +56,6 @@ class DatasetFFDNet(data.Dataset):
 
         img_H = util.imread_uint(H_path, self.n_channels_datasetload)       
 
-        # L_path = H_path
         
         img_L = util.imread_uint(L_path, self.n_channels_datasetload)[:,:,:2]       
 
@@ -80,8 +79,6 @@ class DatasetFFDNet(data.Dataset):
             rnd_h = random.randint(0, max(0, H - self.patch_size))
             rnd_w = random.randint(0, max(0, W - self.patch_size))
 
-            # # Comment because using one only channel to train as ground-truth
-            # patch_H = img_H[rnd_h:rnd_h + self.patch_size, rnd_w:rnd_w + self.patch_size, :]
 
             # Ground-truth as channels mean
             patch_H = np.mean(img_H[rnd_h:rnd_h + self.patch_size, rnd_w:rnd_w + self.patch_size, :],axis=2)
@@ -89,13 +86,7 @@ class DatasetFFDNet(data.Dataset):
             # Get the patch from the simulation
             patch_L = img_L[rnd_h:rnd_h + self.patch_size, rnd_w:rnd_w + self.patch_size,:]
 
-            # # Commented augmentation with rotating because of TMDS encoding
 
-            # ---------------------------------
-            # augmentation - flip, rotate
-            # ---------------------------------
-            # mode = random.randint(0, 7)
-            # patch_L = util.augment_img(patch_H, mode=mode)
 
             # ---------------------------------
             # HWC to CHW, numpy(uint) to tensor
