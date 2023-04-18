@@ -25,13 +25,15 @@ class DatasetFFDNet(data.Dataset):
         self.sigma = opt['sigma'] if opt['sigma'] else [0, 75]
         self.sigma_min, self.sigma_max = self.sigma[0], self.sigma[1]
         self.sigma_test = opt['sigma_test'] if opt['sigma_test'] else 25
-        self.num_patches_per_image = opt['num_patches_per_image']
+        self.use_all_patches = opt['use_all_patches'] if opt['use_all_patches'] else False
+        self.num_patches_per_image = opt['num_patches_per_image'] if not(self.use_all_patches) else ((1280**2)//(self.patch_size)**2)
+        self.num_images = 4 # Number of images to use
 
         # -------------------------------------
         # get the path of H, return None if input is None
         # -------------------------------------
-        self.paths_H = util.get_image_paths(opt['dataroot_H'])[:100]   # Edit: overfittear con las primeras 50 imagenes
-        self.paths_L = util.get_image_paths(opt['dataroot_L'])[:100]   # Edit: las primeras 9 imagenes pertenecen a test
+        self.paths_H = util.get_image_paths(opt['dataroot_H'])[:self.num_images]   # Edit: overfittear con las primeras 100 imagenes
+        self.paths_L = util.get_image_paths(opt['dataroot_L'])[:self.num_images]   # Edit: las primeras 9 imagenes pertenecen a test
 
         # Repeat every image in path list to get more than one patch per image
         if self.opt['phase'] == 'train':
@@ -72,21 +74,30 @@ class DatasetFFDNet(data.Dataset):
             # --------------------------------
             """
             H, W = img_H.shape[:2]
+            
+            if self.use_all_patches:
 
-            # ---------------------------------
-            # randomly crop the patch
-            # ---------------------------------
-            rnd_h = random.randint(0, max(0, H - self.patch_size))
-            rnd_w = random.randint(0, max(0, W - self.patch_size))
+                # ---------------------------------
+                # Start or continue image patching
+                # ---------------------------------                
+                img_patch_index = index % self.num_patches_per_image  # Resets to 0 every time index overflows num_patches
+                h_index = img_patch_index // W
+                w_index = img_patch_index % W
+                patch_h = min(self.patch_size * h_index, H - self.patch_size)
+                patch_w = min(self.patch_size * w_index, W - self.patch_size)
 
+            else:
+                # ---------------------------------
+                # randomly crop the patch
+                # ---------------------------------
+                patch_h = random.randint(0, max(0, H - self.patch_size))
+                patch_w = random.randint(0, max(0, W - self.patch_size))
 
             # Ground-truth as channels mean
-            patch_H = np.mean(img_H[rnd_h:rnd_h + self.patch_size, rnd_w:rnd_w + self.patch_size, :],axis=2)
+            patch_H = np.mean(img_H[patch_h:patch_h + self.patch_size, patch_w:patch_w + self.patch_size, :],axis=2)
             
             # Get the patch from the simulation
-            patch_L = img_L[rnd_h:rnd_h + self.patch_size, rnd_w:rnd_w + self.patch_size,:]
-
-
+            patch_L = img_L[patch_h:patch_h + self.patch_size, patch_w:patch_w + self.patch_size,:]
 
             # ---------------------------------
             # HWC to CHW, numpy(uint) to tensor
