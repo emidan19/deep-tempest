@@ -54,7 +54,7 @@
   }
 
   , "train": {
-      "epochs": 1000                      // number of epochs to train
+      "epochs": 1500                      // number of epochs to train
     , "G_lossfn_type": "l1"               // "l1" preferred | "l2sum" | "l2" | "ssim" 
     , "G_lossfn_weight": 1.0            // default
     , "G_tvloss_weight": 0.1            // total variation weight
@@ -64,15 +64,15 @@
     , "G_optimizer_clipgrad": null      // unused
 
     , "G_scheduler_type": "MultiStepLR" // "MultiStepLR" is enough
-    , "G_scheduler_milestones": [2600, 3900, 5200, 7800, 9100]
+    , "G_scheduler_milestones": [2500, 5000, 6000] // as batch iters
     , "G_scheduler_gamma": 0.5  //
 
     , "G_regularizer_orthstep": null    // unused
     , "G_regularizer_clipstep": null    // unused
     
-    // iteration (batch step) checkpoints
-    , "checkpoint_test": 1300           // for testing
-    , "checkpoint_save": 2600           // for saving model
-    , "checkpoint_print": 13           // for print
+    // epoch checkpoints
+    , "checkpoint_test": 100           // for testing
+    , "checkpoint_save": 500           // for saving model
+    , "checkpoint_print": 1           // for print
   }
 }

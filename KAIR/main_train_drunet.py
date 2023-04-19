@@ -60,12 +60,11 @@ def main(json_path='options/train_drunet.json'):
     # ----------------------------------------
     # -->-->-->-->-->-->-->-->-->-->-->-->-->-
 
-    # init_iter_G, init_path_G = option.find_last_checkpoint(opt['path']['models'], net_type='G')
-    init_iter_G, init_path_G = option.find_last_checkpoint(opt['path']['models'], net_type='G', pretrained_path = opt['path']['pretrained_netG'])
-    opt['path']['pretrained_netG'] = init_path_G
-    init_iter_optimizerG, init_path_optimizerG = option.find_last_checkpoint(opt['path']['models'], net_type='optimizerG')
+    init_epoch_G, init_path_G = option.find_last_checkpoint(opt['path']['models'], net_type='G')
+    # init_iter_G, init_path_G = option.find_last_checkpoint(opt['path']['models'], net_type='G', pretrained_path = opt['path']['pretrained_netG'])
+    init_epoch_optimizerG, init_path_optimizerG = option.find_last_checkpoint(opt['path']['models'], net_type='optimizerG')
     opt['path']['pretrained_optimizerG'] = init_path_optimizerG
-    current_step = max(init_iter_G, init_iter_optimizerG)
+    current_epoch = max(init_epoch_G, init_epoch_optimizerG)
 
     border = opt['scale']
     # --<--<--<--<--<--<--<--<--<--<--<--<--<-
@@ -160,10 +159,17 @@ def main(json_path='options/train_drunet.json'):
     # Step--4 (main training)
     # ----------------------------------------
     '''
+    current_step = current_epoch*train_size
 
     for epoch in range(opt['train']['epochs']):  # keep running
+        
+        # Update epoch
+        current_epoch += 1
+
+        epoch_loss = 0
+
         if opt['dist']:
-            train_sampler.set_epoch(epoch)
+            train_sampler.set_epoch(current_epoch)
 
         for i, train_data in enumerate(train_loader):
 
@@ -185,71 +191,83 @@ def main(json_path='options/train_drunet.json'):
             model.optimize_parameters(current_step)
 
             # -------------------------------
-            # 4) training information
+            # 4) training information (loss)
             # -------------------------------
-            if current_step % opt['train']['checkpoint_print'] == 0 and opt['rank'] == 0:
-                logs = model.current_log()  # such as loss
-                message = '<epoch:{:3d}, iter:{:8,d}, lr:{:.3e}> '.format(epoch, current_step, model.current_learning_rate())
-                for k, v in logs.items():  # merge log information into message
-                    message += '{:s}: {:.3e} '.format(k, v)
-                logger.info(message)
+            logs = model.current_log()
+            batch_loss = logs['G_loss'] # get batch loss / iter loss
+            epoch_loss += batch_loss
 
-            # -------------------------------
-            # 5) save model
-            # -------------------------------
-            if current_step % opt['train']['checkpoint_save'] == 0 and opt['rank'] == 0:
-                logger.info('Saving the model.')
-                model.save(current_step)
+        # -------------------------------
+        # Training information
+        # -------------------------------      
 
-            # -------------------------------
-            # 6) testing
-            # -------------------------------
-            if current_step % opt['train']['checkpoint_test'] == 0 and opt['rank'] == 0:
+        # Epoch
+        epoch_loss = epoch_loss/train_size
 
-                avg_psnr = 0.0
-                avg_loss = 0.0
-                idx = 0
+        logs = model.current_log()  # such as loss
+        message = '<epoch:{:3d}, iter:{:8,d}, lr:{:.3e}> G_loss: {:.3e} '.format(current_epoch, 
+                                                                                current_step, 
+                                                                                model.current_learning_rate(),
+                                                                                epoch_loss
+                                                                                )
+        logger.info(message)
 
-                for test_data in test_loader:
-                    idx += 1
-                    image_name_ext = os.path.basename(test_data['L_path'][0])
-                    img_name, ext = os.path.splitext(image_name_ext)
+        # -------------------------------
+        # Save model
+        # -------------------------------
+        if current_epoch % opt['train']['checkpoint_save'] == 0 and opt['rank'] == 0:
+            logger.info('Saving the model.')
+            model.save(current_epoch)
 
-                    img_dir = os.path.join(opt['path']['images'], img_name)
-                    util.mkdir(img_dir)
+        # -------------------------------
+        # Testing
+        # -------------------------------
+        if current_epoch % opt['train']['checkpoint_test'] == 0 and opt['rank'] == 0:
 
-                    model.feed_data(test_data)
-                    model.test()
+            avg_psnr = 0.0
+            avg_loss = 0.0
+            idx = 0
 
-                    visuals = model.current_visuals()
-                    E_img = util.tensor2uint(visuals['E'])
-                    H_img = util.tensor2uint(visuals['H'])
+            for test_data in test_loader:
+                idx += 1
+                image_name_ext = os.path.basename(test_data['L_path'][0])
+                img_name, ext = os.path.splitext(image_name_ext)
 
-                    # -----------------------
-                    # save estimated image E
-                    # -----------------------
-                    save_img_path = os.path.join(img_dir, '{:s}_{:d}.png'.format(img_name, current_step))
-                    util.imsave(E_img, save_img_path)
+                img_dir = os.path.join(opt['path']['images'], img_name)
+                util.mkdir(img_dir)
 
-                    # -----------------------
-                    # calculate PSNR
-                    # -----------------------
-                    current_psnr = util.calculate_psnr(E_img, H_img, border=border)
-                    # -----------------------
-                    # calculate loss
-                    # -----------------------
-                    current_loss = model.G_lossfn_weight * model.G_lossfn(model.E, model.H)
+                model.feed_data(test_data)
+                model.test()
 
-                    logger.info('{:->4d}--> {:>10s} | PSNR = {:<4.2f}dB ; G_loss = {:.3e}'.format(idx, image_name_ext, current_psnr, current_loss))
+                visuals = model.current_visuals()
+                E_img = util.tensor2uint(visuals['E'])
+                H_img = util.tensor2uint(visuals['H'])
 
-                    avg_psnr += current_psnr
-                    avg_loss += current_loss
+                # -----------------------
+                # save estimated image E
+                # -----------------------
+                save_img_path = os.path.join(img_dir, '{:s}_{:d}.png'.format(img_name, current_epoch))
+                util.imsave(E_img, save_img_path)
 
-                avg_psnr = avg_psnr / idx
-                avg_loss = avg_loss / idx
+                # -----------------------
+                # calculate PSNR
+                # -----------------------
+                current_psnr = util.calculate_psnr(E_img, H_img, border=border)
+                # -----------------------
+                # calculate loss
+                # -----------------------
+                current_loss = model.G_lossfn_weight * model.G_lossfn(model.E, model.H)
 
-                # testing log
-                logger.info('<epoch:{:3d}, iter:{:8,d}, Average PSNR : {:<.2f}dB, Average loss : {:.3e}\n'.format(epoch, current_step, avg_psnr, avg_loss))
+                logger.info('{:->4d}--> {:>10s} | PSNR = {:<4.2f}dB ; G_loss = {:.3e}'.format(idx, image_name_ext, current_psnr, current_loss))
+
+                avg_psnr += current_psnr
+                avg_loss += current_loss
+
+            avg_psnr = avg_psnr / idx
+            avg_loss = avg_loss / idx
+
+            # testing log
+            logger.info('<epoch:{:3d}, iter:{:8,d}, Average PSNR : {:<.2f}dB, Average loss : {:.3e}\n'.format(current_epoch, current_step, avg_psnr, avg_loss))
 
 if __name__ == '__main__':
     main()
