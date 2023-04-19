@@ -81,23 +81,27 @@ class DatasetFFDNet(data.Dataset):
                 # Start or continue image patching
                 # ---------------------------------                
                 img_patch_index = index % self.num_patches_per_image  # Resets to 0 every time index overflows num_patches
-                h_index = img_patch_index // W
-                w_index = img_patch_index % W
-                patch_h = min(self.patch_size * h_index, H - self.patch_size)
-                patch_w = min(self.patch_size * w_index, W - self.patch_size)
+                
+                # Upper-left corner of patch
+                h_index = self.patch_size * ( (img_patch_index * self.patch_size) // W)
+                w_index =  self.patch_size * ( ( (img_patch_index * self.patch_size) % W ) // self.patch_size)
+
+                # Dont exceed the image limit
+                h_index = min(h_index, H - self.patch_size)
+                w_index = min(w_index, W - self.patch_size)
 
             else:
                 # ---------------------------------
                 # randomly crop the patch
                 # ---------------------------------
-                patch_h = random.randint(0, max(0, H - self.patch_size))
-                patch_w = random.randint(0, max(0, W - self.patch_size))
+                h_index = random.randint(0, max(0, H - self.patch_size))
+                w_index = random.randint(0, max(0, W - self.patch_size))
 
             # Ground-truth as channels mean
-            patch_H = np.mean(img_H[patch_h:patch_h + self.patch_size, patch_w:patch_w + self.patch_size, :],axis=2)
+            patch_H = np.mean(img_H[h_index:h_index + self.patch_size, w_index:w_index + self.patch_size, :],axis=2)
             
             # Get the patch from the simulation
-            patch_L = img_L[patch_h:patch_h + self.patch_size, patch_w:patch_w + self.patch_size,:]
+            patch_L = img_L[h_index:h_index + self.patch_size, w_index:w_index + self.patch_size,:]
 
             # ---------------------------------
             # HWC to CHW, numpy(uint) to tensor
