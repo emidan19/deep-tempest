@@ -62,9 +62,10 @@ def main(json_path='options/train_drunet.json'):
 
     init_epoch_G, init_path_G = option.find_last_checkpoint(opt['path']['models'], net_type='G')
     # init_iter_G, init_path_G = option.find_last_checkpoint(opt['path']['models'], net_type='G', pretrained_path = opt['path']['pretrained_netG'])
-    init_epoch_optimizerG, init_path_optimizerG = option.find_last_checkpoint(opt['path']['models'], net_type='optimizerG')
-    opt['path']['pretrained_optimizerG'] = init_path_optimizerG
-    current_epoch = max(init_epoch_G, init_epoch_optimizerG)
+    #init_epoch_optimizerG, init_path_optimizerG = option.find_last_checkpoint(opt['path']['models'], net_type='optimizerG')
+    #opt['path']['pretrained_optimizerG'] = init_path_optimizerG
+    #current_epoch = max(init_epoch_G, init_epoch_optimizerG)
+    current_epoch = init_epoch_G
 
     border = opt['scale']
     # --<--<--<--<--<--<--<--<--<--<--<--<--<-
@@ -114,7 +115,7 @@ def main(json_path='options/train_drunet.json'):
     for phase, dataset_opt in opt['datasets'].items():
         if phase == 'train':
             train_set = define_Dataset(dataset_opt)
-            train_size = int(math.ceil(len(train_set) / dataset_opt['dataloader_batch_size']))
+            train_size = int(math.floor(len(train_set) / dataset_opt['dataloader_batch_size']))
             if opt['rank'] == 0:
                 logger.info('Number of train images: {:,d}, iters: {:,d}'.format(len(train_set), train_size))
             if opt['dist']:

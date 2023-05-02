@@ -125,8 +125,14 @@ class ModelPlain(ModelBase):
     # ----------------------------------------
     def define_scheduler(self):
         if self.opt_train['G_scheduler_type'] == 'MultiStepLR':
+ 
+            if self.opt_train['G_scheduler_iter_step'] is None:
+                iter_LR_updates = self.opt_train['G_scheduler_milestones']
+            else:
+                iter_LR_update_step = self.opt_train['G_scheduler_iter_step']
+                iter_LR_updates = list(range(iter_LR_update_step, int(1e6),iter_LR_update_step))
             self.schedulers.append(lr_scheduler.MultiStepLR(self.G_optimizer,
-                                                            self.opt_train['G_scheduler_milestones'],
+                                                            iter_LR_updates,
                                                             self.opt_train['G_scheduler_gamma']
                                                             ))
         elif self.opt_train['G_scheduler_type'] == 'CosineAnnealingWarmRestarts':

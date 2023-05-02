@@ -6,8 +6,8 @@
   , "scale": 0       // broadcast to "netG" if SISR
   , "n_channels": 1  // broadcast to "datasets", 1 for grayscale, 3 for color
   , "n_channels_datasetload": 3 // broadcast to image training set
-  , "sigma": [0, 50]      // 15, 25, 50 for DnCNN | [0, 75] for FFDNet and FDnCNN
-  , "sigma_test": 20 // 15, 25, 50 for DnCNN and ffdnet
+  , "sigma": [0, 0]      // 15, 25, 50 for DnCNN | [0, 75] for FFDNet and FDnCNN
+  , "sigma_test": 0 // 15, 25, 50 for DnCNN and ffdnet
 
   , "path": {
     "root": "denoising"            // "denoising" | "superresolution"
@@ -25,7 +25,7 @@
       , "H_size": 64                    // patch size 40 | 64 | 96 | 128 | 192
       , "dataloader_shuffle": false
       , "dataloader_num_workers": 8
-      , "dataloader_batch_size": 128     // batch size 1 | 16 | 32 | 48 | 64 | 128
+      , "dataloader_batch_size": 256     // batch size 1 | 16 | 32 | 48 | 64 | 128
     }
     , "test": {
       "name": "test_dataset"            // just name
@@ -54,7 +54,7 @@
   }
 
   , "train": {
-      "epochs": 1500                      // number of epochs to train
+      "epochs": 1000                      // number of epochs to train
     , "G_lossfn_type": "l1"               // "l1" preferred | "l2sum" | "l2" | "ssim" 
     , "G_lossfn_weight": 1.0            // default
     , "G_tvloss_weight": 0.1            // total variation weight
@@ -64,15 +64,16 @@
     , "G_optimizer_clipgrad": null      // unused
 
     , "G_scheduler_type": "MultiStepLR" // "MultiStepLR" is enough
-    , "G_scheduler_milestones": [2500, 5000, 6000] // as batch iters
+    , "G_scheduler_milestones": [] // as batch iters
+    , "G_scheduler_iter_step": 450 // use gamma factor on lr every this number of iter steps, null if using milestones
     , "G_scheduler_gamma": 0.5  //
 
     , "G_regularizer_orthstep": null    // unused
     , "G_regularizer_clipstep": null    // unused
     
     // epoch checkpoints
-    , "checkpoint_test": 100           // for testing
-    , "checkpoint_save": 500           // for saving model
+    , "checkpoint_test": 10           // for testing
+    , "checkpoint_save": 100           // for saving model
     , "checkpoint_print": 1           // for print
   }
 }

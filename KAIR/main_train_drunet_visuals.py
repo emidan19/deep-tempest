@@ -19,6 +19,30 @@ from data.select_dataset import define_Dataset
 from models.select_model import define_Model
 
 
+def save_deeptempest_result(imgs_dict, save_path):
+
+    # Name of original image and saving path
+    file_name = imgs_dict['image_name']
+    save_img_path = os.path.join(save_path, file_name)
+
+    # High resolution image
+    H = imgs_dict['H_vis']
+    util.imsave(H, save_img_path+'_H.png')
+
+    # Low resolution image (real/imaginary part and module)
+    L = util.tensor2uint(imgs_dict['L'])
+    L_complex = np.pad(L,((0,0),(0,0),(0,1)))    # Real and imaginary
+    util.imsave(L_complex, save_img_path+'_L_complex.png')
+
+    L = L.astype('float')
+    L = np.abs(L[:,:,0] + 1j*L[:,:,1])
+    L = 255*(L - L.min())/(L.max() - L.min())   # Module
+    util.imsave(L, save_img_path+'_L_module.png')
+
+    E = imgs_dict['E_vis']
+
+    util.imsave(E, save_img_path+'_E.png')
+
 '''
 # --------------------------------------------
 # training code for DRUNet
@@ -194,4 +218,8 @@ def drunet_pipeline(json_path='options/train_drunet.json'):
     return test_imgs_list
 
 if __name__ == '__main__':
-    main()
+    imgs = drunet_pipeline()
+    save_path = 'testsets/web_subset/visuals' # COMPLETE SAVING PATH
+    for img in imgs:
+        save_deeptempest_result(img, save_path)
+
