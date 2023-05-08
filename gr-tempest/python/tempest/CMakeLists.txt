@@ -38,7 +38,8 @@ GR_PYTHON_INSTALL(
     message_to_var.py
     tempest_msgbtn.py
     DTutils.py
-    TMDS_image_source.py DESTINATION ${GR_PYTHON_DIR}/gnuradio/tempest
+    TMDS_image_source.py
+    buttonToFileSink.py DESTINATION ${GR_PYTHON_DIR}/gnuradio/tempest
 )
 
 ########################################################################

@@ -19,5 +19,6 @@ install(FILES
     tempest_tempest_msgbtn.block.yml
     tempest_message_to_var.block.yml
     tempest_image_source.block.yml 
-    tempest_TMDS_image_source.block.yml DESTINATION share/gnuradio/grc/blocks
+    tempest_TMDS_image_source.block.yml
+    tempest_buttonToFileSink.block.yml DESTINATION share/gnuradio/grc/blocks
 )
