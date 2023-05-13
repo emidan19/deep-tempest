@@ -6,12 +6,13 @@
   , "scale": 0       // broadcast to "netG" if SISR
   , "n_channels": 1  // broadcast to "datasets", 1 for grayscale, 3 for color
   , "n_channels_datasetload": 3 // broadcast to image training set
-  , "sigma": [0, 0]      // 15, 25, 50 for DnCNN | [0, 75] for FFDNet and FDnCNN
-  , "sigma_test": 0 // 15, 25, 50 for DnCNN and ffdnet
+  , "sigma": [0, 30]      // 15, 25, 50 for DnCNN | [0, 75] for FFDNet and FDnCNN
+  , "sigma_test": 15 // 15, 25, 50 for DnCNN and ffdnet
+  , "skip_natural_patches": true // keep only non-natural image patches/text based image patches
 
   , "path": {
     "root": "denoising"            // "denoising" | "superresolution"
-    , "pretrained_netG": "denoising/drunet/models/drunet_gray.pth"    // path of pretrained model, if model from scratch type: null
+    , "pretrained_netG": "denoising/drunet/models/40_G.pth"    // path of pretrained model, if model from scratch type: null
   }
 
   , "datasets": {
@@ -22,10 +23,10 @@
       , "use_all_patches": true       // use or not all 
       , "num_patches_per_image": 20   // number of random patches of training image, if not using all patches
       , "dataroot_L": "trainsets/simulations" // path of L training dataset, if using noisy H type: null
-      , "H_size": 64                    // patch size 40 | 64 | 96 | 128 | 192
+      , "H_size": 128                    // patch size 40 | 64 | 96 | 128 | 192
       , "dataloader_shuffle": false
       , "dataloader_num_workers": 8
-      , "dataloader_batch_size": 256     // batch size 1 | 16 | 32 | 48 | 64 | 128
+      , "dataloader_batch_size": 152     // batch size 1 | 16 | 32 | 48 | 64 | 128
     }
     , "test": {
       "name": "test_dataset"            // just name
@@ -48,14 +49,14 @@
     , "upsample_mode": "convtranspose"  // "pixelshuffle" | "convtranspose" | "upconv"
     , "downsample_mode": "strideconv"   // "strideconv" | "avgpool" | "maxpool"
     , "bias": false//
-    , "init_type": "orthogonal"         // "orthogonal" | "normal" | "uniform" | "xavier_normal" | "xavier_uniform" | "kaiming_normal" | "kaiming_uniform"
+    , "init_type": "kaiming_normal"         // "orthogonal" | "normal" | "uniform" | "xavier_normal" | "xavier_uniform" | "kaiming_normal" | "kaiming_uniform"
     , "init_bn_type": "uniform"         // "uniform" | "constant"
     , "init_gain": 0.2
   }
 
   , "train": {
-      "epochs": 1000                      // number of epochs to train
-    , "G_lossfn_type": "l1"               // "l1" preferred | "l2sum" | "l2" | "ssim" 
+      "epochs": 20                      // number of epochs to train
+    , "G_lossfn_type": "l2"               // "l1" preferred | "l2sum" | "l2" | "ssim" 
     , "G_lossfn_weight": 1.0            // default
     , "G_tvloss_weight": 0.1            // total variation weight
 
@@ -64,16 +65,16 @@
     , "G_optimizer_clipgrad": null      // unused
 
     , "G_scheduler_type": "MultiStepLR" // "MultiStepLR" is enough
-    , "G_scheduler_milestones": [] // as batch iters
-    , "G_scheduler_iter_step": 450 // use gamma factor on lr every this number of iter steps, null if using milestones
+    , "G_scheduler_milestones": [10000] // as batch iters
+    , "G_scheduler_iter_step": 101800 // use gamma factor on lr every this number of iter steps, null if using milestones
     , "G_scheduler_gamma": 0.5  //
 
     , "G_regularizer_orthstep": null    // unused
     , "G_regularizer_clipstep": null    // unused
     
     // epoch checkpoints
-    , "checkpoint_test": 10           // for testing
-    , "checkpoint_save": 100           // for saving model
-    , "checkpoint_print": 1           // for print
+    , "checkpoint_test": 1            // for testing
+    , "checkpoint_save": 4           // for saving model
+    , "checkpoint_print": 1             // for print
   }
 }

@@ -3,6 +3,7 @@ import numpy as np
 import torch
 import torch.utils.data as data
 import utils.utils_image as util
+from utils.DTutils import is_natural_patch
 import itertools
 
 
@@ -27,13 +28,14 @@ class DatasetFFDNet(data.Dataset):
         self.sigma_test = opt['sigma_test'] if opt['sigma_test'] else 25
         self.use_all_patches = opt['use_all_patches'] if opt['use_all_patches'] else False
         self.num_patches_per_image = opt['num_patches_per_image'] if not(self.use_all_patches) else ((1280**2)//(self.patch_size)**2)
-        self.num_images = 4 # Number of images to use
+        self.skip_natural_patches = opt['skip_natural_patches'] if opt['skip_natural_patches'] else False
 
         # -------------------------------------
         # get the path of H, return None if input is None
         # -------------------------------------
-        self.paths_H = util.get_image_paths(opt['dataroot_H'])[:self.num_images]   # Edit: overfittear con las primeras 100 imagenes
-        self.paths_L = util.get_image_paths(opt['dataroot_L'])[:self.num_images]   # Edit: las primeras 9 imagenes pertenecen a test
+        self.paths_H = util.get_image_paths(opt['dataroot_H'])
+        self.paths_L = util.get_image_paths(opt['dataroot_L'])
+
 
         # Repeat every image in path list to get more than one patch per image
         if self.opt['phase'] == 'train':
@@ -89,6 +91,22 @@ class DatasetFFDNet(data.Dataset):
                 # Dont exceed the image limit
                 h_index = min(h_index, H - self.patch_size)
                 w_index = min(w_index, W - self.patch_size)
+
+                ### Keep text patches only (non-natural images)
+                if self.skip_natural_patches:
+
+                    # Check if selected patch is natural, based on RGB entropy
+                    is_natural = is_natural_patch(img_H[h_index:h_index + self.patch_size, w_index:w_index + self.patch_size, :])
+
+                    # If natural, select random patch and keep trying until non-natural or reaching max attempts
+                    attempt = 0
+                    max_attempts = 10
+                    while is_natural and (attempt < max_attempts):
+                        h_index = random.randint(0, max(0, H - self.patch_size))
+                        w_index = random.randint(0, max(0, W - self.patch_size))
+                        is_natural = is_natural_patch(img_H[h_index:h_index + self.patch_size, w_index:w_index + self.patch_size, :])
+                        attempt += 1
+
 
             else:
                 # ---------------------------------

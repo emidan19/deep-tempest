@@ -2,6 +2,54 @@ import numpy as np
 from scipy import signal
 from numba import jit, uint8, int8, prange
 
+def rgb_entropy(I):
+    """ 
+    Calculates image entropy with unweighted sum of histogram RGB channels
+
+    Inputs:
+    - I (3D array): RGB image
+
+    Returns
+    - entropy (float): image color entropy
+    """
+    # Number of grey-scale bins
+    hist_size = 256
+    
+    # Channels histograms
+    hist_R, _ = np.histogram(I[:,:,0], bins=hist_size)
+    hist_G, _ = np.histogram(I[:,:,1], bins=hist_size)
+    hist_B, _ = np.histogram(I[:,:,2], bins=hist_size)
+
+    # Histogram sum and normalize
+    hist_chs_sum = hist_R + hist_G + hist_B
+    hist_chs_sum = hist_chs_sum/np.sum(hist_chs_sum)
+    
+    # Find entropy
+    entropy = 0
+    for i in range (0,256):
+        if hist_chs_sum[i] != 0:
+            entropy -= (hist_chs_sum[i]/hist_size)*np.log(hist_chs_sum[i]/hist_size)
+
+    return entropy
+
+def is_natural_patch(patch, entropy_thrs = 0.035):
+  """  
+  Label an image patch as natural or artifitial based on it's color entropy
+
+  Inputs:
+  - patch (3D array): RGB image patch
+  - entropy_thrs (float, default 0.035): threshold that decides if its natural or not
+
+  Returns:
+  - is_natural (bool): True if entropy of patch is above threshold, False otherwise
+  """
+
+  entropy = rgb_entropy(patch)
+
+  is_natural = entropy > entropy_thrs
+
+  return is_natural
+
 def autocorr(x):
 	"""Compute autocorrelation function of 1-D array
 
