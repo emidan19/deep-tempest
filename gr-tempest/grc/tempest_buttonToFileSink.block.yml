@@ -4,7 +4,7 @@ category: '[tempest]'
 
 templates:
   imports: from gnuradio import tempest
-  make: tempest.buttonToFileSink(${Filename}, ${num_samples})
+  make: tempest.buttonToFileSink(${Filename}, ${H_size}, ${V_size})
 
 #  Make one 'parameters' list entry for every parameter you want settable from the GUI.
 #     Keys include:
@@ -14,13 +14,16 @@ templates:
 #     * default
 parameters:
 - id: Filename
-  label: output file to save samples
-  dtype: string
-  default: "output.dat"
-- id: num_samples
-  label: number of samples to save
+  label: output directory
+  dtype: file_save
+- id: H_size
+  label: Horizontal pixels
   dtype: int
-  default: "10"
+  default: "800"
+- id: V_size
+  label: Vertical pixels
+  dtype: int
+  default: "600"
 
 #  Make one 'inputs' list entry per input and one 'outputs' list entry per output.
 #  Keys include:
