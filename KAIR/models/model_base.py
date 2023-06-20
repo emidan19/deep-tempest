@@ -63,7 +63,8 @@ class ModelBase():
             scheduler.step(n)
 
     def current_learning_rate(self):
-        return self.schedulers[0].get_lr()[0]
+        # return self.schedulers[0].get_lr()[0]
+        return self.schedulers[0].get_lr()[-1] # Above lr seems always fixed
 
     def requires_grad(self, model, flag=True):
         for p in model.parameters():

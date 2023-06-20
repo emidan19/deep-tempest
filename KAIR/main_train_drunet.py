@@ -167,7 +167,7 @@ def main(json_path='options/train_drunet.json'):
         # Update epoch
         current_epoch += 1
 
-        epoch_loss = 0
+        epoch_loss = 0.0
 
         if opt['dist']:
             train_sampler.set_epoch(current_epoch)
@@ -194,8 +194,10 @@ def main(json_path='options/train_drunet.json'):
             # -------------------------------
             # 4) training information (loss)
             # -------------------------------
+
             logs = model.current_log()
             batch_loss = logs['G_loss'] # get batch loss / iter loss
+
             epoch_loss += batch_loss
 
         # -------------------------------
@@ -231,24 +233,30 @@ def main(json_path='options/train_drunet.json'):
 
             for test_data in test_loader:
                 idx += 1
+
                 image_name_ext = os.path.basename(test_data['L_path'][0])
                 img_name, ext = os.path.splitext(image_name_ext)
-
-                img_dir = os.path.join(opt['path']['images'], img_name)
-                util.mkdir(img_dir)
 
                 model.feed_data(test_data)
                 model.test()
 
                 visuals = model.current_visuals()
-                E_img = util.tensor2uint(visuals['E'])
-                H_img = util.tensor2uint(visuals['H'])
+                E_visual = visuals['E']
+                E_img = util.tensor2uint(E_visual)
+                H_visual = visuals['H']
+                H_img = util.tensor2uint(H_visual)
 
                 # -----------------------
                 # save estimated image E
                 # -----------------------
-                save_img_path = os.path.join(img_dir, '{:s}_{:d}.png'.format(img_name, current_epoch))
-                util.imsave(E_img, save_img_path)
+
+                if current_epoch % opt['train']['checkpoint_test_save'] == 0:
+
+                    img_dir = os.path.join(opt['path']['images'], img_name)
+                    util.mkdir(img_dir)
+
+                    save_img_path = os.path.join(img_dir, '{:s}_{:d}.png'.format(img_name, current_epoch))
+                    util.imsave(E_img, save_img_path)
 
                 # -----------------------
                 # calculate PSNR
@@ -257,7 +265,7 @@ def main(json_path='options/train_drunet.json'):
                 # -----------------------
                 # calculate loss
                 # -----------------------
-                current_loss = model.G_lossfn_weight * model.G_lossfn(model.E, model.H)
+                current_loss = model.G_lossfn_weight * model.G_lossfn(E_visual, H_visual)
 
                 logger.info('{:->4d}--> {:>10s} | PSNR = {:<4.2f}dB ; G_loss = {:.3e}'.format(idx, image_name_ext, current_psnr, current_loss))
 

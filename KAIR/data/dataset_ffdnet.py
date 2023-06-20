@@ -25,9 +25,10 @@ class DatasetFFDNet(data.Dataset):
         self.patch_size = self.opt['H_size'] if opt['H_size'] else 64
         self.sigma = opt['sigma'] if opt['sigma'] else [0, 75]
         self.sigma_min, self.sigma_max = self.sigma[0], self.sigma[1]
-        self.sigma_test = opt['sigma_test'] if opt['sigma_test'] else 25
+        self.sigma_test = opt['sigma_test'] if opt['sigma_test']  else 0
         self.use_all_patches = opt['use_all_patches'] if opt['use_all_patches'] else False
-        self.num_patches_per_image = opt['num_patches_per_image'] if not(self.use_all_patches) else ((1280**2)//(self.patch_size)**2)
+        self.num_patches_per_image = opt['num_patches_per_image'] if opt['num_patches_per_image'] else 100
+        # self.num_patches_per_image = opt['num_patches_per_image'] if not(self.use_all_patches) else ((1280**2)//(self.patch_size)**2)    ### HARDCODED
         self.skip_natural_patches = opt['skip_natural_patches'] if opt['skip_natural_patches'] else False
 
         # -------------------------------------
@@ -35,7 +36,6 @@ class DatasetFFDNet(data.Dataset):
         # -------------------------------------
         self.paths_H = util.get_image_paths(opt['dataroot_H'])
         self.paths_L = util.get_image_paths(opt['dataroot_L'])
-
 
         # Repeat every image in path list to get more than one patch per image
         if self.opt['phase'] == 'train':
@@ -63,6 +63,12 @@ class DatasetFFDNet(data.Dataset):
         
         img_L = util.imread_uint(L_path, self.n_channels_datasetload)[:,:,:2]       
 
+        # Temp solution for blanking images
+        L_v, L_h = img_L.shape[:2]
+
+        if L_v==1000 and L_h==1800:
+          img_L  = img_L[(1000-900)//2:-(1000-900)//2,(1800-1600)//2:-(1800-1600)//2,:]
+
         # Get module of complex image, stretch and to uint8
         # img_L = img_L.astype('float')
         # img_L = np.abs(img_L[:,:,0]+1j*img_L[:,:,1])
@@ -76,8 +82,8 @@ class DatasetFFDNet(data.Dataset):
             # --------------------------------
             """
             H, W = img_H.shape[:2]
-            
-            if self.use_all_patches:
+
+            if self.use_all_patches or (img_H.shape[0] <= self.patch_size) or (img_H.shape[1] <= self.patch_size):
 
                 # ---------------------------------
                 # Start or continue image patching
@@ -130,14 +136,14 @@ class DatasetFFDNet(data.Dataset):
             # ---------------------------------
             # get noise level
             # ---------------------------------
+            noise_level = torch.FloatTensor([int(np.random.uniform(self.sigma_min, self.sigma_max))])/255.0
             # noise_level = torch.FloatTensor([np.random.randint(self.sigma_min, self.sigma_max)])/255.0
-            noise_level = torch.FloatTensor([np.random.uniform(self.sigma_min, self.sigma_max)])/255.0
-
-            # ---------------------------------
-            # add noise
-            # ---------------------------------
-            noise = torch.randn(img_L.size()).mul_(noise_level).float()
-            img_L.add_(noise)
+            if (self.sigma_max != 0):
+                # ---------------------------------
+                # add noise
+                # ---------------------------------
+                noise = torch.randn(img_L.size()).mul_(noise_level).float()
+                img_L.add_(noise)
 
         else:
             """
@@ -149,18 +155,34 @@ class DatasetFFDNet(data.Dataset):
             # Ground-truth as mean value of RGB channels
             img_H = np.mean(img_H,axis=2)
             img_H = img_H[:,:,np.newaxis]
-            img_H = util.uint2single(img_H)
-
-            img_L = util.uint2single(img_L)
-
-            np.random.seed(seed=0)
-            img_L = img_L + np.random.normal(0, self.sigma_test/255.0, img_L.shape)
-            noise_level = torch.FloatTensor([self.sigma_test/255.0])
 
             # ---------------------------------
-            # L/H image pairs
+            # HWC to CHW, numpy(uint) to tensor
             # ---------------------------------
-            img_H, img_L = util.single2tensor3(img_H), util.single2tensor3(img_L)
+            img_H = util.uint2tensor3(img_H)
+            img_L = util.uint2tensor3(img_L)
+
+            # img_H = util.uint2single(img_H)
+
+            # img_L = util.uint2single(img_L)
+
+            
+            # ---------------------------------
+            # get noise level
+            # ---------------------------------
+
+            noise_level = torch.FloatTensor([int(self.sigma_test)])/255.0
+            if self.sigma_test != 0:
+
+                # noise_level = torch.FloatTensor([np.random.randint(self.sigma_min, self.sigma_max)])/255.0
+            
+                # ---------------------------------
+                # add noise
+                # ---------------------------------
+                noise = torch.randn(img_L.size()).mul_(noise_level).float()
+                img_L.add_(noise)
+
+
 
         noise_level = noise_level.unsqueeze(1).unsqueeze(1)
 
