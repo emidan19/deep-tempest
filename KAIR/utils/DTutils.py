@@ -106,37 +106,37 @@ def TMDS_pixel_rare (pix):
 
   Outputs:
   - pix_out: TDMS coded 16-bit pixel (only 10 useful)
-  - cnt: 0's and 1's balance updated with new pixel coding
+  - cnt: 0's and 1's balance updated with new pixel coding  
 
   """ 
   # Convert 8-bit pixel to binary list D
-  D = uint8_to_binarray(pix)
+  d = uint8_to_binarray(pix)
 
   # Initialize output q
-  qm = [D[0]]
+  Qm = [d[0]]
 
   # 1's unbalanced condition at current pixel
-  N1_D = np.sum(D)
+  N1_D = np.sum(d)
 
-  if N1_D>4 or (N1_D==4 and not(D[0])):
+  if N1_D>4 or (N1_D==4 and not(d[0])):
 
     # XNOR of consecutive bits
     for k in range(1,8):
-      qm.append( not(qm[k-1] ^ D[k]) )
-    qm.append(0)
+      Qm.append( not(Qm[k-1] ^ d[k]) )
+    Qm.append(0)
 
   else:
     # XOR of consecutive bits
     for k in range(1,8):
-      qm.append( qm[k-1] ^ D[k] )
-    qm.append(1)
+      Qm.append( Qm[k-1] ^ d[k] )
+    Qm.append(1)
 
-  qm.append(np.random.choice([0,1]))
+  Qm.append(np.random.choice([0,1]))
 
   
 
   # Return the TMDS coded pixel as uint and 0's y 1's balance
-  return binarray_to_uint(qm)
+  return binarray_to_uint(Qm)
 
 @jit(nopython=True)
 def TMDS_pixel_numba(pix:uint8, cnt:int8)->tuple:
@@ -293,11 +293,11 @@ def TMDS_encoding_original (I, blanking = False):
   if blanking:
     # Get blanking resolution for input image
     
-    v = (v_in==1080)*1125 + (v_in==720)*750   + (v_in==600)*628  + (v_in==480)*525
-    h = (h_in==1920)*2200 + (h_in==1280)*1650 + (h_in==800)*1056 + (h_in==640)*800 
+    v = (v_in==1080)*1125 + (v_in==900)*1000  + (v_in==720)*750   + (v_in==600)*628  + (v_in==480)*525
+    h = (h_in==1920)*2200 + (h_in==1600)*1800 + (h_in==1280)*1650 + (h_in==800)*1056 + (h_in==640)*800 
 
-    vdiff = v - v_in
-    hdiff = h - h_in
+    v_diff = v - v_in
+    h_diff = h - h_in
 
     # Create image with blanking and change type to uint16
     # Assuming the blanking corresponds to 10bit number [0, 0, 1, 0, 1, 0, 1, 0, 1, 1] (LSB first)
