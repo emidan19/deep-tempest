@@ -37,7 +37,8 @@ GR_PYTHON_INSTALL(
     tempest_msgbtn.py
     TMDS_image_source.py
     DTutils.py
-    TMDS_decoder.py DESTINATION ${GR_PYTHON_DIR}/tempest
+    TMDS_decoder.py 
+    buttonToFileSink.py DESTINATION ${GR_PYTHON_DIR}/tempest
 )
 
 ########################################################################

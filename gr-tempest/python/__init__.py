@@ -39,4 +39,6 @@ from .TMDS_image_source import TMDS_image_source
 
 from .TMDS_decoder import TMDS_decoder
 
+from .buttonToFileSink import buttonToFileSink
+
 #

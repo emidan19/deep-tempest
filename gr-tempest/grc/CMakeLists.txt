@@ -32,5 +32,6 @@ install(FILES
     tempest_tempest_msgbtn.block.yml
     tempest_ssamp_correction.block.yml
     tempest_TMDS_image_source.block.yml
-    tempest_TMDS_decoder.block.yml DESTINATION share/gnuradio/grc/blocks
+    tempest_TMDS_decoder.block.yml 
+    tempest_buttonToFileSink.block.yml DESTINATION share/gnuradio/grc/blocks
 )
