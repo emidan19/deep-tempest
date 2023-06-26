@@ -245,11 +245,11 @@ def TMDS_encoding_original (I, blanking = False):
   if blanking:
     # Get blanking resolution for input image
     
-    v = (v_in==1080)*1125 + (v_in==720)*750   + (v_in==600)*628  + (v_in==480)*525
-    h = (h_in==1920)*2200 + (h_in==1280)*1650 + (h_in==800)*1056 + (h_in==640)*800 
+    v = (v_in==1080)*1125 + (v_in==900)*1000  + (v_in==720)*750   + (v_in==600)*628  + (v_in==480)*525
+    h = (h_in==1920)*2200 + (h_in==1600)*1800 + (h_in==1280)*1650 + (h_in==800)*1056 + (h_in==640)*800 
 
-    vdiff = v - v_in
-    hdiff = h - h_in
+    v_diff = v - v_in
+    h_diff = h - h_in
 
     # Create image with blanking and change type to uint16
     # Assuming the blanking corresponds to 10bit number [0, 0, 1, 0, 1, 0, 1, 0, 1, 1] (LSB first)
@@ -358,6 +358,8 @@ for byte in byte_range:
   TMDS_cntdiff_table[byte,2] = p1[1]
 
   TMDS_rare_pix_table[byte] = TMDS_pixel_rare(byte)
+
+
 
 def pixel_fastencoding(pix,cnt_prev=0):
   """8bit pixel TMDS fast coding
