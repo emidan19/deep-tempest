@@ -29,7 +29,7 @@ from datetime import datetime
 def get_images_names_from_folder (folder):
     images_list = [image for image in os.listdir(folder) \
                    if image.endswith('.png') or image.endswith('.jpg') or image.endswith('.jpeg') or \
-                       image.endswith('.tif') or image.endswith('.tiff') or image.endswith('.gif')] 
+                       image.endswith('.tif') or image.endswith('.tiff') or image.endswith('.gif') or image.endswith('.bmp')] 
     return images_list
 
 def get_subfolders_names_from_folder(folder):
