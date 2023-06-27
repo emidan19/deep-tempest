@@ -289,13 +289,13 @@ def TMDS_encoding_original (I, blanking = False):
 
   # Get image resolution
   v_in, h_in = I.shape[:2]
-  
-  if blanking:
-    # Get blanking resolution for input image
-    
-    v = (v_in==1080)*1125 + (v_in==900)*1000  + (v_in==720)*750   + (v_in==600)*628  + (v_in==480)*525
-    h = (h_in==1920)*2200 + (h_in==1600)*1800 + (h_in==1280)*1650 + (h_in==800)*1056 + (h_in==640)*800 
 
+  # Verify VESA resolutions
+  v = (v_in==1080)*1125 + (v_in==900)*1000  + (v_in==720)*750   + (v_in==600)*628  + (v_in==480)*525
+  h = (h_in==1920)*2200 + (h_in==1600)*1800 + (h_in==1280)*1650 + (h_in==800)*1056 + (h_in==640)*800 
+  
+  if blanking and (h*v != 0):
+    # Get blanking resolution for input image
     v_diff = v - v_in
     h_diff = h - h_in
 
@@ -304,6 +304,7 @@ def TMDS_encoding_original (I, blanking = False):
     I_c = 852*np.ones((v,h,chs)).astype('uint16')
     
   else:
+    # If no blanking or not VESA resolution, exclude blanking
     v_diff = 0
     h_diff = 0
     I_c = np.zeros((v_in,h_in,chs)).astype('uint16')
