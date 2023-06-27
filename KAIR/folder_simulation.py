@@ -9,12 +9,11 @@ Script that reads all images in folder and simulates HDMI tempest capture
 
 """
 
-#%%
-
 # =============================================================================
 # Imports
 # =============================================================================
 import os
+import json
 import time as time
 import numpy as np
 from skimage.io import imread
@@ -25,8 +24,6 @@ import sys
 import logging
 from utils import utils_logger
 from datetime import datetime
-
-#%%
 
 # Currently supporting png, jpg, jpeg, tif and gif extentions only
 def get_images_names_from_folder (folder):
@@ -109,74 +106,106 @@ def save_simulation_image(I,path_and_name):
     im = Image.fromarray(I_save.astype('uint8'))
     im.save(path_and_name)
     
-def main():
+def main(simulation_options_path = 'options/tempest_simulation.json'):
 
-    logs_dir = './logfiles/'
+    # Load JSON options file
+    options = json.load(open(simulation_options_path))
+
+    logs_dir = 'logfiles/'
     # Create logs directory if not exist
     if not os.path.exists(logs_dir):
         os.mkdir(logs_dir)
 
+    # Get input and output dirs
+    input_folder = options['paths']['folder_original_images']
+
     logger_name = 'simulations_'+datetime.now().strftime("%d-%m-%Y_%H:%M:%S")
-    utils_logger.logger_info(logger_name, logs_dir+logger_name+'.log')
+    utils_logger.logger_info(logger_name, os.path.join(logs_dir,logger_name+'.log'))
     logger = logging.getLogger(logger_name)
 
-
-    # Get foldername argument
-    foldername = sys.argv[-1]
-    
-    message = f'Tempest capture simulation for image folder {foldername}\n'
+    message = f'Tempest capture simulation for image folder {input_folder}\n'
     logger.info(message)
 
-    # Get images and subfolders names
-    images = get_images_names_from_folder(foldername)
-    
-    # Create simulation directory if not exist at the folder path
-    simulations_path = foldername+'/simulations/'
-    if not os.path.exists(simulations_path):
-        os.mkdir(simulations_path)
-        message = f'Created simulation directory at {simulations_path}\n'
+    # Check input directory exists
+    if not(os.path.exists(input_folder)):
+        message = f'No input folder {input_folder} was found. Exiting\n'
         logger.info(message)
-    
-    # Possible noise std values
-    # noise_stds = np.array([ 0, 5,  10,  15,  20,  25])
+        exit()
 
+    # Create output simulation directory if not exists
+    output_folder = options['paths']['folder_simulated_images']
+    if not (os.path.exists(output_folder)):
+        os.mkdir(output_folder)
+        message = f'Created simulation directory at {output_folder}\n'
+        logger.info(message)
+
+    message = f'Tempest options:\n {options} \n'
+    logger.info(message)
+
+    # Get tempest options
+    blanking = options['options']['blanking']
+    fps = options['options']['frames_per_second']
+    harmonics = options['options']['random']['harmonics']
+    freq_error_range = options['options']['random']['freq_error']
+    phase_error_range = options['options']['random']['phase_error']
+    sigma = options['options']['random']['sigma']
+
+    # Process possible sigma types
+    if type(sigma) == list:
+        sigma = np.random.randint(sigma[0],sigma[1])
+    elif sigma is None:
+        sigma = 0
+
+    # Get images and subfolders names
+    images = get_images_names_from_folder(input_folder)
     
+    # Initialize processing time
+    t_all_images = 0
+
     for image in images:
         
         # timestamp for simulation starting
         t1_image = time.time()
 
         # Read image
-        image_path = foldername+'/'+image
+        image_path = os.path.join(input_folder,image)
         I = imread(image_path)
 
-        # Choose random pixelrate harmonic number
-        N_harmonic = np.random.randint(1,10)
+        # Random channel effects
+        freq_error = np.random.uniform(freq_error_range[0], freq_error_range[1])
+        phase_error = np.random.uniform(phase_error_range[0], phase_error_range[1])*np.pi
+        
+        # Choose random pixel rate harmonic number
+        N_harmonic = np.random.choice(harmonics)
 
-
-        message = f'Initiate simulation for image {image} with {N_harmonic} pixel harmonic frequency'
+        message = f'Initiate simulation for image "{image}" with {N_harmonic} pixel harmonic frequency, {freq_error} Hz and {phase_error} rads error.'
         logger.info(message)
 
         
         # TMDS coding and bit serialization
-        I_Tx, resolution = image_transmition_simulation(I, blanking=True)
+        I_Tx, resolution = image_transmition_simulation(I, blanking=blanking)
         v_res, h_res, _ = resolution
 
-        I_capture = image_capture_simulation(I_Tx, h_res, v_res, N_harmonic)
+        I_capture = image_capture_simulation(I_Tx, h_res, v_res, N_harmonic, 
+                                             sigma, fps, freq_error, phase_error)
         
-        path = simulations_path+image
+        path = os.path.join(output_folder,image)
         
         save_simulation_image(I_capture,path)
 
         # timestamp for simulation ending
         t2_image = time.time()                
 
-        t_images = t2_image-t1_image
+        t_image = t2_image-t1_image
 
-        message = 'Processing time: {:.2f}'.format(t_images)+'s\n'
+        t_all_images += t_image
+
+        message = 'Processing time: {:.2f}'.format(t_image)+'s\n'
         logger.info(message)
 
-        
+    # message = 'Total processing time for {} images: {:.2f}'.format(len(images),t_all_images)+'s\n'
+    message = 'Total processing time for {} images: {:.2f}s \n'.format(len(images),t_all_images)
+    logger.info(message)
 if __name__ == "__main__":    
     main()
     
