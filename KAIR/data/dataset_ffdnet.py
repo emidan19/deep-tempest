@@ -56,7 +56,7 @@ class DatasetFFDNet(data.Dataset):
         H_file, L_file = H_path.split('/')[-1], L_path.split('/')[-1]
         H_name, L_name = H_file.split('.')[0], L_file.split('.')[0]
         
-        assert H_name==L_name, 'Both high and low quality images MUST have same name'
+        assert H_name==L_name, f'Both high and low quality images MUST have same name.\nGot {H_name} and {L_name} respectively.'
 
         img_H = util.imread_uint(H_path, self.n_channels_datasetload)       
 
