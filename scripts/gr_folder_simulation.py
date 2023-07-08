@@ -20,6 +20,9 @@ from gnuradio import blocks
 from gnuradio import filter
 from gnuradio import gr
 import signal
+import logging
+import utils_logger
+from datetime import datetime
 # from argparse import ArgumentParser
 # from gnuradio.eng_arg import eng_float, intx
 # from gnuradio import eng_notation
@@ -340,31 +343,36 @@ def run_simulation_flowgraph(top_block, harmonic, noise_std):
 
 def main():
 
+    logs_dir = './logfiles'
+    # Create logs directory if not exist
+    if not os.path.exists(logs_dir):
+        os.mkdir(logs_dir)
+
+    logger_name = 'simulations_'+datetime.now().strftime("%d-%m-%Y_%H:%M:%S")
+    utils_logger.logger_info(logger_name, 'whisper_language_'+logger_name+'.log')
+    logger = logging.getLogger(logger_name)
+
     # Get foldername argument
     foldername = sys.argv[-1]
     
-    # Get images and subfolders names
-    images_tmp = get_images_names_from_folder(foldername)
-    old_subfolders = get_subfolders_names_from_folder(foldername)
-    
-    # Keep images without dedicated folders only
-    images = []
-    new_subfolders = []
-    for image in images_tmp:
-        image_name = image.split('.')[0]
-        if image_name not in old_subfolders:
-            images.append(image)
-            new_subfolders.append(image_name)
-    
-    # Possible std dev noise simulation values
-    noise_stds = np.array([ 0, 5,  10,  15,  20,  25,  40, 50])
-    
-    for image, subfolder in zip(images,new_subfolders):
-        
-        # Create new directory for simulations
-        subfolder_path = foldername+'/'+subfolder
-        os.mkdir(subfolder_path)
+    message = f'Tempest capture simulation for image folder {foldername}\n'
+    logger.info(message)
 
+    # Create simulation directory if not exist at the folder path
+    simulations_path = foldername+'/simulations'
+    if not os.path.exists(simulations_path):
+        os.mkdir(simulations_path)
+        message = f'Created simulation directory at {simulations_path}\n'
+        logger.info(message)
+
+    # Get images names
+    images = get_images_names_from_folder(foldername)
+    
+    # Possible noise std values
+    noise_stds = np.array([ 0, 5,  10,  15,  20,  25])
+    
+    for image in images:
+        
         # timestamp for simulation starting
         t1_image = time.time()
         
@@ -379,34 +387,42 @@ def main():
                         'Vvisible': I.shape[0],
                         'Hvisible': I.shape[1],
                         'FILEPATH': image_path,
-                        'blanking': False,
+                        'blanking': True,
                         }
+
+        message = f'Initiate simulation for image {imagename} with flowgraph options: {options_dict}'
+        logger.info(message)
 
         # Initialize the top block with encoded image
         top_block = set_top_block(top_block_cls=NO_GUI_tempest_simulated_TMDS, options_dict=options_dict)
 
-        for i in range(4):
+        # Choose random pixelrate harmonic number
+        N_harmonic = np.random.randint(1,10)
+        
+        # Random sigma value for noise
+        noise_std = np.random.choice(noise_stds)
 
-            # Choose random pixelrate harmonic number
-            N_harmonic = np.random.randint(1,10)
-            
-            # Choose random SNR value (SNR=0 for no noise)
-            noise_std = np.random.choice(noise_stds)
+        path = simulations_path+'/'+imagename+'.png'
 
-            path = subfolder_path+'/'+imagename+'_'+str(N_harmonic)+'harm_'+str(noise_std)+"std.png"
+        message = f'Starting simulation flowgraph with {N_harmonic} harmonic frequency and sigma={noise_std}'
+        logger.info(message)
 
-            I_capture = run_simulation_flowgraph(top_block, N_harmonic, noise_std)
+        # Run simulation
+        I_capture = run_simulation_flowgraph(top_block, N_harmonic, noise_std)
 
-            save_simulation_image(I_capture,path)
+        save_simulation_image(I_capture,path)
 
-            if i==0:
-                # timestamp for simulation ending
-                t2_image = time.time()    
+        
+        # timestamp for simulation ending
+        t2_image = time.time()    
 
 
         t_image = t2_image-t1_image
         
         print('Tiempo de la primer simulación de '+image+':','{:.2f}'.format(t_image)+'s\n')
+
+        message = 'Processing time: {:.2f}'.format(t_image)+'s\n'
+        logger.info(message)
 
 if __name__ == '__main__':
     main()

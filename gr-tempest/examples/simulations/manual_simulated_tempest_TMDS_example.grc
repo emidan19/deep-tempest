@@ -36,7 +36,7 @@ blocks:
   id: variable
   parameters:
     comment: ''
-    value: 2*Hsize
+    value: Hsize
   states:
     bus_sink: false
     bus_source: false
@@ -72,7 +72,7 @@ blocks:
   id: variable
   parameters:
     comment: ''
-    value: 2*Vsize
+    value: Vsize
   states:
     bus_sink: false
     bus_source: false
@@ -286,8 +286,8 @@ blocks:
     rangeType: float
     start: '0'
     step: 1e-4
-    stop: 2e-2
-    value: 1e-3
+    stop: 2e-1
+    value: '0'
     widget: counter_slider
   states:
     bus_sink: false
@@ -336,7 +336,7 @@ blocks:
   id: variable
   parameters:
     comment: ''
-    value: int(10*px_rate*inter)
+    value: int(px_rate*inter)
   states:
     bus_sink: false
     bus_source: false
@@ -413,7 +413,7 @@ blocks:
     bus_structure: null
     coordinate: [216, 268.0]
     rotation: 0
-    state: disabled
+    state: enabled
 - name: binary_serializer_0_0_0
   id: binary_serializer
   parameters:
@@ -431,7 +431,7 @@ blocks:
     bus_structure: null
     coordinate: [216, 308.0]
     rotation: 0
-    state: disabled
+    state: enabled
 - name: blocks_add_xx_0
   id: blocks_add_xx
   parameters:
@@ -449,7 +449,7 @@ blocks:
     bus_structure: null
     coordinate: [160, 408.0]
     rotation: 0
-    state: disabled
+    state: enabled
 - name: blocks_complex_to_mag_0
   id: blocks_complex_to_mag
   parameters:
@@ -463,7 +463,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [920, 800.0]
+    coordinate: [824, 656.0]
     rotation: 180
     state: enabled
 - name: blocks_delay_0
@@ -482,9 +482,25 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [928, 740.0]
+    coordinate: [1016, 740.0]
     rotation: 180
     state: enabled
+- name: blocks_float_to_complex_0
+  id: blocks_float_to_complex
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    vlen: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [304, 448.0]
+    rotation: 0
+    state: true
 - name: blocks_float_to_short_0
   id: blocks_float_to_short
   parameters:
@@ -516,7 +532,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [235, 893]
+    coordinate: [224, 1068.0]
     rotation: 180
     state: disabled
 - name: blocks_multiply_xx_0
@@ -553,7 +569,7 @@ blocks:
     bus_structure: null
     coordinate: [488, 256.0]
     rotation: 0
-    state: true
+    state: disabled
 - name: blocks_throttle_0_0
   id: blocks_throttle
   parameters:
@@ -610,9 +626,9 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [280, 556.0]
+    coordinate: [288, 628.0]
     rotation: 0
-    state: enabled
+    state: disabled
 - name: qtgui_freq_sink_x_0
   id: qtgui_freq_sink_x
   parameters:
@@ -718,8 +734,9 @@ blocks:
   parameters:
     affinity: ''
     alias: ''
+    blanking: 'True'
     comment: ''
-    image_file: /home/emidan19/deep-tempest/images/1600x900_test1.jpeg
+    image_file: /home/emidan19/Desktop/deep-tempest/drunet/notebooks/results_l1_l2/imagenes/originalRGB/train/Abavisani_Improving_the_Performance_of_Unimodal_Dynamic_Hand-Gesture_Recognition_With_Multimodal_CVPR_2019_paper.png
     maxoutbuf: '0'
     minoutbuf: '0'
     mode: '1'
@@ -730,6 +747,23 @@ blocks:
     coordinate: [8, 256.0]
     rotation: 0
     state: enabled
+- name: tempest_buttonToFileSink_0
+  id: tempest_buttonToFileSink
+  parameters:
+    Filename: /home/emidan19/Desktop/captura_simulada
+    H_size: Hsize
+    V_size: Vsize
+    affinity: ''
+    alias: ''
+    comment: ''
+    input_width: interpolatedHsize
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [744, 892.0]
+    rotation: 180
+    state: true
 - name: tempest_fine_sampling_synchronization_0
   id: tempest_fine_sampling_synchronization
   parameters:
@@ -766,7 +800,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [379, 869]
+    coordinate: [368, 1044.0]
     rotation: 180
     state: disabled
 - name: tempest_normalize_flow_0
@@ -789,6 +823,28 @@ blocks:
     coordinate: [616, 708.0]
     rotation: 180
     state: enabled
+- name: tempest_tempest_msgbtn_0
+  id: tempest_tempest_msgbtn
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    gui_hint: ''
+    label: Take screenshot
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    msgName: pressed
+    relBackgroundColor: default
+    relFontColor: default
+    type: bool
+    value: 'True'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1048, 964.0]
+    rotation: 180
+    state: true
 - name: video_sdl_sink_0_0
   id: video_sdl_sink
   parameters:
@@ -807,7 +863,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [51, 861]
+    coordinate: [40, 1036.0]
     rotation: 180
     state: disabled
 - name: video_sdl_sink_0_0_0
@@ -835,12 +891,14 @@ blocks:
 connections:
 - [analog_sig_source_x_0, '0', blocks_multiply_xx_0, '1']
 - [binary_serializer_0, '0', blocks_add_xx_0, '0']
-- [binary_serializer_0, '0', interp_fir_filter_xxx_0, '0']
 - [binary_serializer_0_0, '0', blocks_add_xx_0, '1']
 - [binary_serializer_0_0_0, '0', blocks_add_xx_0, '2']
+- [blocks_add_xx_0, '0', blocks_float_to_complex_0, '0']
 - [blocks_add_xx_0, '0', interp_fir_filter_xxx_0, '0']
 - [blocks_complex_to_mag_0, '0', tempest_normalize_flow_0, '0']
 - [blocks_delay_0, '0', blocks_complex_to_mag_0, '0']
+- [blocks_delay_0, '0', tempest_buttonToFileSink_0, '0']
+- [blocks_float_to_complex_0, '0', blocks_throttle_0_0, '0']
 - [blocks_float_to_short_0, '0', video_sdl_sink_0_0_0, '0']
 - [blocks_float_to_short_0_0, '0', video_sdl_sink_0_0, '0']
 - [blocks_multiply_xx_0, '0', rational_resampler_xxx_0, '0']
@@ -858,6 +916,7 @@ connections:
 - [tempest_framing_0, '0', blocks_float_to_short_0_0, '0']
 - [tempest_normalize_flow_0, '0', blocks_float_to_short_0, '0']
 - [tempest_normalize_flow_0, '0', tempest_framing_0, '0']
+- [tempest_tempest_msgbtn_0, pressed, tempest_buttonToFileSink_0, en]
 
 metadata:
   file_format: 1

@@ -82,14 +82,14 @@ class manual_simulated_tempest_TMDS_example(gr.top_block, Qt.QWidget):
         # Variables
         ##################################################
         self.refresh_rate = refresh_rate = 60
-        self.Vsize = Vsize = 628
-        self.Hsize = Hsize = 1056
+        self.Vsize = Vsize = 1000
+        self.Hsize = Hsize = 1800
         self.usrp_rate = usrp_rate = int(50e6/100)
         self.px_rate = px_rate = Hsize*Vsize*refresh_rate/100
         self.inter = inter = 10
-        self.samp_rate = samp_rate = int(10*px_rate*inter)
+        self.samp_rate = samp_rate = int(px_rate*inter)
         self.rectangular_pulse = rectangular_pulse = [0.7/255]*inter
-        self.noise = noise = 1e-3
+        self.noise = noise = 0
         self.lines_offset = lines_offset = int(Vsize/2)
         self.inverted = inverted = 1
         self.interpolatedHsize = interpolatedHsize = int(Hsize/float(px_rate)*usrp_rate)
@@ -98,15 +98,15 @@ class manual_simulated_tempest_TMDS_example(gr.top_block, Qt.QWidget):
         self.freq = freq = 0
         self.epsilon_channel = epsilon_channel = 0
         self.decim = decim = inter
-        self.Vvisible = Vvisible = 600
-        self.Vdisplay = Vdisplay = 2*Vsize
-        self.Hvisible = Hvisible = 800
-        self.Hdisplay = Hdisplay = 2*Hsize
+        self.Vvisible = Vvisible = 900
+        self.Vdisplay = Vdisplay = Vsize
+        self.Hvisible = Hvisible = 1600
+        self.Hdisplay = Hdisplay = Hsize
 
         ##################################################
         # Blocks
         ##################################################
-        self._noise_range = Range(0, 2e-2, 1e-4, 1e-3, 200)
+        self._noise_range = Range(0, 2e-1, 1e-4, 0, 200)
         self._noise_win = RangeWidget(self._noise_range, self.set_noise, 'Noise Power', "counter_slider", float)
         self.top_grid_layout.addWidget(self._noise_win, 0, 1, 1, 1)
         for r in range(0, 1):
@@ -177,10 +177,14 @@ class manual_simulated_tempest_TMDS_example(gr.top_block, Qt.QWidget):
             self.top_grid_layout.setRowStretch(r, 1)
         for c in range(0, 1):
             self.top_grid_layout.setColumnStretch(c, 1)
-        self.video_sdl_sink_0_0_0 = video_sdl.sink_s(0, interpolatedHsize, Vsize, 0, 2*Hsize, 2*Vsize)
+        self.video_sdl_sink_0_0_0 = video_sdl.sink_s(0, interpolatedHsize, Vsize, 0, Hsize, Vsize)
+        self.tempest_tempest_msgbtn_0 = _tempest_tempest_msgbtn_0_toggle_button = tempest.tempest_msgbtn('Take screenshot', 'pressed',True,"default","default")
+        self.tempest_tempest_msgbtn_0 = _tempest_tempest_msgbtn_0_toggle_button
+        self.top_layout.addWidget(_tempest_tempest_msgbtn_0_toggle_button)
         self.tempest_normalize_flow_0 = tempest.normalize_flow(10, 245, interpolatedHsize, 1e-2, 0.1)
         self.tempest_fine_sampling_synchronization_0 = tempest.fine_sampling_synchronization(interpolatedHsize, Vsize, 1, 100.0/interpolatedHsize, 1.0/(interpolatedHsize*Vsize))
-        self.tempest_TMDS_image_source_0 = tempest.TMDS_image_source('/home/emidan19/deep-tempest/images/black_cube_800x600.jpg', 1)
+        self.tempest_buttonToFileSink_0 = tempest.buttonToFileSink('/home/emidan19/Desktop/captura_simulada', interpolatedHsize, Hsize, Vsize)
+        self.tempest_TMDS_image_source_0 = tempest.TMDS_image_source('/home/emidan19/Desktop/deep-tempest/drunet/notebooks/results_l1_l2/imagenes/originalRGB/train/Abavisani_Improving_the_Performance_of_Unimodal_Dynamic_Hand-Gesture_Recognition_With_Multimodal_CVPR_2019_paper.png', 1, True)
         self.rational_resampler_xxx_0 = filter.rational_resampler_ccc(
                 interpolation=usrp_rate,
                 decimation=samp_rate,
@@ -226,8 +230,6 @@ class manual_simulated_tempest_TMDS_example(gr.top_block, Qt.QWidget):
 
         self._qtgui_freq_sink_x_0_win = sip.wrapinstance(self.qtgui_freq_sink_x_0.pyqwidget(), Qt.QWidget)
         self.top_layout.addWidget(self._qtgui_freq_sink_x_0_win)
-        self.interp_fir_filter_xxx_0 = filter.interp_fir_filter_fcc(inter, rectangular_pulse)
-        self.interp_fir_filter_xxx_0.declare_sample_delay(0)
         self.channels_channel_model_0 = channels.channel_model(
             noise_voltage=noise,
             frequency_offset=freq,
@@ -238,6 +240,7 @@ class manual_simulated_tempest_TMDS_example(gr.top_block, Qt.QWidget):
         self.blocks_throttle_0_0 = blocks.throttle(gr.sizeof_gr_complex*1, samp_rate,True)
         self.blocks_multiply_xx_0 = blocks.multiply_vcc(1)
         self.blocks_float_to_short_0 = blocks.float_to_short(1, inverted)
+        self.blocks_float_to_complex_0 = blocks.float_to_complex(1)
         self.blocks_delay_0 = blocks.delay(gr.sizeof_gr_complex*1, interpolatedHsize*lines_offset+horizontal_offset)
         self.blocks_complex_to_mag_0 = blocks.complex_to_mag(1)
         self.blocks_add_xx_0 = blocks.add_vff(1)
@@ -256,25 +259,27 @@ class manual_simulated_tempest_TMDS_example(gr.top_block, Qt.QWidget):
             N=16,
             offset=0,
         )
-        self.analog_sig_source_x_0 = analog.sig_source_c(samp_rate, analog.GR_COS_WAVE, px_rate*harmonic, 1, 0, 0)
+        self.analog_sig_source_x_0 = analog.sig_source_c(samp_rate, analog.GR_COS_WAVE, px_rate*harmonic, 4, 0, 0)
 
 
         ##################################################
         # Connections
         ##################################################
+        self.msg_connect((self.tempest_tempest_msgbtn_0, 'pressed'), (self.tempest_buttonToFileSink_0, 'en'))
         self.connect((self.analog_sig_source_x_0, 0), (self.blocks_multiply_xx_0, 1))
         self.connect((self.binary_serializer_0, 0), (self.blocks_add_xx_0, 0))
         self.connect((self.binary_serializer_0_0, 0), (self.blocks_add_xx_0, 1))
         self.connect((self.binary_serializer_0_0_0, 0), (self.blocks_add_xx_0, 2))
-        self.connect((self.blocks_add_xx_0, 0), (self.interp_fir_filter_xxx_0, 0))
+        self.connect((self.blocks_add_xx_0, 0), (self.blocks_float_to_complex_0, 0))
         self.connect((self.blocks_complex_to_mag_0, 0), (self.tempest_normalize_flow_0, 0))
         self.connect((self.blocks_delay_0, 0), (self.blocks_complex_to_mag_0, 0))
+        self.connect((self.blocks_delay_0, 0), (self.tempest_buttonToFileSink_0, 0))
+        self.connect((self.blocks_float_to_complex_0, 0), (self.blocks_throttle_0_0, 0))
         self.connect((self.blocks_float_to_short_0, 0), (self.video_sdl_sink_0_0_0, 0))
         self.connect((self.blocks_multiply_xx_0, 0), (self.rational_resampler_xxx_0, 0))
         self.connect((self.blocks_throttle_0_0, 0), (self.blocks_multiply_xx_0, 0))
         self.connect((self.blocks_throttle_0_0, 0), (self.qtgui_freq_sink_x_0, 0))
         self.connect((self.channels_channel_model_0, 0), (self.tempest_fine_sampling_synchronization_0, 0))
-        self.connect((self.interp_fir_filter_xxx_0, 0), (self.blocks_throttle_0_0, 0))
         self.connect((self.rational_resampler_xxx_0, 0), (self.channels_channel_model_0, 0))
         self.connect((self.tempest_TMDS_image_source_0, 0), (self.binary_serializer_0, 0))
         self.connect((self.tempest_TMDS_image_source_0, 1), (self.binary_serializer_0_0, 0))
@@ -300,7 +305,7 @@ class manual_simulated_tempest_TMDS_example(gr.top_block, Qt.QWidget):
 
     def set_Vsize(self, Vsize):
         self.Vsize = Vsize
-        self.set_Vdisplay(2*self.Vsize)
+        self.set_Vdisplay(self.Vsize)
         self.set_lines_offset(int(self.Vsize/2))
         self.set_px_rate(self.Hsize*self.Vsize*self.refresh_rate/100)
         self.tempest_fine_sampling_synchronization_0.set_Htotal_Vtotal(self.interpolatedHsize, self.Vsize)
@@ -310,7 +315,7 @@ class manual_simulated_tempest_TMDS_example(gr.top_block, Qt.QWidget):
 
     def set_Hsize(self, Hsize):
         self.Hsize = Hsize
-        self.set_Hdisplay(2*self.Hsize)
+        self.set_Hdisplay(self.Hsize)
         self.set_interpolatedHsize(int(self.Hsize/float(self.px_rate)*self.usrp_rate))
         self.set_px_rate(self.Hsize*self.Vsize*self.refresh_rate/100)
 
@@ -327,7 +332,7 @@ class manual_simulated_tempest_TMDS_example(gr.top_block, Qt.QWidget):
     def set_px_rate(self, px_rate):
         self.px_rate = px_rate
         self.set_interpolatedHsize(int(self.Hsize/float(self.px_rate)*self.usrp_rate))
-        self.set_samp_rate(int(10*self.px_rate*self.inter))
+        self.set_samp_rate(int(self.px_rate*self.inter))
         self.analog_sig_source_x_0.set_frequency(self.px_rate*self.harmonic)
 
     def get_inter(self):
@@ -337,7 +342,7 @@ class manual_simulated_tempest_TMDS_example(gr.top_block, Qt.QWidget):
         self.inter = inter
         self.set_decim(self.inter)
         self.set_rectangular_pulse([0.7/255]*self.inter)
-        self.set_samp_rate(int(10*self.px_rate*self.inter))
+        self.set_samp_rate(int(self.px_rate*self.inter))
 
     def get_samp_rate(self):
         return self.samp_rate
@@ -353,7 +358,6 @@ class manual_simulated_tempest_TMDS_example(gr.top_block, Qt.QWidget):
 
     def set_rectangular_pulse(self, rectangular_pulse):
         self.rectangular_pulse = rectangular_pulse
-        self.interp_fir_filter_xxx_0.set_taps(self.rectangular_pulse)
 
     def get_noise(self):
         return self.noise

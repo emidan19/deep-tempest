@@ -98,7 +98,7 @@ blocks:
     start: '0'
     step: '1'
     stop: int(4096*1.5)
-    value: '1800'
+    value: '1056'
     widget: counter
   states:
     bus_sink: false
@@ -111,7 +111,7 @@ blocks:
   id: variable
   parameters:
     comment: ''
-    value: '1600'
+    value: '800'
   states:
     bus_sink: false
     bus_source: false
@@ -143,7 +143,7 @@ blocks:
     start: '0'
     step: '1'
     stop: int(2160*1.5)
-    value: '1000'
+    value: '628'
     widget: counter
   states:
     bus_sink: false
@@ -156,7 +156,7 @@ blocks:
   id: variable
   parameters:
     comment: ''
-    value: '900'
+    value: '600'
   states:
     bus_sink: false
     bus_source: false
@@ -435,7 +435,7 @@ blocks:
     bus_structure: null
     coordinate: [240, 500.0]
     rotation: 0
-    state: enabled
+    state: disabled
 - name: binary_serializer_0_0_0
   id: binary_serializer
   parameters:
@@ -453,7 +453,7 @@ blocks:
     bus_structure: null
     coordinate: [240, 532.0]
     rotation: 0
-    state: enabled
+    state: disabled
 - name: blocks_add_xx_0
   id: blocks_add_xx
   parameters:
@@ -471,7 +471,7 @@ blocks:
     bus_structure: null
     coordinate: [56, 616.0]
     rotation: 0
-    state: true
+    state: disabled
 - name: blocks_complex_to_mag_0
   id: blocks_complex_to_mag
   parameters:
@@ -558,6 +558,23 @@ blocks:
     coordinate: [528, 680.0]
     rotation: 0
     state: enabled
+- name: blocks_null_sink_0
+  id: blocks_null_sink
+  parameters:
+    affinity: ''
+    alias: ''
+    bus_structure_sink: '[[0,],]'
+    comment: ''
+    num_inputs: '2'
+    type: float
+    vlen: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [648, 512.0]
+    rotation: 0
+    state: true
 - name: blocks_throttle_0_0
   id: blocks_throttle
   parameters:
@@ -769,8 +786,9 @@ blocks:
   parameters:
     affinity: ''
     alias: ''
+    blanking: 'True'
     comment: ''
-    image_file: /home/emidan19/deep-tempest/images/1600x900_test1.jpeg
+    image_file: /home/emidan19/deep-tempest/images/VAMO!!.png
     maxoutbuf: '0'
     minoutbuf: '0'
     mode: '1'
@@ -1241,6 +1259,7 @@ connections:
 - [Keep_1_in_N_Frames_0, '0', tempest_sync_detector_0_0, '0']
 - [analog_sig_source_x_0, '0', blocks_multiply_xx_0, '1']
 - [binary_serializer_0, '0', blocks_add_xx_0, '0']
+- [binary_serializer_0, '0', blocks_float_to_complex_0, '0']
 - [binary_serializer_0_0, '0', blocks_add_xx_0, '1']
 - [binary_serializer_0_0_0, '0', blocks_add_xx_0, '2']
 - [blocks_add_xx_0, '0', blocks_float_to_complex_0, '0']
@@ -1255,7 +1274,9 @@ connections:
 - [rational_resampler_xxx_0, '0', Keep_1_in_N_Frames_0, '0']
 - [tempest_TMDS_image_source_0, '0', binary_serializer_0, '0']
 - [tempest_TMDS_image_source_0, '1', binary_serializer_0_0, '0']
+- [tempest_TMDS_image_source_0, '1', blocks_null_sink_0, '0']
 - [tempest_TMDS_image_source_0, '2', binary_serializer_0_0_0, '0']
+- [tempest_TMDS_image_source_0, '2', blocks_null_sink_0, '1']
 - [tempest_fft_peak_fine_sampling_sync_0_0, '0', qtgui_time_sink_x_1, '0']
 - [tempest_fft_peak_fine_sampling_sync_0_0, en, FFT_autocorrelation_0_0, en]
 - [tempest_fft_peak_fine_sampling_sync_0_0, en, tempest_sync_detector_0_0, en]
