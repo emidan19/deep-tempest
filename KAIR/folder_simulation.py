@@ -20,7 +20,6 @@ from skimage.io import imread
 from scipy import signal
 from PIL import Image
 from utils.DTutils import TMDS_encoding_original, TMDS_serial
-import sys
 import logging
 from utils import utils_logger
 from datetime import datetime
@@ -79,10 +78,9 @@ def image_capture_simulation(I_Tx, h_total, v_total, N_harmonic, noise_std=0,
     baseband_exponential = np.exp(2j*np.pi*(harm+freq_error)*t_continuous + 1j*phase_error)
     
     usrp_rate = 50e6
-    usrp_BW = usrp_rate/2
 
     # AM modulation and SDR sampling
-    I_Rx = signal.resample_poly(I_Tx_noisy*baseband_exponential,up=int(usrp_BW), down=sample_rate)
+    I_Rx = signal.resample_poly(I_Tx_noisy*baseband_exponential,up=int(usrp_rate), down=sample_rate)
 
     # Reshape signal to the image size
     I_capture = signal.resample(I_Rx, h_total*v_total).reshape(v_total,h_total)
@@ -172,7 +170,7 @@ def main(simulation_options_path = 'options/tempest_simulation.json'):
         I = imread(image_path)
 
         # Random channel effects
-        freq_error = np.random.uniform(freq_error_range[0], freq_error_range[1])
+        freq_error = np.random.randint(freq_error_range[0], freq_error_range[1])
         phase_error = np.random.uniform(phase_error_range[0], phase_error_range[1])*np.pi
         
         # Choose random pixel rate harmonic number

@@ -1,9 +1,9 @@
 {
     "paths": {
-        "folder_original_images": "web_subset/ground_truth",    
+        "folder_original_images": "testsets/web_images_test",    
         "__comment1__": "Insert input (original images) folder",
 
-        "folder_simulated_images": "web_subset/simulations",
+        "folder_simulated_images": "testsets/simulations",
         "__comment2__": "Insert output (tempest degraded images) folder"
     },
     
@@ -16,13 +16,13 @@
 
         "random": {
 
-            "harmonics": [1,2,3,4,5,6,7,8,9],
+            "harmonics": [3],
             "__comment1__":"Possible pixel harmonic for capture synchronization frequencies",
 
             "sigma": null,          
             "__comment2__":"Gaussian noise with random sigma over specified range [sigma1, simga2]",
 
-            "freq_error": [0,50],   
+            "freq_error": [0,100],   
             "__comment3__": "Random frequency error (Hz) over specified range [f1, f2]",
 
             "phase_error": [-1,1],
