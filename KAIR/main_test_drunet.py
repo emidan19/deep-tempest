@@ -48,90 +48,55 @@ def main(json_path='options/test_drunet.json'):
     opt['dist'] = parser.parse_args().dist
 
     # ----------------------------------------
+    # configure logger
+    # ----------------------------------------
+
+    logger_name = 'test'
+    utils_logger.logger_info(logger_name, os.path.join(opt['path']['log'], logger_name + '.log'))
+    logger = logging.getLogger(logger_name)
+    logger.info(option.dict2str(opt))
+
+    # ----------------------------------------
     # distributed settings
     # ----------------------------------------
     if opt['dist']:
         init_dist('pytorch')
     opt['rank'], opt['world_size'] = get_dist_info()
 
-    if opt['rank'] == 0:
-        util.mkdirs((path for key, path in opt['path'].items() if 'pretrained' not in key))
-
-    # ----------------------------------------
-    # update opt
-    # ----------------------------------------
-    # -->-->-->-->-->-->-->-->-->-->-->-->-->-
-
-    # init_iter_G, init_path_G = option.find_last_checkpoint(opt['path']['models'], net_type='G')
-    init_iter_G, init_path_G = option.find_last_checkpoint(opt['path']['models'], pretrained_path = opt['path']['pretrained_netG'])
-    opt['path']['pretrained_netG'] = init_path_G
-    init_iter_optimizerG, init_path_optimizerG = option.find_last_checkpoint(opt['path']['models'], net_type='optimizerG')
-    opt['path']['pretrained_optimizerG'] = init_path_optimizerG
-    current_step = max(init_iter_G, init_iter_optimizerG)
-
-    border = opt['scale']
-    # --<--<--<--<--<--<--<--<--<--<--<--<--<-
-
-    # ----------------------------------------
-    # save opt to  a '../option.json' file
-    # ----------------------------------------
-    if opt['rank'] == 0:
-        option.save(opt)
-
-    # ----------------------------------------
-    # return None for missing key
-    # ----------------------------------------
     opt = option.dict_to_nonedict(opt)
 
-    # ----------------------------------------
-    # configure logger
-    # ----------------------------------------
-    if opt['rank'] == 0:
-        logger_name = 'test'
-        utils_logger.logger_info(logger_name, os.path.join(opt['path']['log'], logger_name+'.log'))
-        logger = logging.getLogger(logger_name)
-        logger.info(option.dict2str(opt))
+    model_path = opt['path']['pretrained_netG']
+    model_epoch = (model_path.split('/')[-1]).split('_G')[0]
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
-    # ----------------------------------------
-    # seed
-    # ----------------------------------------
-    seed = opt['train']['manual_seed']
-    if seed is None:
-        seed = random.randint(1, 10000)
-    print('Random seed: {}'.format(seed))
-    random.seed(seed)
-    np.random.seed(seed)
-    torch.manual_seed(seed)
-    torch.cuda.manual_seed_all(seed)
+    opt_netG = opt['netG']
 
-    '''
-    # ----------------------------------------
-    # Step--2 (creat dataloader)
-    # ----------------------------------------
-    '''
+    in_nc = opt_netG['in_nc']
+    out_nc = opt_netG['out_nc']
+    nc = opt_netG['nc']
+    nb = opt_netG['nb']
+    act_mode = opt_netG['act_mode']
+    bias = opt_netG['bias']
 
-    # ----------------------------------------
-    # 1) create_dataset
-    # 2) creat_dataloader for test
-    # ----------------------------------------
+    from models.network_unet import UNetRes as net
+    model = net(in_nc=in_nc, out_nc=out_nc, nc=nc, nb=nb, act_mode=act_mode, bias=bias)
+    model.load_state_dict(torch.load(model_path), strict=True)
+    model.eval()
+    for k, v in model.named_parameters():
+        v.requires_grad = False
+    model = model.to(device)
+    logger.info('Model path: {:s}'.format(model_path))
+    number_parameters = sum(map(lambda x: x.numel(), model.parameters()))
+    logger.info('Params number: {}'.format(number_parameters))
 
-    dataset_opt = opt['datasets']['test']
-    test_set = define_Dataset(dataset_opt)
-    test_loader = DataLoader(test_set, batch_size=1,
-                                shuffle=False, num_workers=1,
-                                drop_last=False, pin_memory=True)
 
-    '''
+    """  
     # ----------------------------------------
-    # Step--3 (initialize model)
+    # Step--3 (load paths)
     # ----------------------------------------
-    '''
-
-    model = define_Model(opt)
-    model.init_train()
-    if opt['rank'] == 0:
-        logger.info(model.info_network())
-        logger.info(model.info_params())
+    """
+    L_paths = util.get_image_paths(opt['datasets']['test']['dataroot_L'])
+    noise_sigma = opt['datasets']['test']['sigma_test']
 
     '''
     # ----------------------------------------
@@ -142,9 +107,9 @@ def main(json_path='options/test_drunet.json'):
     # avg_ssim = 0.0
     # idx = 0
 
-    for test_data in test_loader:
+    for L_path in L_paths:
         # idx += 1
-        image_name_ext = os.path.basename(test_data['L_path'][0])
+        image_name_ext = os.path.basename(L_path)
         img_name, ext = os.path.splitext(image_name_ext)
 
         img_dir = os.path.join(opt['path']['images'], img_name)
@@ -152,17 +117,36 @@ def main(json_path='options/test_drunet.json'):
 
         logger.info('Creating inference on test image...')
 
-        model.feed_data(test_data, need_H = False)
-        model.test()
+        # Load image
+        img_L_original = util.imread_uint(L_path, n_channels=3)
+        img_L = img_L_original[:,:,:2]
+        img_L = util.uint2single(img_L)
+        img_L = util.single2tensor4(img_L)
+        
+        # Add noise
+        if noise_sigma > 0:
+            noise_level = torch.FloatTensor([int(noise_sigma)])/255.0
+            noise = torch.randn(img_L.size()).mul_(noise_level).float()
+            img_L.add_(noise)
+        img_L = img_L.to(device)
 
-        visuals = model.current_visuals(need_H=False)
-        E_img = util.tensor2uint(visuals['E'])
+        # Inference on image
+        img_E = model(img_L)
+        img_L_tmp = util.tensor2uint(img_L)
+        img_L = np.zeros_like(img_L_original)
+        img_L[:,:,:2] = img_L_tmp
+        img_E = util.tensor2uint(img_E)
 
+        # -----------------------
+        # save noisy L
+        # -----------------------
+        save_img_path = os.path.join(img_dir, '{:s}_{}std.png'.format(img_name, noise_sigma))
+        util.imsave(img_L, save_img_path)
         # -----------------------
         # save estimated image E
         # -----------------------
-        save_img_path = os.path.join(img_dir, '{:s}_{:d}.png'.format(img_name, current_step))
-        util.imsave(E_img, save_img_path)
+        save_img_path = os.path.join(img_dir, '{:s}_model{}_{}std.png'.format(img_name, model_epoch, noise_sigma))
+        util.imsave(img_E, save_img_path)
 
         logger.info(f'Inference of {img_name} completed. Saved at {img_dir}.')
 

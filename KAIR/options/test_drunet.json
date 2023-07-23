@@ -8,28 +8,28 @@
   , "n_channels_datasetload": 3 // broadcast to image training set
 
   , "path": {
-    "root": "denoising"            // "denoising" | "superresolution"
-    , "pretrained_netG": "denoising/drunet/models/210_G.pth"    // path of pretrained model, if model from scratch type: null
+    "root": "drunet_inference"            // "denoising" | "superresolution"
+    , "pretrained_netG": "denoising/drunet/models/520_G.pth"    // path of pretrained model, if model from scratch type: null
   }
 
   , "datasets": {
     "train": {
       "name": "train_dataset"           // just name
       , "dataset_type": "ffdnet"         // "dncnn" | "dnpatch" for dncnn,  | "fdncnn" | "ffdnet" | "sr" | "srmd" | "dpsr" | "plain" | "plainpatch"
-      , "dataroot_H": "testsets/web_subset/ground_truth" // path of H training dataset
+      , "dataroot_H": "web_subset/ground_truth" // path of H training dataset
       , "sigma": [0, 0]      // 15, 25, 50 for DnCNN | [0, 75] for FFDNet and FDnCNN
       , "num_patches_per_image": 20   // number of random patches of training image
-      , "dataroot_L": "testsets/web_subset/simulations" // path of L training dataset, if using noisy H type: null
+      , "dataroot_L": "web_subset/capturas" // path of L training dataset, if using noisy H type: null
       , "H_size": 128                    // patch size 40 | 64 | 96 | 128 | 192
-      , "dataloader_shuffle": true
+      , "dataloader_shuffle": false
       , "dataloader_num_workers": 8
       , "dataloader_batch_size": 64     // batch size 1 | 16 | 32 | 48 | 64 | 128
     }
     , "test": {
       "name": "test_dataset"            // just name
       , "dataset_type": "ffdnet"         // "dncnn" | "dnpatch" for dncnn,  | "fdncnn" | "ffdnet" | "sr" | "srmd" | "dpsr" | "plain" | "plainpatch"
-      , "dataroot_H": "testsets/web_subset/ground_truth"  // path of H testing dataset
-      , "dataroot_L": "testsets/web_subset/simulations"   // path of L testing dataset
+      , "dataroot_H": "web_subset/ground_truth"  // path of H testing dataset
+      , "dataroot_L": "web_subset/capturas_splitter"   // path of L testing dataset
       , "sigma_test": 0 // 15, 25, 50 for DnCNN and ffdnet
     }
   }
