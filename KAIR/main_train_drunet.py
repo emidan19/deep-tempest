@@ -267,7 +267,7 @@ def main(json_path='options/train_drunet.json'):
                 # -----------------------
                 # calculate loss
                 # -----------------------
-                current_loss = model.G_lossfn_weight * model.G_lossfn(E_visual, H_visual)
+                current_loss = model.G_lossfn(E_visual, H_visual)
 
                 logger.info('{:->4d}--> {:>10s} | PSNR = {:<4.2f}dB ; SSIM = {:.3f} ; G_loss = {:.3e}'.format(idx, image_name_ext, current_psnr, current_ssim, current_loss))
 
