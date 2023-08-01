@@ -180,6 +180,9 @@ class TVLoss(nn.Module):
         """
         Total variation loss
         https://github.com/jxgu1016/Total_Variation_Loss.pytorch
+
+        # Adapted by Emilio Martínez (emiliomartinez98@gmail.com)
+        
         Args:
             tv_loss_weight (int):
         """
@@ -195,7 +198,8 @@ class TVLoss(nn.Module):
         count_w = self.tensor_size(x[:, :, :, 1:])
         h_tv = torch.pow((x[:, :, 1:, :] - x[:, :, :h_x - 1, :]), 2).sum()
         w_tv = torch.pow((x[:, :, :, 1:] - x[:, :, :, :w_x - 1]), 2).sum()
-        return self.MSEloss(x,gt) + self.tv_loss_weight * 2 * (h_tv / count_h + w_tv / count_w) / batch_size
+        loss = self.MSEloss(x,gt) + self.tv_loss_weight * 2 * (h_tv / count_h + w_tv / count_w) / batch_size
+        return loss
 
     @staticmethod
     def tensor_size(t):
