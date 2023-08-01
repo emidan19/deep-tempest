@@ -21,13 +21,86 @@ from utils.utils_dist import get_dist_info, init_dist
 from data.select_dataset import define_Dataset
 from models.select_model import define_Model
 
+'''
+# ----------------------------------------
+# Step--1 (prepare opt)
+# ----------------------------------------
+'''
+
+json_path='options/optuna_options.json'
+
+parser = argparse.ArgumentParser()
+parser.add_argument('--opt', type=str, default=json_path, help='Path to option JSON file.')
+parser.add_argument('--launcher', default='pytorch', help='job launcher')
+parser.add_argument('--local_rank', type=int, default=0)
+parser.add_argument('--dist', default=False)
+
+opt = option.parse(parser.parse_args().opt, is_train=True)
+opt['dist'] = parser.parse_args().dist
+
+# ----------------------------------------
+# distributed settings
+# ----------------------------------------
+if opt['dist']:
+    init_dist('pytorch')
+opt['rank'], opt['world_size'] = get_dist_info()
+
+# ----------------------------------------
+# return None for missing key
+# ----------------------------------------
+opt = option.dict_to_nonedict(opt)
+
+# Set logger
+logger_name = 'optuna_hparams'
+utils_logger.logger_info(logger_name, os.path.join(opt['path']['log'], logger_name + '.log'))
+logger = logging.getLogger(logger_name)
+logger.info(option.dict2str(opt))
+
+'''
+# ----------------------------------------
+# Step--2 (create dataloader)
+# ----------------------------------------
+'''
+
+message = 'Loading train and val datasets'
+logger.info(message)
+
+seed = opt['train']['manual_seed']
+if seed is None:
+    seed = random.randint(1, 10000)
+logger.info('Random seed: {}'.format(seed))
+random.seed(seed)
+np.random.seed(seed)
+torch.manual_seed(seed)
+torch.cuda.manual_seed_all(seed)
+
+for phase, dataset_opt in opt['datasets'].items():
+    if phase == 'train':
+        train_set = define_Dataset(dataset_opt)
+        # train_sampler = DistributedSampler(train_set, shuffle=dataset_opt['dataloader_shuffle'], drop_last=True, seed = seed)
+        train_size = int(math.floor(len(train_set) / dataset_opt['dataloader_batch_size']))
+        train_loader = DataLoader(  train_set,
+                                    batch_size=dataset_opt['dataloader_batch_size'],
+                                    shuffle=dataset_opt['dataloader_shuffle'],
+                                    num_workers=dataset_opt['dataloader_num_workers'],
+                                    drop_last=True,
+                                    pin_memory=True)
+
+    elif phase == 'test':
+        test_set = define_Dataset(dataset_opt)
+        val_loader = DataLoader(test_set, batch_size=1,
+                                    shuffle=False, num_workers=1,
+                                    drop_last=False, pin_memory=True)
+    else:
+        raise NotImplementedError("Phase [%s] is not recognized." % phase)
+
+message = f'Datasets loaded. {len(train_loader)} patches for train. {len(val_loader)} images for validation.'
+logger.info(message)
+
+dataset = {'train':train_loader, 'val':val_loader}
+
 # Define model function with optuna hyperparameters
 def define_model(trial, opt):
-
-    # Set learning rate suggestions for trial
-    opt['train']['G_optimizaer_lr'] = trial.suggest_loguniform("lr", 1e-5, 1e-1)
-
-    opt['train']["G_tvloss_weight"] = trial.suggest_loguniform("tv_weight", 1e-7, 1e-2)
 
     # Initialize model
     model = define_Model(opt)
@@ -38,6 +111,7 @@ def define_model(trial, opt):
 def define_metric(metric_str):
 
     metric_dict = {}
+    metric_dict['name'] = metric_str
 
     if metric_str == 'PSNR':
         metric_dict['func'] = util.calculate_psnr
@@ -47,7 +121,7 @@ def define_metric(metric_str):
         metric_dict['func'] = util.calculate_ssim
         metric_dict['direction'] = 'maximize'
     
-    # TODO implement
+    # TODO IMPLEMENTAR
     # elif metric_str == 'CER':
     #     metric_dict['func'] = utilOCR.calculate_cer
     #     metric_dict['direction'] = 'minimize'
@@ -59,20 +133,24 @@ def define_metric(metric_str):
     
     return metric_dict
 
-def train_model(trial, model, metric_dict, criterion, optimizer, num_epochs=25):
+def train_model(trial, model, dataset, metric_dict, num_epochs=25):
+
+    # Load dataset and metrics
+    train_loader = dataset['train']
+    val_loader = dataset['val']
 
     metric = metric_dict['func']
     metric_direction = metric_dict['direction']
 
-    # Time tracker
-    since = time.time()
-
     # Copy model weights to get best weights register
-    best_model_wts = copy.deepcopy(model.state_dict())
+    # best_model_wts = copy.deepcopy(model.state_dict())
 
     best_metric = 0*(metric_direction=='maximize') + 1e6*(metric_direction=='minimize')
 
     current_step = 0
+
+    # Time tracker
+    since = time.time()
 
     # Iter over epoch
     for epoch in range(num_epochs):
@@ -118,19 +196,17 @@ def train_model(trial, model, metric_dict, criterion, optimizer, num_epochs=25):
 
             epoch_metric += metric(H_img, E_img)
 
-            epoch_loss += batch_loss     
+            epoch_loss += model.current_log()['G_loss']     
 
         # Train loss and metric
         avg_train_loss = epoch_loss/train_size
         avg_train_metric = epoch_metric/train_size
 
-        logs = model.current_log()  # such as loss
-        message = '<epoch:{:3d}, iter:{:8,d}, lr:{:.3e}> G_loss: {:.3e} '.format(current_epoch, 
-                                                                                current_step, 
-                                                                                model.current_learning_rate(),
-                                                                                epoch_loss
-                                                                                )
-        logger.info(message)
+        message_train = f'\nepoch:{epoch+1}/{num_epochs}\n'+'-'*14+'\ntrain loss: {:.3e}, train {}: {:.3f}\n'.format(
+                                                                                                        avg_train_loss,
+                                                                                                        metric_dict['name'],
+                                                                                                        avg_train_metric
+                                                                                                        )
 
 
         # -------------------------------
@@ -140,13 +216,10 @@ def train_model(trial, model, metric_dict, criterion, optimizer, num_epochs=25):
         avg_val_loss = 0.0
         idx = 0
 
-        for test_data in test_loader:
+        for val_data in val_loader:
             idx += 1
 
-            image_name_ext = os.path.basename(test_data['L_path'][0])
-            img_name, ext = os.path.splitext(image_name_ext)
-
-            model.feed_data(test_data)
+            model.feed_data(val_data)
             model.test()
 
             visuals = model.current_visuals()
@@ -155,7 +228,10 @@ def train_model(trial, model, metric_dict, criterion, optimizer, num_epochs=25):
             H_visual = visuals['H']
             H_img = util.tensor2uint(H_visual)
 
-            current_loss = model.G_lossfn(E_visual, H_visual)
+            sizes = E_visual.size()
+
+            current_loss = model.G_lossfn(torch.reshape(E_visual,(1,1,sizes[1],sizes[2])),
+                                          torch.reshape(H_visual,(1,1,sizes[1],sizes[2])))
 
             val_metric += metric(H_img, E_img)
 
@@ -163,12 +239,19 @@ def train_model(trial, model, metric_dict, criterion, optimizer, num_epochs=25):
         
         # Val loss and metric
         avg_val_loss = avg_val_loss/idx
-        val_metric = val_metric/idx
+        avg_val_metric = val_metric/idx
+
+        message_val = 'val loss: {:.3e}, val {}: {:.3f}'.format(avg_val_loss,
+                                                                    metric_dict['name'],
+                                                                    avg_val_metric
+                                                                    )
+        # Write epoch log
+        logger.info(message_train + message_val)
 
         # Update if validation metric is better
-        if val_metric > best_metric:
-                        best_metric = val_metric
-                        best_model_wts = copy.deepcopy(model.state_dict())
+        if avg_val_metric > best_metric:
+                        best_metric = avg_val_metric
+                        # best_model_wts = copy.deepcopy(model.state_dict())
         
         # Report trial epoch and check if should prune
         trial.report(best_metric, epoch)
@@ -177,78 +260,85 @@ def train_model(trial, model, metric_dict, criterion, optimizer, num_epochs=25):
 
     # Whole optuna parameters searching time
     time_elapsed = time.time() - since
+    logger.info('Trial {}: training complete in {:.0f}hs {:.0f}min {:.0f}s'.format(
+        trial.number ,time_elapsed // 60*60, time_elapsed // 60, time_elapsed % 60))
 
     return best_metric
 
-
 # Define optuna objective function
-def objective(trial, opt):
+def objective(trial):
+
+    # Set learning rate suggestions for trial
+    trial_lr = trial.suggest_loguniform("lr", 1e-5, 1e-1)
+    opt['train']['G_optimizaer_lr'] = trial_lr
+
+    trial_tvweight = trial.suggest_loguniform("tv_weight", 1e-7, 1e-2)
+    opt['train']["G_tvloss_weight"] = trial_tvweight
+
+    message = f'Trial number {trial.number} with parameters:\n'
+    message = message+f'lr = {trial_lr}\n'
+    message = message+f'tv_weight = {trial_tvweight}'
+
+    logger.info(message)
 
     # Generate the model and optimizers
     model = define_model(trial, opt)
 
-    best_metric = train_model(trial, model, metric, num_epochs=25)    
+    # Select metric specified at options
+    metric_dict = define_metric(opt['optuna']['metric'])
+
+    best_metric = train_model(trial, model, dataset, metric_dict, num_epochs=opt['optuna']['trial_epochs'])    
     
     # Save best model for each trial
     # torch.save(best_model.state_dict(), f"model_trial_{trial.number}.pth")
 
     # Return metric (Objective Value) of the current trial
+
     return best_metric
 
-def main(json_path='options/train_drunet.json'):
+def save_optuna_info(study):
 
-    '''
-    # ----------------------------------------
-    # Step--1 (prepare opt)
-    # ----------------------------------------
-    '''
+    root_dir = opt['path']['root']
 
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--opt', type=str, default=json_path, help='Path to option JSON file.')
-    parser.add_argument('--launcher', default='pytorch', help='job launcher')
-    parser.add_argument('--local_rank', type=int, default=0)
-    parser.add_argument('--dist', default=False)
+    # Save page for plot contour
+    fig = optuna.visualization.plot_contour(study, params=['tv_weight','lr'])
+    fig.write_html(os.path.join(root_dir,'optuna_plot_contour.html'))
+    # Save page for plot slice
+    fig = optuna.visualization.plot_slice(study)
+    fig.write_html(os.path.join(root_dir,'optuna_plot_slice.html'))
+    # Save page for hyperparameters importances
+    fig = optuna.visualization.plot_param_importances(study)
+    fig.write_html(os.path.join(root_dir,'optuna_plot_param_importances.html'))
+    # Save page for optimization history
+    fig = optuna.visualization.plot_optimization_history(study)
+    fig.write_html(os.path.join(root_dir,'optuna_plot_optimization_history.html'))
+    # Save page for optimization history
+    fig = optuna.visualization.plot_intermediate_values(study)
+    fig.write_html(os.path.join(root_dir,'optuna_plot_intermediate_values.html'))
 
-    opt = option.parse(parser.parse_args().opt, is_train=True)
-    opt['dist'] = parser.parse_args().dist
-
-    # ----------------------------------------
-    # return None for missing key
-    # ----------------------------------------
-    opt = option.dict_to_nonedict(opt)
+    return
 
 
-    '''
-    # ----------------------------------------
-    # Step--2 (create dataloader)
-    # ----------------------------------------
-    '''
+'''
+# ----------------------------------------
+# Step--3 (setup optuna hyperparameter search)
+# ----------------------------------------
+'''
+metric_dict = define_metric(opt['optuna']['metric'])
+sampler = optuna.samplers.TPESampler()
+study = optuna.create_study(
+        sampler=sampler,
+        pruner=optuna.pruners.MedianPruner( 
+            n_startup_trials=3, n_warmup_steps=5, interval_steps=3
+        ),
+        direction=metric_dict['direction'])
 
-    for phase, dataset_opt in opt['datasets'].items():
-        if phase == 'train':
-            train_set = define_Dataset(dataset_opt)
-            train_size = int(math.floor(len(train_set) / dataset_opt['dataloader_batch_size']))
-            train_sampler = DistributedSampler(train_set, shuffle=dataset_opt['dataloader_shuffle'], drop_last=True)
-            train_loader = DataLoader(train_set,
-                                        batch_size=dataset_opt['dataloader_batch_size']//opt['num_gpu'],
-                                        shuffle=True,
-                                        num_workers=dataset_opt['dataloader_num_workers']//opt['num_gpu'],
-                                        drop_last=True,
-                                        pin_memory=True,
-                                        sampler=train_sampler)
+study.optimize(func=objective, n_trials=opt['optuna']['n_trials'])
 
-        elif phase == 'test':
-            test_set = define_Dataset(dataset_opt)
-            test_loader = DataLoader(test_set, batch_size=1,
-                                     shuffle=False, num_workers=1,
-                                     drop_last=False, pin_memory=True)
-        else:
-            raise NotImplementedError("Phase [%s] is not recognized." % phase)
+message = 'Best trial:\n'+str(study.best_trial)
+logger.info(message)
 
-    '''
-    # ----------------------------------------
-    # Step--3 (setup optuna hyperparameters)
-    # ----------------------------------------
-    '''
+logger.info('Saving study information at ' + opt['path']['root'])
+save_optuna_info(study)
 
-    define_model(trial, opt)
+logger.info('Hyperparameters study ended')
