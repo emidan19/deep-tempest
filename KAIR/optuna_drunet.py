@@ -260,7 +260,12 @@ def train_model(trial, model, dataset, metric_dict, num_epochs=25):
         # Report trial epoch and check if should prune
         trial.report(best_metric, epoch)
         if trial.should_prune():
+            time_elapsed = time.time() - since
+            logger.info(f'Trial number {} pruned. Wasted {:.0f}hs {:.0f}min {:.0f}s on training ¯\_(ツ)_/¯'.format(
+                trial.number ,time_elapsed // (60*60), time_elapsed // 60, time_elapsed % 60)
+                )
             raise optuna.TrialPruned()
+
 
     # Whole optuna parameters searching time
     time_elapsed = time.time() - since
