@@ -126,6 +126,10 @@ def define_metric(metric_str):
     #     metric_dict['func'] = utilOCR.calculate_cer
     #     metric_dict['direction'] = 'minimize'
 
+    elif 'edgeJaccard':
+        metric_dict['func'] = util.calculate_edge_jaccard
+        metric_dict['direction'] = 'maximize'
+
     else:
         # If none of above, choose MSE
         metric_dict['func'] = nn.MSELoss
@@ -241,12 +245,12 @@ def train_model(trial, model, dataset, metric_dict, num_epochs=25):
         avg_val_loss = avg_val_loss/idx
         avg_val_metric = val_metric/idx
 
-        message_val = 'val loss: {:.3e}, val {}: {:.3f}'.format(avg_val_loss,
+        message_val = 'val loss: {:.3e}, val {}: {:.3f}\n'.format(avg_val_loss,
                                                                     metric_dict['name'],
                                                                     avg_val_metric
                                                                     )
         # Write epoch log
-        logger.info(message_train + message_val)
+        logger.info(message_train + message_val +'-'*14)
 
         # Update if validation metric is better
         if avg_val_metric > best_metric:
@@ -260,8 +264,8 @@ def train_model(trial, model, dataset, metric_dict, num_epochs=25):
 
     # Whole optuna parameters searching time
     time_elapsed = time.time() - since
-    logger.info('Trial {}: training complete in {:.0f}hs {:.0f}min {:.0f}s'.format(
-        trial.number ,time_elapsed // 60*60, time_elapsed // 60, time_elapsed % 60))
+    logger.info('Trial {}: training completed in {:.0f}hs {:.0f}min {:.0f}s'.format(
+        trial.number ,time_elapsed // (60*60), time_elapsed // 60, time_elapsed % 60))
 
     return best_metric
 

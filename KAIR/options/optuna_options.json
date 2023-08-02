@@ -13,9 +13,9 @@
   }
 
   , "optuna":{
-     "n_trials": 2
-    ,"trial_epochs": 1  // Maximum epochs per trial
-    ,"metric": "PSNR"   // "PSNR" | "SSIM" | "CER" | "MSE"
+     "n_trials": 20
+    ,"trial_epochs": 10  // Maximum epochs per trial
+    ,"metric": "edgeJaccard"   // "edgeJaccard" | "PSNR" | "SSIM" | "CER" | "MSE"
     
   }
 
