@@ -10,6 +10,7 @@ from torch.utils.data import DataLoader
 from torch.utils.data.distributed import DistributedSampler
 import torch
 import torch.nn as nn
+from torch.utils.data import Subset
 import optuna
 import time
 
@@ -77,7 +78,9 @@ torch.cuda.manual_seed_all(seed)
 for phase, dataset_opt in opt['datasets'].items():
     if phase == 'train':
         train_set = define_Dataset(dataset_opt)
-        # train_sampler = DistributedSampler(train_set, shuffle=dataset_opt['dataloader_shuffle'], drop_last=True, seed = seed)
+        # Keep only one third of the dataset
+        indexes = torch.randperm(len(train_set))[:len(train_set)//3]
+        train_set = Subset(train_set, indexes)
         train_size = int(math.floor(len(train_set) / dataset_opt['dataloader_batch_size']))
         train_loader = DataLoader(  train_set,
                                     batch_size=dataset_opt['dataloader_batch_size'],
@@ -88,13 +91,16 @@ for phase, dataset_opt in opt['datasets'].items():
 
     elif phase == 'test':
         test_set = define_Dataset(dataset_opt)
+        # Keep only one third of the dataset
+        indexes = torch.randperm(len(test_set))[:len(test_set)//3]
+        test_set = Subset(test_set, indexes)
         val_loader = DataLoader(test_set, batch_size=1,
-                                    shuffle=False, num_workers=1,
+                                    shuffle=True, num_workers=1,
                                     drop_last=False, pin_memory=True)
     else:
         raise NotImplementedError("Phase [%s] is not recognized." % phase)
 
-message = f'Datasets loaded. {len(train_loader)} patches for train. {len(val_loader)} images for validation.'
+message = f'Datasets loaded.'
 logger.info(message)
 
 dataset = {'train':train_loader, 'val':val_loader}
@@ -261,7 +267,7 @@ def train_model(trial, model, dataset, metric_dict, num_epochs=25):
         trial.report(best_metric, epoch)
         if trial.should_prune():
             time_elapsed = time.time() - since
-            logger.info(f'Trial number {} pruned. Wasted {:.0f}hs {:.0f}min {:.0f}s on training ¯\_(ツ)_/¯'.format(
+            logger.info('Trial number {} pruned. Wasted {:.0f}hs {:.0f}min {:.0f}s on training ¯\_(ツ)_/¯'.format(
                 trial.number ,time_elapsed // (60*60), time_elapsed // 60, time_elapsed % 60)
                 )
             raise optuna.TrialPruned()
