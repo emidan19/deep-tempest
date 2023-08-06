@@ -1,0 +1,1064 @@
+23-08-04 14:40:51.739 :   task: drunet
+  model: plain
+  gpu_ids: [0]
+  scale: 0
+  n_channels: 1
+  n_channels_datasetload: 3
+  path:[
+    root: optuna_hparams
+    pretrained_netG: denoising/drunet/models/520_G.pth
+    task: optuna_hparams/drunet
+    log: optuna_hparams/drunet
+    options: optuna_hparams/drunet/options
+    models: optuna_hparams/drunet/models
+    images: optuna_hparams/drunet/images
+  ]
+  optuna:[
+    n_trials: 25
+    trial_epochs: 10
+    metric: edgeJaccard
+  ]
+  datasets:[
+    train:[
+      name: train_dataset
+      dataset_type: ffdnet
+      dataroot_H: trainsets/ground-truth
+      dataroot_L: trainsets/simulations
+      sigma: [0, 15]
+      num_patches_per_image: 21
+      H_size: 256
+      dataloader_shuffle: True
+      dataloader_num_workers: 8
+      dataloader_batch_size: 28
+      phase: train
+      scale: 0
+      n_channels: 1
+    ]
+    test:[
+      name: test_dataset
+      dataset_type: ffdnet
+      dataroot_H: testsets/ground-truth
+      dataroot_L: testsets/simulations
+      sigma_test: 10
+      phase: test
+      scale: 0
+      n_channels: 1
+    ]
+  ]
+  netG:[
+    net_type: drunet
+    in_nc: 2
+    out_nc: 1
+    nc: [64, 128, 256, 512]
+    nb: 4
+    gc: 32
+    ng: 2
+    reduction: 16
+    act_mode: R
+    upsample_mode: convtranspose
+    downsample_mode: strideconv
+    bias: False
+    init_type: orthogonal
+    init_bn_type: uniform
+    init_gain: 0.2
+    scale: 0
+  ]
+  train:[
+    epochs: 1000
+    G_lossfn_type: tv
+    G_lossfn_weight: 1.0
+    G_tvloss_weight: 0.1
+    G_optimizer_type: adam
+    G_optimizer_lr: 0.0001
+    G_optimizer_clipgrad: None
+    G_scheduler_type: MultiStepLR
+    G_scheduler_milestones: [1600, 3200, 4800, 6400, 8000, 9600, 11200, 12800, 14400]
+    G_scheduler_gamma: 0.1
+    G_regularizer_orthstep: None
+    G_regularizer_clipstep: None
+    checkpoint_test: 1600
+    checkpoint_save: 3999
+    checkpoint_print: 16
+    F_feature_layer: 34
+    F_weights: 1.0
+    F_lossfn_type: l1
+    F_use_input_norm: True
+    F_use_range_norm: False
+    G_optimizer_betas: [0.9, 0.999]
+    G_scheduler_restart_weights: 1
+    G_optimizer_wd: 0
+    G_optimizer_reuse: False
+    G_param_strict: True
+    E_param_strict: True
+    E_decay: 0
+  ]
+  opt_path: options/optuna_options.json
+  is_train: True
+  merge_bn: False
+  merge_bn_startpoint: -1
+  find_unused_parameters: True
+  use_static_graph: False
+  dist: False
+  num_gpu: 1
+  rank: 0
+  world_size: 1
+
+23-08-04 14:40:51.739 : Loading train and val datasets
+23-08-04 14:40:51.739 : Random seed: 9603
+23-08-04 14:40:51.899 : Datasets loaded.
+23-08-04 14:40:51.900 : Trial number 0 with parameters:
+lr = 2.6533377362239036e-06
+tv_weight = 0.0014163872720870303
+23-08-04 14:48:52.095 : 
+epoch:1/10
+--------------
+train loss: 2.028e-02, train edgeJaccard: 0.431
+val loss: 1.447e-02, val edgeJaccard: 0.382
+--------------
+23-08-04 14:56:50.975 : 
+epoch:2/10
+--------------
+train loss: 1.771e-02, train edgeJaccard: 0.422
+val loss: 1.255e-02, val edgeJaccard: 0.406
+--------------
+23-08-04 15:04:49.908 : 
+epoch:3/10
+--------------
+train loss: 1.720e-02, train edgeJaccard: 0.417
+val loss: 1.450e-02, val edgeJaccard: 0.406
+--------------
+23-08-04 15:12:48.768 : 
+epoch:4/10
+--------------
+train loss: 1.716e-02, train edgeJaccard: 0.411
+val loss: 1.257e-02, val edgeJaccard: 0.415
+--------------
+23-08-04 15:20:48.085 : 
+epoch:5/10
+--------------
+train loss: 1.502e-02, train edgeJaccard: 0.447
+val loss: 1.236e-02, val edgeJaccard: 0.422
+--------------
+23-08-04 15:28:47.321 : 
+epoch:6/10
+--------------
+train loss: 1.398e-02, train edgeJaccard: 0.430
+val loss: 1.210e-02, val edgeJaccard: 0.424
+--------------
+23-08-04 15:36:46.815 : 
+epoch:7/10
+--------------
+train loss: 1.344e-02, train edgeJaccard: 0.433
+val loss: 1.178e-02, val edgeJaccard: 0.425
+--------------
+23-08-04 15:44:46.144 : 
+epoch:8/10
+--------------
+train loss: 1.324e-02, train edgeJaccard: 0.437
+val loss: 1.188e-02, val edgeJaccard: 0.425
+--------------
+23-08-04 15:52:45.332 : 
+epoch:9/10
+--------------
+train loss: 1.287e-02, train edgeJaccard: 0.442
+val loss: 1.166e-02, val edgeJaccard: 0.427
+--------------
+23-08-04 16:00:44.680 : 
+epoch:10/10
+--------------
+train loss: 1.274e-02, train edgeJaccard: 0.435
+val loss: 1.190e-02, val edgeJaccard: 0.426
+--------------
+23-08-04 16:00:44.681 : Trial 0: training completed in 1hs 19min 52s
+23-08-04 16:00:44.682 : Trial number 1 with parameters:
+lr = 0.0002520062339855879
+tv_weight = 0.000893155081478533
+23-08-04 16:08:44.809 : 
+epoch:1/10
+--------------
+train loss: 1.988e-02, train edgeJaccard: 0.387
+val loss: 1.467e-02, val edgeJaccard: 0.401
+--------------
+23-08-04 16:16:44.065 : 
+epoch:2/10
+--------------
+train loss: 1.803e-02, train edgeJaccard: 0.439
+val loss: 1.353e-02, val edgeJaccard: 0.408
+--------------
+23-08-04 16:24:44.084 : 
+epoch:3/10
+--------------
+train loss: 1.787e-02, train edgeJaccard: 0.413
+val loss: 1.354e-02, val edgeJaccard: 0.402
+--------------
+23-08-04 16:32:43.553 : 
+epoch:4/10
+--------------
+train loss: 1.626e-02, train edgeJaccard: 0.401
+val loss: 1.215e-02, val edgeJaccard: 0.418
+--------------
+23-08-04 16:40:43.383 : 
+epoch:5/10
+--------------
+train loss: 1.413e-02, train edgeJaccard: 0.412
+val loss: 1.169e-02, val edgeJaccard: 0.423
+--------------
+23-08-04 16:48:43.004 : 
+epoch:6/10
+--------------
+train loss: 1.385e-02, train edgeJaccard: 0.442
+val loss: 1.165e-02, val edgeJaccard: 0.422
+--------------
+23-08-04 16:56:42.782 : 
+epoch:7/10
+--------------
+train loss: 1.306e-02, train edgeJaccard: 0.423
+val loss: 1.195e-02, val edgeJaccard: 0.424
+--------------
+23-08-04 17:04:42.575 : 
+epoch:8/10
+--------------
+train loss: 1.285e-02, train edgeJaccard: 0.426
+val loss: 1.141e-02, val edgeJaccard: 0.426
+--------------
+23-08-04 17:12:42.055 : 
+epoch:9/10
+--------------
+train loss: 1.269e-02, train edgeJaccard: 0.427
+val loss: 1.152e-02, val edgeJaccard: 0.428
+--------------
+23-08-04 17:20:42.095 : 
+epoch:10/10
+--------------
+train loss: 1.282e-02, train edgeJaccard: 0.445
+val loss: 1.147e-02, val edgeJaccard: 0.426
+--------------
+23-08-04 17:20:42.096 : Trial 1: training completed in 1hs 19min 57s
+23-08-04 17:20:42.097 : Trial number 2 with parameters:
+lr = 0.03743393665687413
+tv_weight = 1.0002139441977368e-07
+23-08-04 17:28:41.530 : 
+epoch:1/10
+--------------
+train loss: 1.961e-02, train edgeJaccard: 0.401
+val loss: 1.289e-02, val edgeJaccard: 0.404
+--------------
+23-08-04 17:36:40.331 : 
+epoch:2/10
+--------------
+train loss: 1.861e-02, train edgeJaccard: 0.405
+val loss: 1.323e-02, val edgeJaccard: 0.397
+--------------
+23-08-04 17:44:39.490 : 
+epoch:3/10
+--------------
+train loss: 1.758e-02, train edgeJaccard: 0.430
+val loss: 1.314e-02, val edgeJaccard: 0.406
+--------------
+23-08-04 17:52:38.779 : 
+epoch:4/10
+--------------
+train loss: 1.618e-02, train edgeJaccard: 0.430
+val loss: 1.165e-02, val edgeJaccard: 0.418
+--------------
+23-08-04 18:00:37.723 : 
+epoch:5/10
+--------------
+train loss: 1.418e-02, train edgeJaccard: 0.439
+val loss: 1.128e-02, val edgeJaccard: 0.421
+--------------
+23-08-04 18:08:36.243 : 
+epoch:6/10
+--------------
+train loss: 1.377e-02, train edgeJaccard: 0.435
+val loss: 1.098e-02, val edgeJaccard: 0.425
+--------------
+23-08-04 18:16:35.539 : 
+epoch:7/10
+--------------
+train loss: 1.342e-02, train edgeJaccard: 0.420
+val loss: 1.177e-02, val edgeJaccard: 0.426
+--------------
+23-08-04 18:24:35.143 : 
+epoch:8/10
+--------------
+train loss: 1.295e-02, train edgeJaccard: 0.448
+val loss: 1.117e-02, val edgeJaccard: 0.427
+--------------
+23-08-04 18:32:34.335 : 
+epoch:9/10
+--------------
+train loss: 1.281e-02, train edgeJaccard: 0.438
+val loss: 1.124e-02, val edgeJaccard: 0.429
+--------------
+23-08-04 18:40:33.079 : 
+epoch:10/10
+--------------
+train loss: 1.278e-02, train edgeJaccard: 0.414
+val loss: 1.126e-02, val edgeJaccard: 0.428
+--------------
+23-08-04 18:40:33.079 : Trial 2: training completed in 1hs 19min 50s
+23-08-04 18:40:33.081 : Trial number 3 with parameters:
+lr = 0.01658549132535369
+tv_weight = 2.763796123450118e-07
+23-08-04 18:48:33.689 : 
+epoch:1/10
+--------------
+train loss: 2.025e-02, train edgeJaccard: 0.384
+val loss: 1.238e-02, val edgeJaccard: 0.409
+--------------
+23-08-04 18:56:32.580 : 
+epoch:2/10
+--------------
+train loss: 1.823e-02, train edgeJaccard: 0.401
+val loss: 1.288e-02, val edgeJaccard: 0.410
+--------------
+23-08-04 19:04:31.324 : 
+epoch:3/10
+--------------
+train loss: 1.798e-02, train edgeJaccard: 0.400
+val loss: 1.416e-02, val edgeJaccard: 0.408
+--------------
+23-08-04 19:12:30.546 : 
+epoch:4/10
+--------------
+train loss: 1.669e-02, train edgeJaccard: 0.414
+val loss: 1.250e-02, val edgeJaccard: 0.417
+--------------
+23-08-04 19:20:29.390 : 
+epoch:5/10
+--------------
+train loss: 1.489e-02, train edgeJaccard: 0.426
+val loss: 1.170e-02, val edgeJaccard: 0.422
+--------------
+23-08-04 19:28:28.472 : 
+epoch:6/10
+--------------
+train loss: 1.343e-02, train edgeJaccard: 0.451
+val loss: 1.123e-02, val edgeJaccard: 0.426
+--------------
+23-08-04 19:36:27.587 : 
+epoch:7/10
+--------------
+train loss: 1.355e-02, train edgeJaccard: 0.443
+val loss: 1.148e-02, val edgeJaccard: 0.426
+--------------
+23-08-04 19:44:26.939 : 
+epoch:8/10
+--------------
+train loss: 1.350e-02, train edgeJaccard: 0.444
+val loss: 1.160e-02, val edgeJaccard: 0.428
+--------------
+23-08-04 19:52:25.843 : 
+epoch:9/10
+--------------
+train loss: 1.308e-02, train edgeJaccard: 0.430
+val loss: 1.163e-02, val edgeJaccard: 0.428
+--------------
+23-08-04 20:00:24.911 : 
+epoch:10/10
+--------------
+train loss: 1.276e-02, train edgeJaccard: 0.426
+val loss: 1.164e-02, val edgeJaccard: 0.429
+--------------
+23-08-04 20:00:24.911 : Trial 3: training completed in 1hs 19min 51s
+23-08-04 20:00:24.913 : Trial number 4 with parameters:
+lr = 0.0011844491293508258
+tv_weight = 3.054832727275652e-07
+23-08-04 20:08:24.824 : 
+epoch:1/10
+--------------
+train loss: 2.014e-02, train edgeJaccard: 0.404
+val loss: 1.559e-02, val edgeJaccard: 0.396
+--------------
+23-08-04 20:16:23.731 : 
+epoch:2/10
+--------------
+train loss: 1.896e-02, train edgeJaccard: 0.431
+val loss: 1.316e-02, val edgeJaccard: 0.404
+--------------
+23-08-04 20:24:22.635 : 
+epoch:3/10
+--------------
+train loss: 1.728e-02, train edgeJaccard: 0.422
+val loss: 1.254e-02, val edgeJaccard: 0.402
+--------------
+23-08-04 20:32:20.970 : 
+epoch:4/10
+--------------
+train loss: 1.608e-02, train edgeJaccard: 0.433
+val loss: 1.196e-02, val edgeJaccard: 0.420
+--------------
+23-08-04 20:40:19.256 : 
+epoch:5/10
+--------------
+train loss: 1.464e-02, train edgeJaccard: 0.441
+val loss: 1.107e-02, val edgeJaccard: 0.425
+--------------
+23-08-04 20:48:17.141 : 
+epoch:6/10
+--------------
+train loss: 1.399e-02, train edgeJaccard: 0.425
+val loss: 1.092e-02, val edgeJaccard: 0.426
+--------------
+23-08-04 20:56:15.152 : 
+epoch:7/10
+--------------
+train loss: 1.313e-02, train edgeJaccard: 0.444
+val loss: 1.126e-02, val edgeJaccard: 0.431
+--------------
+23-08-04 21:04:13.568 : 
+epoch:8/10
+--------------
+train loss: 1.284e-02, train edgeJaccard: 0.429
+val loss: 1.113e-02, val edgeJaccard: 0.430
+--------------
+23-08-04 21:12:12.118 : 
+epoch:9/10
+--------------
+train loss: 1.311e-02, train edgeJaccard: 0.446
+val loss: 1.106e-02, val edgeJaccard: 0.430
+--------------
+23-08-04 21:20:10.399 : 
+epoch:10/10
+--------------
+train loss: 1.267e-02, train edgeJaccard: 0.406
+val loss: 1.125e-02, val edgeJaccard: 0.430
+--------------
+23-08-04 21:20:10.399 : Trial 4: training completed in 1hs 19min 45s
+23-08-04 21:20:10.401 : Trial number 5 with parameters:
+lr = 0.0006633901318599708
+tv_weight = 0.0003294169373276098
+23-08-04 21:28:09.886 : 
+epoch:1/10
+--------------
+train loss: 2.061e-02, train edgeJaccard: 0.411
+val loss: 1.305e-02, val edgeJaccard: 0.411
+--------------
+23-08-04 21:36:08.518 : 
+epoch:2/10
+--------------
+train loss: 1.783e-02, train edgeJaccard: 0.392
+val loss: 1.440e-02, val edgeJaccard: 0.408
+--------------
+23-08-04 21:44:07.496 : 
+epoch:3/10
+--------------
+train loss: 1.716e-02, train edgeJaccard: 0.413
+val loss: 1.217e-02, val edgeJaccard: 0.409
+--------------
+23-08-04 21:52:06.087 : 
+epoch:4/10
+--------------
+train loss: 1.599e-02, train edgeJaccard: 0.410
+val loss: 1.190e-02, val edgeJaccard: 0.416
+--------------
+23-08-04 21:52:06.087 : Pruning trial number 5. Used 0hs 31min 55s on pruned training ¯\_(ツ)_/¯
+23-08-04 21:52:06.088 : Trial number 6 with parameters:
+lr = 5.189487613293542e-06
+tv_weight = 1.554154998970387e-07
+23-08-04 22:00:04.542 : 
+epoch:1/10
+--------------
+train loss: 1.988e-02, train edgeJaccard: 0.403
+val loss: 1.293e-02, val edgeJaccard: 0.411
+--------------
+23-08-04 22:08:02.462 : 
+epoch:2/10
+--------------
+train loss: 1.882e-02, train edgeJaccard: 0.424
+val loss: 1.253e-02, val edgeJaccard: 0.412
+--------------
+23-08-04 22:16:00.553 : 
+epoch:3/10
+--------------
+train loss: 1.717e-02, train edgeJaccard: 0.400
+val loss: 1.373e-02, val edgeJaccard: 0.401
+--------------
+23-08-04 22:23:58.500 : 
+epoch:4/10
+--------------
+train loss: 1.758e-02, train edgeJaccard: 0.427
+val loss: 1.151e-02, val edgeJaccard: 0.418
+--------------
+23-08-04 22:23:58.501 : Pruning trial number 6. Used 0hs 31min 52s on pruned training ¯\_(ツ)_/¯
+23-08-04 22:23:58.501 : Trial number 7 with parameters:
+lr = 0.002426753819163594
+tv_weight = 0.008392266024915449
+23-08-04 22:31:57.137 : 
+epoch:1/10
+--------------
+train loss: 2.050e-02, train edgeJaccard: 0.398
+val loss: 1.379e-02, val edgeJaccard: 0.403
+--------------
+23-08-04 22:39:55.393 : 
+epoch:2/10
+--------------
+train loss: 1.873e-02, train edgeJaccard: 0.418
+val loss: 1.480e-02, val edgeJaccard: 0.396
+--------------
+23-08-04 22:47:53.800 : 
+epoch:3/10
+--------------
+train loss: 1.811e-02, train edgeJaccard: 0.395
+val loss: 1.236e-02, val edgeJaccard: 0.411
+--------------
+23-08-04 22:55:52.060 : 
+epoch:4/10
+--------------
+train loss: 1.694e-02, train edgeJaccard: 0.413
+val loss: 1.269e-02, val edgeJaccard: 0.416
+--------------
+23-08-04 22:55:52.061 : Pruning trial number 7. Used 0hs 31min 53s on pruned training ¯\_(ツ)_/¯
+23-08-04 22:55:52.062 : Trial number 8 with parameters:
+lr = 2.3992742074885773e-05
+tv_weight = 4.637310407489192e-06
+23-08-04 23:03:51.500 : 
+epoch:1/10
+--------------
+train loss: 2.011e-02, train edgeJaccard: 0.424
+val loss: 1.468e-02, val edgeJaccard: 0.407
+--------------
+23-08-04 23:11:49.985 : 
+epoch:2/10
+--------------
+train loss: 1.831e-02, train edgeJaccard: 0.396
+val loss: 1.280e-02, val edgeJaccard: 0.417
+--------------
+23-08-04 23:19:48.611 : 
+epoch:3/10
+--------------
+train loss: 1.763e-02, train edgeJaccard: 0.406
+val loss: 1.362e-02, val edgeJaccard: 0.412
+--------------
+23-08-04 23:27:46.768 : 
+epoch:4/10
+--------------
+train loss: 1.604e-02, train edgeJaccard: 0.398
+val loss: 1.222e-02, val edgeJaccard: 0.415
+--------------
+23-08-04 23:27:46.768 : Pruning trial number 8. Used 0hs 31min 54s on pruned training ¯\_(ツ)_/¯
+23-08-04 23:27:46.769 : Trial number 9 with parameters:
+lr = 3.820359391870575e-06
+tv_weight = 1.2203743500486693e-07
+23-08-04 23:35:45.833 : 
+epoch:1/10
+--------------
+train loss: 1.990e-02, train edgeJaccard: 0.397
+val loss: 1.761e-02, val edgeJaccard: 0.395
+--------------
+23-08-04 23:43:44.132 : 
+epoch:2/10
+--------------
+train loss: 1.876e-02, train edgeJaccard: 0.412
+val loss: 1.390e-02, val edgeJaccard: 0.406
+--------------
+23-08-04 23:51:41.860 : 
+epoch:3/10
+--------------
+train loss: 1.788e-02, train edgeJaccard: 0.415
+val loss: 1.302e-02, val edgeJaccard: 0.408
+--------------
+23-08-04 23:59:39.438 : 
+epoch:4/10
+--------------
+train loss: 1.646e-02, train edgeJaccard: 0.441
+val loss: 1.291e-02, val edgeJaccard: 0.416
+--------------
+23-08-04 23:59:39.439 : Pruning trial number 9. Used 0hs 31min 52s on pruned training ¯\_(ツ)_/¯
+23-08-04 23:59:39.445 : Trial number 10 with parameters:
+lr = 9.525727972418805e-05
+tv_weight = 4.36215118982566e-06
+23-08-05 00:07:37.389 : 
+epoch:1/10
+--------------
+train loss: 1.999e-02, train edgeJaccard: 0.416
+val loss: 1.398e-02, val edgeJaccard: 0.413
+--------------
+23-08-05 00:15:35.340 : 
+epoch:2/10
+--------------
+train loss: 1.827e-02, train edgeJaccard: 0.402
+val loss: 1.595e-02, val edgeJaccard: 0.389
+--------------
+23-08-05 00:23:33.068 : 
+epoch:3/10
+--------------
+train loss: 1.760e-02, train edgeJaccard: 0.416
+val loss: 1.357e-02, val edgeJaccard: 0.408
+--------------
+23-08-05 00:31:30.843 : 
+epoch:4/10
+--------------
+train loss: 1.660e-02, train edgeJaccard: 0.416
+val loss: 1.165e-02, val edgeJaccard: 0.409
+--------------
+23-08-05 00:31:30.843 : Pruning trial number 10. Used 0hs 31min 51s on pruned training ¯\_(ツ)_/¯
+23-08-05 00:31:30.850 : Trial number 11 with parameters:
+lr = 0.08894497664315971
+tv_weight = 1.1440848655926734e-06
+23-08-05 00:39:29.630 : 
+epoch:1/10
+--------------
+train loss: 2.007e-02, train edgeJaccard: 0.407
+val loss: 1.209e-02, val edgeJaccard: 0.411
+--------------
+23-08-05 00:47:28.033 : 
+epoch:2/10
+--------------
+train loss: 1.802e-02, train edgeJaccard: 0.404
+val loss: 1.418e-02, val edgeJaccard: 0.408
+--------------
+23-08-05 00:55:25.621 : 
+epoch:3/10
+--------------
+train loss: 1.731e-02, train edgeJaccard: 0.418
+val loss: 1.268e-02, val edgeJaccard: 0.404
+--------------
+23-08-05 01:03:23.831 : 
+epoch:4/10
+--------------
+train loss: 1.711e-02, train edgeJaccard: 0.426
+val loss: 1.221e-02, val edgeJaccard: 0.413
+--------------
+23-08-05 01:03:23.831 : Pruning trial number 11. Used 0hs 31min 52s on pruned training ¯\_(ツ)_/¯
+23-08-05 01:03:23.837 : Trial number 12 with parameters:
+lr = 0.0033442614711111725
+tv_weight = 9.208677379670135e-07
+23-08-05 01:11:22.392 : 
+epoch:1/10
+--------------
+train loss: 1.917e-02, train edgeJaccard: 0.410
+val loss: 1.329e-02, val edgeJaccard: 0.405
+--------------
+23-08-05 01:19:20.155 : 
+epoch:2/10
+--------------
+train loss: 1.937e-02, train edgeJaccard: 0.404
+val loss: 1.359e-02, val edgeJaccard: 0.406
+--------------
+23-08-05 01:27:18.032 : 
+epoch:3/10
+--------------
+train loss: 1.835e-02, train edgeJaccard: 0.394
+val loss: 1.375e-02, val edgeJaccard: 0.399
+--------------
+23-08-05 01:35:15.893 : 
+epoch:4/10
+--------------
+train loss: 1.630e-02, train edgeJaccard: 0.405
+val loss: 1.172e-02, val edgeJaccard: 0.412
+--------------
+23-08-05 01:35:15.894 : Pruning trial number 12. Used 0hs 31min 51s on pruned training ¯\_(ツ)_/¯
+23-08-05 01:35:15.900 : Trial number 13 with parameters:
+lr = 0.03400998413994269
+tv_weight = 1.9739749237762413e-05
+23-08-05 01:43:14.718 : 
+epoch:1/10
+--------------
+train loss: 1.954e-02, train edgeJaccard: 0.402
+val loss: 1.359e-02, val edgeJaccard: 0.412
+--------------
+23-08-05 01:51:12.274 : 
+epoch:2/10
+--------------
+train loss: 1.834e-02, train edgeJaccard: 0.401
+val loss: 1.573e-02, val edgeJaccard: 0.395
+--------------
+23-08-05 01:59:09.626 : 
+epoch:3/10
+--------------
+train loss: 1.731e-02, train edgeJaccard: 0.389
+val loss: 1.436e-02, val edgeJaccard: 0.406
+--------------
+23-08-05 02:07:06.530 : 
+epoch:4/10
+--------------
+train loss: 1.663e-02, train edgeJaccard: 0.434
+val loss: 1.246e-02, val edgeJaccard: 0.418
+--------------
+23-08-05 02:07:06.530 : Pruning trial number 13. Used 0hs 31min 50s on pruned training ¯\_(ツ)_/¯
+23-08-05 02:07:06.536 : Trial number 14 with parameters:
+lr = 0.00785616596228237
+tv_weight = 5.602814473062132e-07
+23-08-05 02:15:04.336 : 
+epoch:1/10
+--------------
+train loss: 2.011e-02, train edgeJaccard: 0.395
+val loss: 1.377e-02, val edgeJaccard: 0.409
+--------------
+23-08-05 02:23:01.697 : 
+epoch:2/10
+--------------
+train loss: 1.887e-02, train edgeJaccard: 0.390
+val loss: 1.372e-02, val edgeJaccard: 0.404
+--------------
+23-08-05 02:30:58.385 : 
+epoch:3/10
+--------------
+train loss: 1.770e-02, train edgeJaccard: 0.411
+val loss: 1.238e-02, val edgeJaccard: 0.414
+--------------
+23-08-05 02:38:54.876 : 
+epoch:4/10
+--------------
+train loss: 1.651e-02, train edgeJaccard: 0.403
+val loss: 1.146e-02, val edgeJaccard: 0.417
+--------------
+23-08-05 02:38:54.876 : Pruning trial number 14. Used 0hs 31min 48s on pruned training ¯\_(ツ)_/¯
+23-08-05 02:38:54.882 : Trial number 15 with parameters:
+lr = 0.07379018012871992
+tv_weight = 1.1257451026280502e-07
+23-08-05 02:46:52.457 : 
+epoch:1/10
+--------------
+train loss: 1.982e-02, train edgeJaccard: 0.406
+val loss: 1.385e-02, val edgeJaccard: 0.407
+--------------
+23-08-05 02:54:49.644 : 
+epoch:2/10
+--------------
+train loss: 1.808e-02, train edgeJaccard: 0.431
+val loss: 1.442e-02, val edgeJaccard: 0.377
+--------------
+23-08-05 03:02:46.376 : 
+epoch:3/10
+--------------
+train loss: 1.749e-02, train edgeJaccard: 0.423
+val loss: 1.468e-02, val edgeJaccard: 0.394
+--------------
+23-08-05 03:10:43.421 : 
+epoch:4/10
+--------------
+train loss: 1.692e-02, train edgeJaccard: 0.416
+val loss: 1.234e-02, val edgeJaccard: 0.414
+--------------
+23-08-05 03:10:43.422 : Pruning trial number 15. Used 0hs 31min 48s on pruned training ¯\_(ツ)_/¯
+23-08-05 03:10:43.428 : Trial number 16 with parameters:
+lr = 0.0012185570133413535
+tv_weight = 1.6492681060579484e-06
+23-08-05 03:18:41.390 : 
+epoch:1/10
+--------------
+train loss: 2.007e-02, train edgeJaccard: 0.398
+val loss: 1.423e-02, val edgeJaccard: 0.411
+--------------
+23-08-05 03:26:38.486 : 
+epoch:2/10
+--------------
+train loss: 1.775e-02, train edgeJaccard: 0.382
+val loss: 1.361e-02, val edgeJaccard: 0.406
+--------------
+23-08-05 03:34:35.356 : 
+epoch:3/10
+--------------
+train loss: 1.770e-02, train edgeJaccard: 0.396
+val loss: 1.427e-02, val edgeJaccard: 0.416
+--------------
+23-08-05 03:42:32.308 : 
+epoch:4/10
+--------------
+train loss: 1.847e-02, train edgeJaccard: 0.379
+val loss: 1.339e-02, val edgeJaccard: 0.405
+--------------
+23-08-05 03:42:32.309 : Pruning trial number 16. Used 0hs 31min 48s on pruned training ¯\_(ツ)_/¯
+23-08-05 03:42:32.315 : Trial number 17 with parameters:
+lr = 0.007068778025457067
+tv_weight = 4.513790119387486e-07
+23-08-05 03:50:30.047 : 
+epoch:1/10
+--------------
+train loss: 1.977e-02, train edgeJaccard: 0.404
+val loss: 1.357e-02, val edgeJaccard: 0.402
+--------------
+23-08-05 03:58:27.295 : 
+epoch:2/10
+--------------
+train loss: 1.798e-02, train edgeJaccard: 0.411
+val loss: 1.523e-02, val edgeJaccard: 0.412
+--------------
+23-08-05 04:06:25.039 : 
+epoch:3/10
+--------------
+train loss: 1.783e-02, train edgeJaccard: 0.405
+val loss: 1.349e-02, val edgeJaccard: 0.409
+--------------
+23-08-05 04:14:22.130 : 
+epoch:4/10
+--------------
+train loss: 1.658e-02, train edgeJaccard: 0.415
+val loss: 1.214e-02, val edgeJaccard: 0.416
+--------------
+23-08-05 04:14:22.131 : Pruning trial number 17. Used 0hs 31min 49s on pruned training ¯\_(ツ)_/¯
+23-08-05 04:14:22.137 : Trial number 18 with parameters:
+lr = 0.020050367660658056
+tv_weight = 2.8983377107833103e-05
+23-08-05 04:22:20.193 : 
+epoch:1/10
+--------------
+train loss: 1.990e-02, train edgeJaccard: 0.391
+val loss: 1.469e-02, val edgeJaccard: 0.410
+--------------
+23-08-05 04:30:17.070 : 
+epoch:2/10
+--------------
+train loss: 1.803e-02, train edgeJaccard: 0.417
+val loss: 1.291e-02, val edgeJaccard: 0.403
+--------------
+23-08-05 04:38:13.954 : 
+epoch:3/10
+--------------
+train loss: 1.742e-02, train edgeJaccard: 0.412
+val loss: 1.341e-02, val edgeJaccard: 0.394
+--------------
+23-08-05 04:46:11.031 : 
+epoch:4/10
+--------------
+train loss: 1.693e-02, train edgeJaccard: 0.415
+val loss: 1.241e-02, val edgeJaccard: 0.420
+--------------
+23-08-05 04:54:07.759 : 
+epoch:5/10
+--------------
+train loss: 1.435e-02, train edgeJaccard: 0.418
+val loss: 1.168e-02, val edgeJaccard: 0.424
+--------------
+23-08-05 05:02:04.641 : 
+epoch:6/10
+--------------
+train loss: 1.346e-02, train edgeJaccard: 0.416
+val loss: 1.167e-02, val edgeJaccard: 0.425
+--------------
+23-08-05 05:10:01.381 : 
+epoch:7/10
+--------------
+train loss: 1.364e-02, train edgeJaccard: 0.449
+val loss: 1.196e-02, val edgeJaccard: 0.427
+--------------
+23-08-05 05:17:57.972 : 
+epoch:8/10
+--------------
+train loss: 1.310e-02, train edgeJaccard: 0.455
+val loss: 1.157e-02, val edgeJaccard: 0.429
+--------------
+23-08-05 05:25:54.875 : 
+epoch:9/10
+--------------
+train loss: 1.271e-02, train edgeJaccard: 0.453
+val loss: 1.144e-02, val edgeJaccard: 0.428
+--------------
+23-08-05 05:33:51.896 : 
+epoch:10/10
+--------------
+train loss: 1.286e-02, train edgeJaccard: 0.435
+val loss: 1.167e-02, val edgeJaccard: 0.426
+--------------
+23-08-05 05:33:51.896 : Trial 18: training completed in 1hs 19min 29s
+23-08-05 05:33:51.903 : Trial number 19 with parameters:
+lr = 0.0006656471296865696
+tv_weight = 1.0615712246819309e-07
+23-08-05 05:41:49.049 : 
+epoch:1/10
+--------------
+train loss: 2.043e-02, train edgeJaccard: 0.424
+val loss: 1.344e-02, val edgeJaccard: 0.400
+--------------
+23-08-05 05:49:45.027 : 
+epoch:2/10
+--------------
+train loss: 1.817e-02, train edgeJaccard: 0.418
+val loss: 1.422e-02, val edgeJaccard: 0.407
+--------------
+23-08-05 05:57:41.844 : 
+epoch:3/10
+--------------
+train loss: 1.715e-02, train edgeJaccard: 0.422
+val loss: 1.345e-02, val edgeJaccard: 0.392
+--------------
+23-08-05 06:05:39.421 : 
+epoch:4/10
+--------------
+train loss: 1.690e-02, train edgeJaccard: 0.404
+val loss: 1.143e-02, val edgeJaccard: 0.418
+--------------
+23-08-05 06:05:39.422 : Pruning trial number 19. Used 0hs 31min 47s on pruned training ¯\_(ツ)_/¯
+23-08-05 06:05:39.428 : Trial number 20 with parameters:
+lr = 0.0022559104553210203
+tv_weight = 3.576031524184772e-07
+23-08-05 06:13:36.200 : 
+epoch:1/10
+--------------
+train loss: 1.980e-02, train edgeJaccard: 0.399
+val loss: 1.339e-02, val edgeJaccard: 0.405
+--------------
+23-08-05 06:21:32.255 : 
+epoch:2/10
+--------------
+train loss: 1.797e-02, train edgeJaccard: 0.394
+val loss: 1.370e-02, val edgeJaccard: 0.406
+--------------
+23-08-05 06:29:28.949 : 
+epoch:3/10
+--------------
+train loss: 1.784e-02, train edgeJaccard: 0.405
+val loss: 1.376e-02, val edgeJaccard: 0.401
+--------------
+23-08-05 06:37:25.586 : 
+epoch:4/10
+--------------
+train loss: 1.701e-02, train edgeJaccard: 0.406
+val loss: 1.146e-02, val edgeJaccard: 0.416
+--------------
+23-08-05 06:37:25.587 : Pruning trial number 20. Used 0hs 31min 46s on pruned training ¯\_(ツ)_/¯
+23-08-05 06:37:25.593 : Trial number 21 with parameters:
+lr = 0.016145903107215195
+tv_weight = 6.859920753036916e-05
+23-08-05 06:45:22.258 : 
+epoch:1/10
+--------------
+train loss: 1.992e-02, train edgeJaccard: 0.415
+val loss: 1.296e-02, val edgeJaccard: 0.399
+--------------
+23-08-05 06:53:18.550 : 
+epoch:2/10
+--------------
+train loss: 1.883e-02, train edgeJaccard: 0.408
+val loss: 1.509e-02, val edgeJaccard: 0.408
+--------------
+23-08-05 07:01:14.514 : 
+epoch:3/10
+--------------
+train loss: 1.731e-02, train edgeJaccard: 0.398
+val loss: 1.266e-02, val edgeJaccard: 0.415
+--------------
+23-08-05 07:09:10.517 : 
+epoch:4/10
+--------------
+train loss: 1.679e-02, train edgeJaccard: 0.400
+val loss: 1.148e-02, val edgeJaccard: 0.415
+--------------
+23-08-05 07:09:10.518 : Pruning trial number 21. Used 0hs 31min 44s on pruned training ¯\_(ツ)_/¯
+23-08-05 07:09:10.525 : Trial number 22 with parameters:
+lr = 0.02522319501904527
+tv_weight = 2.5364287413856723e-06
+23-08-05 07:17:08.070 : 
+epoch:1/10
+--------------
+train loss: 1.963e-02, train edgeJaccard: 0.447
+val loss: 1.357e-02, val edgeJaccard: 0.412
+--------------
+23-08-05 07:25:04.474 : 
+epoch:2/10
+--------------
+train loss: 1.793e-02, train edgeJaccard: 0.381
+val loss: 1.330e-02, val edgeJaccard: 0.407
+--------------
+23-08-05 07:33:00.786 : 
+epoch:3/10
+--------------
+train loss: 1.739e-02, train edgeJaccard: 0.392
+val loss: 1.297e-02, val edgeJaccard: 0.406
+--------------
+23-08-05 07:40:57.261 : 
+epoch:4/10
+--------------
+train loss: 1.643e-02, train edgeJaccard: 0.442
+val loss: 1.153e-02, val edgeJaccard: 0.418
+--------------
+23-08-05 07:40:57.261 : Pruning trial number 22. Used 0hs 31min 46s on pruned training ¯\_(ツ)_/¯
+23-08-05 07:40:57.268 : Trial number 23 with parameters:
+lr = 0.005194234662525907
+tv_weight = 9.678429202166447e-06
+23-08-05 07:48:54.771 : 
+epoch:1/10
+--------------
+train loss: 1.981e-02, train edgeJaccard: 0.412
+val loss: 1.547e-02, val edgeJaccard: 0.396
+--------------
+23-08-05 07:56:51.603 : 
+epoch:2/10
+--------------
+train loss: 1.858e-02, train edgeJaccard: 0.418
+val loss: 1.568e-02, val edgeJaccard: 0.399
+--------------
+23-08-05 08:04:48.464 : 
+epoch:3/10
+--------------
+train loss: 1.727e-02, train edgeJaccard: 0.406
+val loss: 1.350e-02, val edgeJaccard: 0.408
+--------------
+23-08-05 08:12:45.526 : 
+epoch:4/10
+--------------
+train loss: 1.663e-02, train edgeJaccard: 0.410
+val loss: 1.167e-02, val edgeJaccard: 0.418
+--------------
+23-08-05 08:12:45.526 : Pruning trial number 23. Used 0hs 31min 48s on pruned training ¯\_(ツ)_/¯
+23-08-05 08:12:45.533 : Trial number 24 with parameters:
+lr = 0.010627353800727782
+tv_weight = 2.972145701291623e-05
+23-08-05 08:20:42.716 : 
+epoch:1/10
+--------------
+train loss: 2.008e-02, train edgeJaccard: 0.383
+val loss: 1.287e-02, val edgeJaccard: 0.405
+--------------
+23-08-05 08:28:38.928 : 
+epoch:2/10
+--------------
+train loss: 1.828e-02, train edgeJaccard: 0.397
+val loss: 1.320e-02, val edgeJaccard: 0.411
+--------------
+23-08-05 08:36:35.501 : 
+epoch:3/10
+--------------
+train loss: 1.783e-02, train edgeJaccard: 0.381
+val loss: 1.419e-02, val edgeJaccard: 0.403
+--------------
+23-08-05 08:44:32.158 : 
+epoch:4/10
+--------------
+train loss: 1.645e-02, train edgeJaccard: 0.437
+val loss: 1.185e-02, val edgeJaccard: 0.419
+--------------
+23-08-05 08:52:29.157 : 
+epoch:5/10
+--------------
+train loss: 1.425e-02, train edgeJaccard: 0.415
+val loss: 1.138e-02, val edgeJaccard: 0.422
+--------------
+23-08-05 09:00:26.076 : 
+epoch:6/10
+--------------
+train loss: 1.375e-02, train edgeJaccard: 0.418
+val loss: 1.171e-02, val edgeJaccard: 0.424
+--------------
+23-08-05 09:08:24.266 : 
+epoch:7/10
+--------------
+train loss: 1.335e-02, train edgeJaccard: 0.437
+val loss: 1.170e-02, val edgeJaccard: 0.426
+--------------
+23-08-05 09:16:21.779 : 
+epoch:8/10
+--------------
+train loss: 1.293e-02, train edgeJaccard: 0.435
+val loss: 1.168e-02, val edgeJaccard: 0.428
+--------------
+23-08-05 09:24:19.171 : 
+epoch:9/10
+--------------
+train loss: 1.282e-02, train edgeJaccard: 0.441
+val loss: 1.157e-02, val edgeJaccard: 0.427
+--------------
+23-08-05 09:32:17.252 : 
+epoch:10/10
+--------------
+train loss: 1.256e-02, train edgeJaccard: 0.438
+val loss: 1.164e-02, val edgeJaccard: 0.426
+--------------
+23-08-05 09:32:17.252 : Trial 24: training completed in 1hs 19min 31s
+23-08-05 09:32:17.254 : Best trial:
+FrozenTrial(number=4, state=TrialState.COMPLETE, values=[0.4306077328613429], datetime_start=datetime.datetime(2023, 8, 4, 20, 0, 24, 912634), datetime_complete=datetime.datetime(2023, 8, 4, 21, 20, 10, 400722), params={'lr': 0.0011844491293508258, 'tv_weight': 3.054832727275652e-07}, user_attrs={}, system_attrs={}, intermediate_values={0: 0.39637826199877724, 1: 0.404435472166157, 2: 0.40165877365170394, 3: 0.4197445209422053, 4: 0.4245127418329338, 5: 0.4260046509750668, 6: 0.4306077328613429, 7: 0.4298000587944116, 8: 0.4297812800349688, 9: 0.43012747680178925}, distributions={'lr': FloatDistribution(high=0.1, log=True, low=1e-06, step=None), 'tv_weight': FloatDistribution(high=0.01, log=True, low=1e-07, step=None)}, trial_id=4, value=None)
+23-08-05 09:32:17.254 : Saving study information at optuna_hparams
+23-08-05 09:32:17.687 : Hyperparameters study ended

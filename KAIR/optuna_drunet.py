@@ -95,7 +95,7 @@ for phase, dataset_opt in opt['datasets'].items():
         indexes = torch.randperm(len(test_set))[:len(test_set)//2]
         test_set = Subset(test_set, indexes)
         val_loader = DataLoader(test_set, batch_size=1,
-                                    shuffle=True, num_workers=1,
+                                    shuffle=False, num_workers=1,
                                     drop_last=False, pin_memory=True)
     else:
         raise NotImplementedError("Phase [%s] is not recognized." % phase)
@@ -106,7 +106,7 @@ logger.info(message)
 dataset = {'train':train_loader, 'val':val_loader}
 
 # Define model function with optuna hyperparameters
-def define_model(trial, opt):
+def define_model(opt):
 
     # Initialize model
     model = define_Model(opt)
@@ -152,10 +152,7 @@ def train_model(trial, model, dataset, metric_dict, num_epochs=25):
     metric = metric_dict['func']
     metric_direction = metric_dict['direction']
 
-    # Copy model weights to get best weights register
-    # best_model_wts = copy.deepcopy(model.state_dict())
-
-    best_metric = 0*(metric_direction=='maximize') + 1e6*(metric_direction=='minimize')
+    best_metric = -1e6*(metric_direction=='maximize') + 1e6*(metric_direction=='minimize')
 
     current_step = 0
 
@@ -167,7 +164,7 @@ def train_model(trial, model, dataset, metric_dict, num_epochs=25):
 
         epoch_loss = 0.0
 
-        epoch_metric = 0.0
+        # epoch_metric = 0.0
 
         # -------------------------------
         # Training phase
@@ -192,31 +189,24 @@ def train_model(trial, model, dataset, metric_dict, num_epochs=25):
             model.optimize_parameters(current_step)
 
             # -------------------------------
-            # 4) training information (loss)
+            # 4) training information (loss and metric)
             # -------------------------------
 
-            logs = model.current_log()
-            batch_loss = logs['G_loss'] # get batch loss / iter loss
+            # visuals = model.current_visuals()
+            # E_visual = visuals['E']
+            # E_img = util.tensor2uint(E_visual)
+            # H_visual = visuals['H']
+            # H_img = util.tensor2uint(H_visual)
 
-            visuals = model.current_visuals()
-            E_visual = visuals['E']
-            E_img = util.tensor2uint(E_visual)
-            H_visual = visuals['H']
-            H_img = util.tensor2uint(H_visual)
-
-            epoch_metric += metric(H_img, E_img)
+            # epoch_metric += metric(H_img, E_img)
 
             epoch_loss += model.current_log()['G_loss']     
 
         # Train loss and metric
         avg_train_loss = epoch_loss/train_size
-        avg_train_metric = epoch_metric/train_size
+        # avg_train_metric = epoch_metric/train_size
 
-        message_train = f'\nepoch:{epoch+1}/{num_epochs}\n'+'-'*14+'\ntrain loss: {:.3e}, train {}: {:.3f}\n'.format(
-                                                                                                        avg_train_loss,
-                                                                                                        metric_dict['name'],
-                                                                                                        avg_train_metric
-                                                                                                        )
+        message_train = f'\nepoch:{epoch+1}/{num_epochs}\n'+'-'*14+'\ntrain loss: {:.3e}\n'.format(avg_train_loss)
 
 
         # -------------------------------
@@ -243,10 +233,9 @@ def train_model(trial, model, dataset, metric_dict, num_epochs=25):
             current_loss = model.G_lossfn(torch.reshape(E_visual,(1,1,sizes[1],sizes[2])),
                                           torch.reshape(H_visual,(1,1,sizes[1],sizes[2])))
 
+            avg_val_loss += current_loss
             val_metric += metric(H_img, E_img)
 
-            avg_val_loss += current_loss
-        
         # Val loss and metric
         avg_val_loss = avg_val_loss/idx
         avg_val_metric = val_metric/idx
@@ -258,8 +247,13 @@ def train_model(trial, model, dataset, metric_dict, num_epochs=25):
         # Write epoch log
         logger.info(message_train + message_val +'-'*14)
 
-        # Update if validation metric is better
-        if avg_val_metric > best_metric:
+        # Update if validation metric is better (lower when minimizing, greater when maximizing)
+        maximizing = ( (avg_val_metric > best_metric) and metric_dict['direction'] == 'maximize')
+        minimizing = ( (avg_val_metric < best_metric) and metric_dict['direction'] == 'minimize') 
+
+        val_metric_is_better = maximizing or minimizing                       
+
+        if val_metric_is_better:
                         best_metric = avg_val_metric
                         # best_model_wts = copy.deepcopy(model.state_dict())
         
@@ -284,7 +278,7 @@ def train_model(trial, model, dataset, metric_dict, num_epochs=25):
 def objective(trial):
 
     # Set learning rate suggestions for trial
-    trial_lr = trial.suggest_loguniform("lr", 1e-5, 1e-1)
+    trial_lr = trial.suggest_loguniform("lr", 1e-6, 1e-1)
     opt['train']['G_optimizaer_lr'] = trial_lr
 
     trial_tvweight = trial.suggest_loguniform("tv_weight", 1e-7, 1e-2)
@@ -297,7 +291,7 @@ def objective(trial):
     logger.info(message)
 
     # Generate the model and optimizers
-    model = define_model(trial, opt)
+    model = define_model(opt)
 
     # Select metric specified at options
     metric_dict = define_metric(opt['optuna']['metric'])
@@ -327,9 +321,12 @@ def save_optuna_info(study):
     # Save page for optimization history
     fig = optuna.visualization.plot_optimization_history(study)
     fig.write_html(os.path.join(root_dir,'optuna_plot_optimization_history.html'))
-    # Save page for optimization history
+    # Save page for intermediate values plot
     fig = optuna.visualization.plot_intermediate_values(study)
     fig.write_html(os.path.join(root_dir,'optuna_plot_intermediate_values.html'))
+    # Save page for parallel coordinate plot
+    fig = optuna.visualization.plot_parallel_coordinate(study)
+    fig.write_html(os.path.join(root_dir,'optuna_plot_parallel_coordinate.html'))
 
     return
 
@@ -344,7 +341,7 @@ sampler = optuna.samplers.TPESampler()
 study = optuna.create_study(
         sampler=sampler,
         pruner=optuna.pruners.MedianPruner( 
-            n_startup_trials=3, n_warmup_steps=5, interval_steps=3
+            n_startup_trials=5, n_warmup_steps=3, interval_steps=3
         ),
         direction=metric_dict['direction'])
 
