@@ -132,7 +132,7 @@ def define_metric(metric_str):
     #     metric_dict['func'] = utilOCR.calculate_cer
     #     metric_dict['direction'] = 'minimize'
 
-    elif 'edgeJaccard':
+    elif metric_str == 'edgeJaccard':
         metric_dict['func'] = util.calculate_edge_jaccard
         metric_dict['direction'] = 'maximize'
 
