@@ -736,7 +736,7 @@ blocks:
     alias: ''
     blanking: 'True'
     comment: ''
-    image_file: /home/emidan19/Desktop/deep-tempest/drunet/notebooks/results_l1_l2/imagenes/originalRGB/train/Abavisani_Improving_the_Performance_of_Unimodal_Dynamic_Hand-Gesture_Recognition_With_Multimodal_CVPR_2019_paper.png
+    image_file: /home/emidan19/Desktop/deep-tempest/capturas/fine-tuning-images/Abolghasemi_Pay_Attention_-_Robustifying_a_Deep_Visuomotor_Policy_Through_Task-Focused_CVPR_2019_paper.png
     maxoutbuf: '0'
     minoutbuf: '0'
     mode: '1'
@@ -756,6 +756,7 @@ blocks:
     affinity: ''
     alias: ''
     comment: ''
+    enhance_image: 'True'
     input_width: interpolatedHsize
   states:
     bus_sink: false

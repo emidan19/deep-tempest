@@ -996,12 +996,13 @@ blocks:
 - name: tempest_buttonToFileSink_0
   id: tempest_buttonToFileSink
   parameters:
-    Filename: /home/emidan19/Desktop/deep-tempest/capturas/samp_rate_45M/captura
+    Filename: /home/emidan19/Desktop/captura_mejorada
     H_size: Hsize
     V_size: Vsize
     affinity: ''
     alias: ''
     comment: ''
+    enhance_image: 'True'
     input_width: interpolatedHsize
   states:
     bus_sink: false

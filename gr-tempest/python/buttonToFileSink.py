@@ -6,7 +6,7 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 #
 
-
+### Classic imports
 import numpy as np
 from gnuradio import gr
 import pmt
@@ -14,11 +14,85 @@ from scipy import signal
 from datetime import datetime
 from PIL import Image
 
+### Deep-TEMPEST imports
+import os
+import math
+import argparse
+import time
+import random
+import torch
+import sys
+# Adding KAIR folder to the system path
+# current_file_path = os.path.abspath(__file__)
+# sys.path.insert(0, os.path.join(current_file_path,'../../KAIR/'))
+kair_path = '/home/emidan19/deep-tempest/KAIR'
+sys.path.insert(0,kair_path)
+from utils import utils_option as option
+from utils import utils_image as util
+from utils.utils_dist import get_dist_info, init_dist
+from models.select_model import define_Model
+from models.network_unet import UNetRes as net
+
+def load_enhancement_model(json_path='/home/emidan19/deep-tempest/KAIR/options/test_drunet.json'):
+    '''
+    # ----------------------------------------
+    # Step - 1 Prepare options
+    # ----------------------------------------
+    '''
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--opt', type=str, default=json_path, help='Path to option JSON file.')
+    parser.add_argument('--launcher', default='pytorch', help='job launcher')
+    parser.add_argument('--local_rank', type=int, default=0)
+    parser.add_argument('--dist', default=False)
+
+    opt = option.parse(parser.parse_args().opt, is_train=True)
+    opt['dist'] = parser.parse_args().dist
+    
+    """
+    # ----------------------------------------
+    # Step 2 - distributed settings
+    # ---------------------------------------- 
+    """
+    if opt['dist']:
+        init_dist('pytorch')
+    opt['rank'], opt['world_size'] = get_dist_info()
+
+    opt = option.dict_to_nonedict(opt)
+
+    """
+    # ----------------------------------------
+    # Step 3 - Load model with option setup
+    # ---------------------------------------- 
+    """
+
+    model_path = os.path.join(kair_path,opt['path']['pretrained_netG'])
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+
+    opt_netG = opt['netG']
+
+    in_nc = opt_netG['in_nc']
+    out_nc = opt_netG['out_nc']
+    nc = opt_netG['nc']
+    nb = opt_netG['nb']
+    act_mode = opt_netG['act_mode']
+    bias = opt_netG['bias']
+
+    model = net(in_nc=in_nc, out_nc=out_nc, nc=nc, nb=nb, act_mode=act_mode, bias=bias)
+    model.load_state_dict(torch.load(model_path), strict=True)
+    model.eval()
+    for k, v in model.named_parameters():
+        v.requires_grad = False
+    model = model.to(device)
+
+    return model
+
+
 class buttonToFileSink(gr.sync_block):
     f"""
     Block that saves num_samples of complex samples after recieving a TRUE boolean message in the 'en' port
     """
-    def __init__(self, Filename = "output.png", input_width=740, H_size=2200, V_size=1125):
+    def __init__(self, Filename = "output.png", input_width=740, H_size=2200, V_size=1125, enhance_image=False):
         gr.sync_block.__init__(self,
             name="buttonToFileSink",
             in_sig=[(np.complex64)],
@@ -35,6 +109,28 @@ class buttonToFileSink(gr.sync_block):
         self.message_port_register_in(pmt.intern("en")) #declare message port
         self.set_msg_handler(pmt.intern("en"), self.handle_msg) #declare handler for messages
         self.stream_image = [] # initialize list to apppend samples
+        if enhance_image:
+            # Load model
+            self.model = load_enhancement_model()
+            # Define inference function
+            def inference (img):
+                # Preprocess image to network input
+                img_L = img[:,:,:2]
+                img_L = util.uint2single(img_L)
+                img_L = util.single2tensor4(img_L)
+
+                # Model inference on image
+                img_E = self.model(img_L)
+                img_E = util.tensor2uint(img_E)
+                return img_E
+            
+            self.inference = inference
+        else:
+            # No enhancement. 
+            def inference(img):
+                return img
+            self.inference = inference
+
 
     def work(self, input_items, output_items):      # Don't process, just save samples
 
@@ -93,6 +189,9 @@ class buttonToFileSink(gr.sync_block):
 
         # Date and time of screenshot
         date_time = datetime.now().strftime("%d-%m-%Y_%H:%M:%S") 
+
+        # Create inference if using deep-tempest enhacenment
+        captured_image = self.inference(captured_image)
 
         # Save image as png
         im = Image.fromarray(captured_image)

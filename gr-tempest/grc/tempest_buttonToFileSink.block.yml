@@ -4,7 +4,7 @@ category: '[Tempest]'
 
 templates:
   imports: import tempest
-  make: tempest.buttonToFileSink(${Filename}, ${input_width}, ${H_size}, ${V_size})
+  make: tempest.buttonToFileSink(${Filename}, ${input_width}, ${H_size}, ${V_size}, ${enhance_image})
 
 #  Make one 'parameters' list entry for every parameter you want settable from the GUI.
 #     Keys include:
@@ -28,6 +28,12 @@ parameters:
   label: Vertical pixels
   dtype: int
   default: "1125"
+- id: enhance_image
+  label: Enhance Image
+  dtype: bool
+  default: False
+  options: [False, True]
+  option_labels: ['No', 'Yes']
 
 #  Make one 'inputs' list entry per input and one 'outputs' list entry per output.
 #  Keys include:
