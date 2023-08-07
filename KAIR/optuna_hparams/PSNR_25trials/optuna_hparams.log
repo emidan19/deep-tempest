@@ -1,0 +1,1352 @@
+23-08-05 20:10:09.304 :   task: drunet
+  model: plain
+  gpu_ids: [0]
+  scale: 0
+  n_channels: 1
+  n_channels_datasetload: 3
+  path:[
+    root: optuna_hparams
+    pretrained_netG: denoising/drunet/models/520_G.pth
+    task: optuna_hparams/drunet
+    log: optuna_hparams/drunet
+    options: optuna_hparams/drunet/options
+    models: optuna_hparams/drunet/models
+    images: optuna_hparams/drunet/images
+  ]
+  optuna:[
+    n_trials: 25
+    trial_epochs: 10
+    metric: PSNR
+  ]
+  datasets:[
+    train:[
+      name: train_dataset
+      dataset_type: ffdnet
+      dataroot_H: trainsets/ground-truth
+      dataroot_L: trainsets/simulations
+      sigma: [0, 15]
+      num_patches_per_image: 21
+      H_size: 256
+      dataloader_shuffle: True
+      dataloader_num_workers: 8
+      dataloader_batch_size: 28
+      phase: train
+      scale: 0
+      n_channels: 1
+    ]
+    test:[
+      name: test_dataset
+      dataset_type: ffdnet
+      dataroot_H: testsets/ground-truth
+      dataroot_L: testsets/simulations
+      sigma_test: 10
+      phase: test
+      scale: 0
+      n_channels: 1
+    ]
+  ]
+  netG:[
+    net_type: drunet
+    in_nc: 2
+    out_nc: 1
+    nc: [64, 128, 256, 512]
+    nb: 4
+    gc: 32
+    ng: 2
+    reduction: 16
+    act_mode: R
+    upsample_mode: convtranspose
+    downsample_mode: strideconv
+    bias: False
+    init_type: orthogonal
+    init_bn_type: uniform
+    init_gain: 0.2
+    scale: 0
+  ]
+  train:[
+    epochs: 1000
+    G_lossfn_type: tv
+    G_lossfn_weight: 1.0
+    G_tvloss_weight: 0.1
+    G_optimizer_type: adam
+    G_optimizer_lr: 0.0001
+    G_optimizer_clipgrad: None
+    G_scheduler_type: MultiStepLR
+    G_scheduler_milestones: [1600, 3200, 4800, 6400, 8000, 9600, 11200, 12800, 14400]
+    G_scheduler_gamma: 0.1
+    G_regularizer_orthstep: None
+    G_regularizer_clipstep: None
+    checkpoint_test: 1600
+    checkpoint_save: 3999
+    checkpoint_print: 16
+    F_feature_layer: 34
+    F_weights: 1.0
+    F_lossfn_type: l1
+    F_use_input_norm: True
+    F_use_range_norm: False
+    G_optimizer_betas: [0.9, 0.999]
+    G_scheduler_restart_weights: 1
+    G_optimizer_wd: 0
+    G_optimizer_reuse: False
+    G_param_strict: True
+    E_param_strict: True
+    E_decay: 0
+  ]
+  opt_path: options/optuna_options.json
+  is_train: True
+  merge_bn: False
+  merge_bn_startpoint: -1
+  find_unused_parameters: True
+  use_static_graph: False
+  dist: False
+  num_gpu: 1
+  rank: 0
+  world_size: 1
+
+23-08-05 20:10:09.304 : Loading train and val datasets
+23-08-05 20:10:09.304 : Random seed: 6764
+23-08-05 20:10:09.462 : Datasets loaded.
+23-08-05 20:10:09.462 : Trial number 0 with parameters:
+lr = 0.015751203894136416
+tv_weight = 0.0007254234261321763
+23-08-05 20:17:33.915 : 
+epoch:1/10
+--------------
+train loss: 2.006e-02
+val loss: 1.376e-02, val PSNR: 20.412
+--------------
+23-08-05 20:24:56.862 : 
+epoch:2/10
+--------------
+train loss: 1.816e-02
+val loss: 1.277e-02, val PSNR: 20.623
+--------------
+23-08-05 20:32:19.863 : 
+epoch:3/10
+--------------
+train loss: 1.790e-02
+val loss: 1.373e-02, val PSNR: 20.130
+--------------
+23-08-05 20:39:42.997 : 
+epoch:4/10
+--------------
+train loss: 1.685e-02
+val loss: 1.248e-02, val PSNR: 20.880
+--------------
+23-08-05 20:47:06.499 : 
+epoch:5/10
+--------------
+train loss: 1.417e-02
+val loss: 1.181e-02, val PSNR: 21.094
+--------------
+23-08-05 20:54:29.604 : 
+epoch:6/10
+--------------
+train loss: 1.369e-02
+val loss: 1.215e-02, val PSNR: 21.015
+--------------
+23-08-05 21:01:52.740 : 
+epoch:7/10
+--------------
+train loss: 1.313e-02
+val loss: 1.161e-02, val PSNR: 21.261
+--------------
+23-08-05 21:09:15.939 : 
+epoch:8/10
+--------------
+train loss: 1.300e-02
+val loss: 1.163e-02, val PSNR: 21.242
+--------------
+23-08-05 21:16:39.300 : 
+epoch:9/10
+--------------
+train loss: 1.311e-02
+val loss: 1.163e-02, val PSNR: 21.234
+--------------
+23-08-05 21:24:02.770 : 
+epoch:10/10
+--------------
+train loss: 1.255e-02
+val loss: 1.143e-02, val PSNR: 21.305
+--------------
+23-08-05 21:24:02.770 : Trial 0: training completed in 1hs 13min 53s
+23-08-05 21:24:02.773 : Trial number 1 with parameters:
+lr = 1.8689410666686946e-05
+tv_weight = 9.032448181535577e-05
+23-08-05 21:31:27.053 : 
+epoch:1/10
+--------------
+train loss: 2.030e-02
+val loss: 1.382e-02, val PSNR: 20.190
+--------------
+23-08-05 21:38:50.172 : 
+epoch:2/10
+--------------
+train loss: 1.800e-02
+val loss: 1.662e-02, val PSNR: 19.610
+--------------
+23-08-05 21:46:13.339 : 
+epoch:3/10
+--------------
+train loss: 1.748e-02
+val loss: 1.300e-02, val PSNR: 20.310
+--------------
+23-08-05 21:53:37.118 : 
+epoch:4/10
+--------------
+train loss: 1.741e-02
+val loss: 1.186e-02, val PSNR: 20.928
+--------------
+23-08-05 22:01:00.568 : 
+epoch:5/10
+--------------
+train loss: 1.452e-02
+val loss: 1.195e-02, val PSNR: 20.924
+--------------
+23-08-05 22:08:23.761 : 
+epoch:6/10
+--------------
+train loss: 1.392e-02
+val loss: 1.156e-02, val PSNR: 21.152
+--------------
+23-08-05 22:15:47.478 : 
+epoch:7/10
+--------------
+train loss: 1.333e-02
+val loss: 1.156e-02, val PSNR: 21.239
+--------------
+23-08-05 22:23:10.917 : 
+epoch:8/10
+--------------
+train loss: 1.286e-02
+val loss: 1.145e-02, val PSNR: 21.268
+--------------
+23-08-05 22:30:34.220 : 
+epoch:9/10
+--------------
+train loss: 1.307e-02
+val loss: 1.137e-02, val PSNR: 21.314
+--------------
+23-08-05 22:37:57.705 : 
+epoch:10/10
+--------------
+train loss: 1.289e-02
+val loss: 1.151e-02, val PSNR: 21.286
+--------------
+23-08-05 22:37:57.705 : Trial 1: training completed in 1hs 13min 54s
+23-08-05 22:37:57.707 : Trial number 2 with parameters:
+lr = 1.4643190248909616e-06
+tv_weight = 0.0002028046933044487
+23-08-05 22:45:21.338 : 
+epoch:1/10
+--------------
+train loss: 2.008e-02
+val loss: 1.294e-02, val PSNR: 20.316
+--------------
+23-08-05 22:52:44.893 : 
+epoch:2/10
+--------------
+train loss: 1.821e-02
+val loss: 1.469e-02, val PSNR: 20.056
+--------------
+23-08-05 23:00:07.953 : 
+epoch:3/10
+--------------
+train loss: 1.789e-02
+val loss: 1.241e-02, val PSNR: 20.512
+--------------
+23-08-05 23:07:31.296 : 
+epoch:4/10
+--------------
+train loss: 1.717e-02
+val loss: 1.139e-02, val PSNR: 20.939
+--------------
+23-08-05 23:14:55.010 : 
+epoch:5/10
+--------------
+train loss: 1.446e-02
+val loss: 1.105e-02, val PSNR: 21.221
+--------------
+23-08-05 23:22:18.459 : 
+epoch:6/10
+--------------
+train loss: 1.405e-02
+val loss: 1.121e-02, val PSNR: 21.169
+--------------
+23-08-05 23:29:41.860 : 
+epoch:7/10
+--------------
+train loss: 1.327e-02
+val loss: 1.103e-02, val PSNR: 21.271
+--------------
+23-08-05 23:37:05.094 : 
+epoch:8/10
+--------------
+train loss: 1.275e-02
+val loss: 1.114e-02, val PSNR: 21.304
+--------------
+23-08-05 23:44:28.760 : 
+epoch:9/10
+--------------
+train loss: 1.254e-02
+val loss: 1.107e-02, val PSNR: 21.355
+--------------
+23-08-05 23:51:52.320 : 
+epoch:10/10
+--------------
+train loss: 1.277e-02
+val loss: 1.097e-02, val PSNR: 21.379
+--------------
+23-08-05 23:51:52.321 : Trial 2: training completed in 1hs 13min 54s
+23-08-05 23:51:52.322 : Trial number 3 with parameters:
+lr = 0.013847889871322938
+tv_weight = 0.0032269982773938844
+23-08-05 23:59:16.174 : 
+epoch:1/10
+--------------
+train loss: 2.037e-02
+val loss: 1.374e-02, val PSNR: 20.382
+--------------
+23-08-06 00:06:39.588 : 
+epoch:2/10
+--------------
+train loss: 1.854e-02
+val loss: 1.385e-02, val PSNR: 20.326
+--------------
+23-08-06 00:14:03.092 : 
+epoch:3/10
+--------------
+train loss: 1.797e-02
+val loss: 1.331e-02, val PSNR: 20.325
+--------------
+23-08-06 00:21:26.628 : 
+epoch:4/10
+--------------
+train loss: 1.696e-02
+val loss: 1.189e-02, val PSNR: 21.036
+--------------
+23-08-06 00:28:49.929 : 
+epoch:5/10
+--------------
+train loss: 1.491e-02
+val loss: 1.197e-02, val PSNR: 21.107
+--------------
+23-08-06 00:36:13.115 : 
+epoch:6/10
+--------------
+train loss: 1.381e-02
+val loss: 1.170e-02, val PSNR: 21.199
+--------------
+23-08-06 00:43:36.655 : 
+epoch:7/10
+--------------
+train loss: 1.347e-02
+val loss: 1.147e-02, val PSNR: 21.315
+--------------
+23-08-06 00:50:59.992 : 
+epoch:8/10
+--------------
+train loss: 1.282e-02
+val loss: 1.146e-02, val PSNR: 21.366
+--------------
+23-08-06 00:58:23.402 : 
+epoch:9/10
+--------------
+train loss: 1.256e-02
+val loss: 1.146e-02, val PSNR: 21.395
+--------------
+23-08-06 01:05:47.629 : 
+epoch:10/10
+--------------
+train loss: 1.298e-02
+val loss: 1.138e-02, val PSNR: 21.385
+--------------
+23-08-06 01:05:47.629 : Trial 3: training completed in 1hs 13min 55s
+23-08-06 01:05:47.630 : Trial number 4 with parameters:
+lr = 0.0023246540362348873
+tv_weight = 1.8064909253675992e-06
+23-08-06 01:13:11.946 : 
+epoch:1/10
+--------------
+train loss: 2.003e-02
+val loss: 1.648e-02, val PSNR: 19.568
+--------------
+23-08-06 01:20:35.254 : 
+epoch:2/10
+--------------
+train loss: 1.847e-02
+val loss: 1.531e-02, val PSNR: 19.958
+--------------
+23-08-06 01:27:57.831 : 
+epoch:3/10
+--------------
+train loss: 1.824e-02
+val loss: 1.309e-02, val PSNR: 20.671
+--------------
+23-08-06 01:35:21.212 : 
+epoch:4/10
+--------------
+train loss: 1.680e-02
+val loss: 1.241e-02, val PSNR: 20.936
+--------------
+23-08-06 01:42:44.889 : 
+epoch:5/10
+--------------
+train loss: 1.429e-02
+val loss: 1.214e-02, val PSNR: 21.016
+--------------
+23-08-06 01:50:08.187 : 
+epoch:6/10
+--------------
+train loss: 1.367e-02
+val loss: 1.187e-02, val PSNR: 21.260
+--------------
+23-08-06 01:57:31.719 : 
+epoch:7/10
+--------------
+train loss: 1.366e-02
+val loss: 1.174e-02, val PSNR: 21.365
+--------------
+23-08-06 02:04:55.095 : 
+epoch:8/10
+--------------
+train loss: 1.330e-02
+val loss: 1.173e-02, val PSNR: 21.233
+--------------
+23-08-06 02:12:18.148 : 
+epoch:9/10
+--------------
+train loss: 1.276e-02
+val loss: 1.168e-02, val PSNR: 21.253
+--------------
+23-08-06 02:19:41.604 : 
+epoch:10/10
+--------------
+train loss: 1.303e-02
+val loss: 1.162e-02, val PSNR: 21.266
+--------------
+23-08-06 02:19:41.604 : Trial 4: training completed in 1hs 13min 53s
+23-08-06 02:19:41.606 : Trial number 5 with parameters:
+lr = 0.026387290478815394
+tv_weight = 2.4176266278285176e-07
+23-08-06 02:27:05.730 : 
+epoch:1/10
+--------------
+train loss: 2.067e-02
+val loss: 1.484e-02, val PSNR: 19.960
+--------------
+23-08-06 02:34:29.264 : 
+epoch:2/10
+--------------
+train loss: 1.830e-02
+val loss: 1.320e-02, val PSNR: 20.362
+--------------
+23-08-06 02:41:52.725 : 
+epoch:3/10
+--------------
+train loss: 1.753e-02
+val loss: 1.200e-02, val PSNR: 20.664
+--------------
+23-08-06 02:49:15.755 : 
+epoch:4/10
+--------------
+train loss: 1.646e-02
+val loss: 1.158e-02, val PSNR: 20.956
+--------------
+23-08-06 02:56:39.108 : 
+epoch:5/10
+--------------
+train loss: 1.450e-02
+val loss: 1.101e-02, val PSNR: 21.331
+--------------
+23-08-06 03:04:02.189 : 
+epoch:6/10
+--------------
+train loss: 1.377e-02
+val loss: 1.107e-02, val PSNR: 21.322
+--------------
+23-08-06 03:11:25.354 : 
+epoch:7/10
+--------------
+train loss: 1.315e-02
+val loss: 1.139e-02, val PSNR: 21.278
+--------------
+23-08-06 03:18:48.739 : 
+epoch:8/10
+--------------
+train loss: 1.314e-02
+val loss: 1.128e-02, val PSNR: 21.295
+--------------
+23-08-06 03:26:12.384 : 
+epoch:9/10
+--------------
+train loss: 1.289e-02
+val loss: 1.105e-02, val PSNR: 21.332
+--------------
+23-08-06 03:33:35.674 : 
+epoch:10/10
+--------------
+train loss: 1.259e-02
+val loss: 1.107e-02, val PSNR: 21.301
+--------------
+23-08-06 03:33:35.674 : Trial 5: training completed in 1hs 13min 53s
+23-08-06 03:33:35.676 : Trial number 6 with parameters:
+lr = 0.0008779439799507758
+tv_weight = 1.6477700367001567e-07
+23-08-06 03:40:59.798 : 
+epoch:1/10
+--------------
+train loss: 1.984e-02
+val loss: 1.589e-02, val PSNR: 19.432
+--------------
+23-08-06 03:48:23.718 : 
+epoch:2/10
+--------------
+train loss: 1.868e-02
+val loss: 1.373e-02, val PSNR: 20.476
+--------------
+23-08-06 03:55:47.230 : 
+epoch:3/10
+--------------
+train loss: 1.750e-02
+val loss: 1.306e-02, val PSNR: 20.580
+--------------
+23-08-06 04:03:10.447 : 
+epoch:4/10
+--------------
+train loss: 1.675e-02
+val loss: 1.170e-02, val PSNR: 21.117
+--------------
+23-08-06 04:10:33.944 : 
+epoch:5/10
+--------------
+train loss: 1.402e-02
+val loss: 1.137e-02, val PSNR: 21.134
+--------------
+23-08-06 04:17:57.524 : 
+epoch:6/10
+--------------
+train loss: 1.365e-02
+val loss: 1.116e-02, val PSNR: 21.294
+--------------
+23-08-06 04:25:21.087 : 
+epoch:7/10
+--------------
+train loss: 1.356e-02
+val loss: 1.104e-02, val PSNR: 21.231
+--------------
+23-08-06 04:32:44.503 : 
+epoch:8/10
+--------------
+train loss: 1.275e-02
+val loss: 1.087e-02, val PSNR: 21.356
+--------------
+23-08-06 04:40:08.142 : 
+epoch:9/10
+--------------
+train loss: 1.279e-02
+val loss: 1.106e-02, val PSNR: 21.319
+--------------
+23-08-06 04:47:31.415 : 
+epoch:10/10
+--------------
+train loss: 1.251e-02
+val loss: 1.097e-02, val PSNR: 21.339
+--------------
+23-08-06 04:47:31.416 : Trial 6: training completed in 1hs 13min 55s
+23-08-06 04:47:31.417 : Trial number 7 with parameters:
+lr = 4.1063809598016566e-05
+tv_weight = 1.4672973112037351e-07
+23-08-06 04:54:55.887 : 
+epoch:1/10
+--------------
+train loss: 2.034e-02
+val loss: 1.449e-02, val PSNR: 20.267
+--------------
+23-08-06 05:02:18.995 : 
+epoch:2/10
+--------------
+train loss: 1.854e-02
+val loss: 1.518e-02, val PSNR: 19.892
+--------------
+23-08-06 05:09:42.361 : 
+epoch:3/10
+--------------
+train loss: 1.749e-02
+val loss: 1.206e-02, val PSNR: 20.837
+--------------
+23-08-06 05:17:05.637 : 
+epoch:4/10
+--------------
+train loss: 1.708e-02
+val loss: 1.102e-02, val PSNR: 21.174
+--------------
+23-08-06 05:24:27.845 : 
+epoch:5/10
+--------------
+train loss: 1.424e-02
+val loss: 1.112e-02, val PSNR: 21.186
+--------------
+23-08-06 05:31:51.392 : 
+epoch:6/10
+--------------
+train loss: 1.396e-02
+val loss: 1.103e-02, val PSNR: 21.301
+--------------
+23-08-06 05:39:14.452 : 
+epoch:7/10
+--------------
+train loss: 1.360e-02
+val loss: 1.124e-02, val PSNR: 21.268
+--------------
+23-08-06 05:46:37.592 : 
+epoch:8/10
+--------------
+train loss: 1.285e-02
+val loss: 1.078e-02, val PSNR: 21.418
+--------------
+23-08-06 05:54:00.820 : 
+epoch:9/10
+--------------
+train loss: 1.294e-02
+val loss: 1.073e-02, val PSNR: 21.429
+--------------
+23-08-06 06:01:24.334 : 
+epoch:10/10
+--------------
+train loss: 1.274e-02
+val loss: 1.073e-02, val PSNR: 21.469
+--------------
+23-08-06 06:01:24.335 : Trial 7: training completed in 1hs 13min 52s
+23-08-06 06:01:24.336 : Trial number 8 with parameters:
+lr = 0.013081219427801114
+tv_weight = 1.4467785319711244e-07
+23-08-06 06:08:48.353 : 
+epoch:1/10
+--------------
+train loss: 2.011e-02
+val loss: 1.381e-02, val PSNR: 20.623
+--------------
+23-08-06 06:16:11.494 : 
+epoch:2/10
+--------------
+train loss: 1.867e-02
+val loss: 1.286e-02, val PSNR: 20.588
+--------------
+23-08-06 06:23:34.904 : 
+epoch:3/10
+--------------
+train loss: 1.837e-02
+val loss: 1.363e-02, val PSNR: 20.145
+--------------
+23-08-06 06:30:58.241 : 
+epoch:4/10
+--------------
+train loss: 1.687e-02
+val loss: 1.202e-02, val PSNR: 20.978
+--------------
+23-08-06 06:38:21.711 : 
+epoch:5/10
+--------------
+train loss: 1.455e-02
+val loss: 1.184e-02, val PSNR: 21.032
+--------------
+23-08-06 06:45:44.978 : 
+epoch:6/10
+--------------
+train loss: 1.379e-02
+val loss: 1.159e-02, val PSNR: 21.192
+--------------
+23-08-06 06:53:08.479 : 
+epoch:7/10
+--------------
+train loss: 1.339e-02
+val loss: 1.183e-02, val PSNR: 21.134
+--------------
+23-08-06 06:53:08.480 : Pruning trial number 8. Used 0hs 51min 44s on pruned training ¯\_(ツ)_/¯
+23-08-06 06:53:08.480 : Trial number 9 with parameters:
+lr = 0.0004903832492346015
+tv_weight = 0.0003507754215847766
+23-08-06 07:00:32.439 : 
+epoch:1/10
+--------------
+train loss: 2.002e-02
+val loss: 1.420e-02, val PSNR: 20.449
+--------------
+23-08-06 07:07:55.470 : 
+epoch:2/10
+--------------
+train loss: 1.890e-02
+val loss: 1.668e-02, val PSNR: 19.200
+--------------
+23-08-06 07:15:18.848 : 
+epoch:3/10
+--------------
+train loss: 1.768e-02
+val loss: 1.519e-02, val PSNR: 19.743
+--------------
+23-08-06 07:22:41.959 : 
+epoch:4/10
+--------------
+train loss: 1.670e-02
+val loss: 1.200e-02, val PSNR: 20.818
+--------------
+23-08-06 07:22:41.959 : Pruning trial number 9. Used 0hs 29min 33s on pruned training ¯\_(ツ)_/¯
+23-08-06 07:22:41.965 : Trial number 10 with parameters:
+lr = 3.1246613495299394e-05
+tv_weight = 7.220014682289241e-06
+23-08-06 07:30:05.769 : 
+epoch:1/10
+--------------
+train loss: 2.049e-02
+val loss: 1.362e-02, val PSNR: 20.382
+--------------
+23-08-06 07:37:29.479 : 
+epoch:2/10
+--------------
+train loss: 1.921e-02
+val loss: 1.266e-02, val PSNR: 20.778
+--------------
+23-08-06 07:44:52.274 : 
+epoch:3/10
+--------------
+train loss: 1.746e-02
+val loss: 1.325e-02, val PSNR: 20.529
+--------------
+23-08-06 07:52:16.133 : 
+epoch:4/10
+--------------
+train loss: 1.691e-02
+val loss: 1.201e-02, val PSNR: 20.777
+--------------
+23-08-06 07:52:16.134 : Pruning trial number 10. Used 0hs 29min 34s on pruned training ¯\_(ツ)_/¯
+23-08-06 07:52:16.140 : Trial number 11 with parameters:
+lr = 0.06729011906040945
+tv_weight = 0.007850368342167461
+23-08-06 07:59:39.776 : 
+epoch:1/10
+--------------
+train loss: 2.025e-02
+val loss: 1.373e-02, val PSNR: 20.219
+--------------
+23-08-06 08:07:03.516 : 
+epoch:2/10
+--------------
+train loss: 1.903e-02
+val loss: 1.208e-02, val PSNR: 20.957
+--------------
+23-08-06 08:14:26.967 : 
+epoch:3/10
+--------------
+train loss: 1.730e-02
+val loss: 1.389e-02, val PSNR: 20.562
+--------------
+23-08-06 08:21:50.224 : 
+epoch:4/10
+--------------
+train loss: 1.687e-02
+val loss: 1.316e-02, val PSNR: 20.766
+--------------
+23-08-06 08:29:13.147 : 
+epoch:5/10
+--------------
+train loss: 1.460e-02
+val loss: 1.256e-02, val PSNR: 21.008
+--------------
+23-08-06 08:36:36.807 : 
+epoch:6/10
+--------------
+train loss: 1.420e-02
+val loss: 1.216e-02, val PSNR: 21.062
+--------------
+23-08-06 08:43:59.806 : 
+epoch:7/10
+--------------
+train loss: 1.342e-02
+val loss: 1.247e-02, val PSNR: 20.999
+--------------
+23-08-06 08:43:59.807 : Pruning trial number 11. Used 0hs 51min 43s on pruned training ¯\_(ツ)_/¯
+23-08-06 08:43:59.813 : Trial number 12 with parameters:
+lr = 0.0001199996852144491
+tv_weight = 1.7375491069888175e-05
+23-08-06 08:51:23.779 : 
+epoch:1/10
+--------------
+train loss: 2.059e-02
+val loss: 1.408e-02, val PSNR: 20.217
+--------------
+23-08-06 08:58:47.027 : 
+epoch:2/10
+--------------
+train loss: 1.805e-02
+val loss: 1.270e-02, val PSNR: 20.391
+--------------
+23-08-06 09:06:10.930 : 
+epoch:3/10
+--------------
+train loss: 1.757e-02
+val loss: 1.417e-02, val PSNR: 20.032
+--------------
+23-08-06 09:13:34.875 : 
+epoch:4/10
+--------------
+train loss: 1.627e-02
+val loss: 1.197e-02, val PSNR: 20.923
+--------------
+23-08-06 09:13:34.876 : Pruning trial number 12. Used 0hs 29min 34s on pruned training ¯\_(ツ)_/¯
+23-08-06 09:13:34.882 : Trial number 13 with parameters:
+lr = 0.002830555386656614
+tv_weight = 1.6401073818345678e-06
+23-08-06 09:20:59.088 : 
+epoch:1/10
+--------------
+train loss: 2.029e-02
+val loss: 1.360e-02, val PSNR: 20.669
+--------------
+23-08-06 09:28:22.136 : 
+epoch:2/10
+--------------
+train loss: 1.904e-02
+val loss: 1.323e-02, val PSNR: 20.494
+--------------
+23-08-06 09:35:45.375 : 
+epoch:3/10
+--------------
+train loss: 1.802e-02
+val loss: 1.350e-02, val PSNR: 20.047
+--------------
+23-08-06 09:43:08.617 : 
+epoch:4/10
+--------------
+train loss: 1.691e-02
+val loss: 1.273e-02, val PSNR: 20.624
+--------------
+23-08-06 09:43:08.618 : Pruning trial number 13. Used 0hs 29min 33s on pruned training ¯\_(ツ)_/¯
+23-08-06 09:43:08.626 : Trial number 14 with parameters:
+lr = 0.0886712834212291
+tv_weight = 0.002190821208984851
+23-08-06 09:50:33.483 : 
+epoch:1/10
+--------------
+train loss: 2.062e-02
+val loss: 1.452e-02, val PSNR: 20.305
+--------------
+23-08-06 09:57:56.945 : 
+epoch:2/10
+--------------
+train loss: 1.910e-02
+val loss: 1.418e-02, val PSNR: 20.202
+--------------
+23-08-06 10:05:20.692 : 
+epoch:3/10
+--------------
+train loss: 1.778e-02
+val loss: 1.434e-02, val PSNR: 20.305
+--------------
+23-08-06 10:12:43.920 : 
+epoch:4/10
+--------------
+train loss: 1.652e-02
+val loss: 1.209e-02, val PSNR: 20.942
+--------------
+23-08-06 10:12:43.921 : Pruning trial number 14. Used 0hs 29min 35s on pruned training ¯\_(ツ)_/¯
+23-08-06 10:12:43.927 : Trial number 15 with parameters:
+lr = 0.00017483284345694137
+tv_weight = 5.868108208469932e-05
+23-08-06 10:20:08.268 : 
+epoch:1/10
+--------------
+train loss: 2.057e-02
+val loss: 1.404e-02, val PSNR: 20.143
+--------------
+23-08-06 10:27:32.438 : 
+epoch:2/10
+--------------
+train loss: 1.834e-02
+val loss: 1.517e-02, val PSNR: 19.893
+--------------
+23-08-06 10:34:56.417 : 
+epoch:3/10
+--------------
+train loss: 1.826e-02
+val loss: 1.342e-02, val PSNR: 20.236
+--------------
+23-08-06 10:42:20.079 : 
+epoch:4/10
+--------------
+train loss: 1.642e-02
+val loss: 1.234e-02, val PSNR: 20.948
+--------------
+23-08-06 10:49:43.650 : 
+epoch:5/10
+--------------
+train loss: 1.415e-02
+val loss: 1.188e-02, val PSNR: 21.065
+--------------
+23-08-06 10:57:08.204 : 
+epoch:6/10
+--------------
+train loss: 1.353e-02
+val loss: 1.119e-02, val PSNR: 21.376
+--------------
+23-08-06 11:04:32.360 : 
+epoch:7/10
+--------------
+train loss: 1.325e-02
+val loss: 1.113e-02, val PSNR: 21.387
+--------------
+23-08-06 11:11:56.370 : 
+epoch:8/10
+--------------
+train loss: 1.304e-02
+val loss: 1.125e-02, val PSNR: 21.276
+--------------
+23-08-06 11:19:20.216 : 
+epoch:9/10
+--------------
+train loss: 1.295e-02
+val loss: 1.090e-02, val PSNR: 21.357
+--------------
+23-08-06 11:26:44.028 : 
+epoch:10/10
+--------------
+train loss: 1.274e-02
+val loss: 1.099e-02, val PSNR: 21.348
+--------------
+23-08-06 11:26:44.029 : Trial 15: training completed in 1hs 13min 59s
+23-08-06 11:26:44.036 : Trial number 16 with parameters:
+lr = 0.005235822421073187
+tv_weight = 0.008623867053112806
+23-08-06 11:34:07.845 : 
+epoch:1/10
+--------------
+train loss: 2.073e-02
+val loss: 1.275e-02, val PSNR: 20.700
+--------------
+23-08-06 11:41:31.726 : 
+epoch:2/10
+--------------
+train loss: 1.928e-02
+val loss: 1.607e-02, val PSNR: 19.874
+--------------
+23-08-06 11:48:56.529 : 
+epoch:3/10
+--------------
+train loss: 1.824e-02
+val loss: 1.468e-02, val PSNR: 20.369
+--------------
+23-08-06 11:56:21.054 : 
+epoch:4/10
+--------------
+train loss: 1.721e-02
+val loss: 1.275e-02, val PSNR: 20.904
+--------------
+23-08-06 11:56:21.055 : Pruning trial number 16. Used 0hs 29min 36s on pruned training ¯\_(ツ)_/¯
+23-08-06 11:56:21.061 : Trial number 17 with parameters:
+lr = 0.00072473315169949
+tv_weight = 0.0012385137696608493
+23-08-06 12:03:46.613 : 
+epoch:1/10
+--------------
+train loss: 2.017e-02
+val loss: 1.432e-02, val PSNR: 19.991
+--------------
+23-08-06 12:11:10.861 : 
+epoch:2/10
+--------------
+train loss: 1.816e-02
+val loss: 1.396e-02, val PSNR: 20.339
+--------------
+23-08-06 12:18:35.180 : 
+epoch:3/10
+--------------
+train loss: 1.728e-02
+val loss: 1.473e-02, val PSNR: 20.073
+--------------
+23-08-06 12:25:59.791 : 
+epoch:4/10
+--------------
+train loss: 1.667e-02
+val loss: 1.260e-02, val PSNR: 20.927
+--------------
+23-08-06 12:25:59.792 : Pruning trial number 17. Used 0hs 29min 38s on pruned training ¯\_(ツ)_/¯
+23-08-06 12:25:59.798 : Trial number 18 with parameters:
+lr = 6.339297250598436e-05
+tv_weight = 2.2251046067999785e-05
+23-08-06 12:33:25.024 : 
+epoch:1/10
+--------------
+train loss: 2.052e-02
+val loss: 1.366e-02, val PSNR: 20.442
+--------------
+23-08-06 12:40:49.710 : 
+epoch:2/10
+--------------
+train loss: 1.829e-02
+val loss: 1.476e-02, val PSNR: 19.845
+--------------
+23-08-06 12:48:14.347 : 
+epoch:3/10
+--------------
+train loss: 1.751e-02
+val loss: 1.302e-02, val PSNR: 20.429
+--------------
+23-08-06 12:55:39.110 : 
+epoch:4/10
+--------------
+train loss: 1.685e-02
+val loss: 1.187e-02, val PSNR: 21.036
+--------------
+23-08-06 13:03:03.702 : 
+epoch:5/10
+--------------
+train loss: 1.464e-02
+val loss: 1.148e-02, val PSNR: 21.140
+--------------
+23-08-06 13:10:28.385 : 
+epoch:6/10
+--------------
+train loss: 1.387e-02
+val loss: 1.107e-02, val PSNR: 21.363
+--------------
+23-08-06 13:17:53.448 : 
+epoch:7/10
+--------------
+train loss: 1.330e-02
+val loss: 1.110e-02, val PSNR: 21.377
+--------------
+23-08-06 13:25:18.394 : 
+epoch:8/10
+--------------
+train loss: 1.282e-02
+val loss: 1.133e-02, val PSNR: 21.365
+--------------
+23-08-06 13:32:43.301 : 
+epoch:9/10
+--------------
+train loss: 1.295e-02
+val loss: 1.123e-02, val PSNR: 21.339
+--------------
+23-08-06 13:40:08.996 : 
+epoch:10/10
+--------------
+train loss: 1.280e-02
+val loss: 1.108e-02, val PSNR: 21.454
+--------------
+23-08-06 13:40:08.996 : Trial 18: training completed in 1hs 14min 9s
+23-08-06 13:40:09.006 : Trial number 19 with parameters:
+lr = 3.52683754067213e-05
+tv_weight = 1.6201595780020512e-05
+23-08-06 13:47:35.131 : 
+epoch:1/10
+--------------
+train loss: 1.987e-02
+val loss: 1.451e-02, val PSNR: 19.840
+--------------
+23-08-06 13:55:00.323 : 
+epoch:2/10
+--------------
+train loss: 1.895e-02
+val loss: 1.255e-02, val PSNR: 20.617
+--------------
+23-08-06 14:02:25.350 : 
+epoch:3/10
+--------------
+train loss: 1.740e-02
+val loss: 1.335e-02, val PSNR: 20.399
+--------------
+23-08-06 14:09:50.720 : 
+epoch:4/10
+--------------
+train loss: 1.650e-02
+val loss: 1.194e-02, val PSNR: 21.020
+--------------
+23-08-06 14:17:15.822 : 
+epoch:5/10
+--------------
+train loss: 1.501e-02
+val loss: 1.140e-02, val PSNR: 21.258
+--------------
+23-08-06 14:24:41.012 : 
+epoch:6/10
+--------------
+train loss: 1.391e-02
+val loss: 1.178e-02, val PSNR: 21.087
+--------------
+23-08-06 14:32:06.455 : 
+epoch:7/10
+--------------
+train loss: 1.330e-02
+val loss: 1.124e-02, val PSNR: 21.304
+--------------
+23-08-06 14:39:31.948 : 
+epoch:8/10
+--------------
+train loss: 1.288e-02
+val loss: 1.149e-02, val PSNR: 21.311
+--------------
+23-08-06 14:46:57.189 : 
+epoch:9/10
+--------------
+train loss: 1.309e-02
+val loss: 1.141e-02, val PSNR: 21.333
+--------------
+23-08-06 14:54:22.576 : 
+epoch:10/10
+--------------
+train loss: 1.300e-02
+val loss: 1.139e-02, val PSNR: 21.359
+--------------
+23-08-06 14:54:22.576 : Trial 19: training completed in 1hs 14min 13s
+23-08-06 14:54:22.584 : Trial number 20 with parameters:
+lr = 5.843389059074124e-06
+tv_weight = 6.275383340282916e-07
+23-08-06 15:01:48.460 : 
+epoch:1/10
+--------------
+train loss: 1.979e-02
+val loss: 1.301e-02, val PSNR: 20.578
+--------------
+23-08-06 15:09:13.848 : 
+epoch:2/10
+--------------
+train loss: 1.849e-02
+val loss: 1.285e-02, val PSNR: 20.692
+--------------
+23-08-06 15:16:39.034 : 
+epoch:3/10
+--------------
+train loss: 1.713e-02
+val loss: 1.262e-02, val PSNR: 20.658
+--------------
+23-08-06 15:24:04.298 : 
+epoch:4/10
+--------------
+train loss: 1.688e-02
+val loss: 1.193e-02, val PSNR: 21.014
+--------------
+23-08-06 15:31:29.681 : 
+epoch:5/10
+--------------
+train loss: 1.467e-02
+val loss: 1.175e-02, val PSNR: 21.121
+--------------
+23-08-06 15:38:55.249 : 
+epoch:6/10
+--------------
+train loss: 1.369e-02
+val loss: 1.153e-02, val PSNR: 21.281
+--------------
+23-08-06 15:46:20.481 : 
+epoch:7/10
+--------------
+train loss: 1.310e-02
+val loss: 1.130e-02, val PSNR: 21.256
+--------------
+23-08-06 15:53:45.866 : 
+epoch:8/10
+--------------
+train loss: 1.297e-02
+val loss: 1.123e-02, val PSNR: 21.292
+--------------
+23-08-06 16:01:11.551 : 
+epoch:9/10
+--------------
+train loss: 1.282e-02
+val loss: 1.099e-02, val PSNR: 21.413
+--------------
+23-08-06 16:08:37.690 : 
+epoch:10/10
+--------------
+train loss: 1.272e-02
+val loss: 1.107e-02, val PSNR: 21.388
+--------------
+23-08-06 16:08:37.691 : Trial 20: training completed in 1hs 14min 14s
+23-08-06 16:08:37.698 : Trial number 21 with parameters:
+lr = 7.334340796160673e-06
+tv_weight = 6.274718199591784e-07
+23-08-06 16:16:04.567 : 
+epoch:1/10
+--------------
+train loss: 2.026e-02
+val loss: 1.380e-02, val PSNR: 20.417
+--------------
+23-08-06 16:23:29.575 : 
+epoch:2/10
+--------------
+train loss: 1.906e-02
+val loss: 1.445e-02, val PSNR: 20.076
+--------------
+23-08-06 16:30:55.324 : 
+epoch:3/10
+--------------
+train loss: 1.833e-02
+val loss: 1.406e-02, val PSNR: 20.151
+--------------
+23-08-06 16:38:20.175 : 
+epoch:4/10
+--------------
+train loss: 1.643e-02
+val loss: 1.170e-02, val PSNR: 21.051
+--------------
+23-08-06 16:45:45.176 : 
+epoch:5/10
+--------------
+train loss: 1.486e-02
+val loss: 1.184e-02, val PSNR: 20.959
+--------------
+23-08-06 16:53:10.306 : 
+epoch:6/10
+--------------
+train loss: 1.400e-02
+val loss: 1.132e-02, val PSNR: 21.143
+--------------
+23-08-06 17:00:35.427 : 
+epoch:7/10
+--------------
+train loss: 1.344e-02
+val loss: 1.149e-02, val PSNR: 21.148
+--------------
+23-08-06 17:00:35.427 : Pruning trial number 21. Used 0hs 51min 57s on pruned training ¯\_(ツ)_/¯
+23-08-06 17:00:35.434 : Trial number 22 with parameters:
+lr = 7.991783843174595e-05
+tv_weight = 6.433803497689947e-07
+23-08-06 17:08:00.956 : 
+epoch:1/10
+--------------
+train loss: 1.978e-02
+val loss: 1.362e-02, val PSNR: 20.644
+--------------
+23-08-06 17:15:25.936 : 
+epoch:2/10
+--------------
+train loss: 1.881e-02
+val loss: 1.706e-02, val PSNR: 19.064
+--------------
+23-08-06 17:22:51.278 : 
+epoch:3/10
+--------------
+train loss: 1.822e-02
+val loss: 1.348e-02, val PSNR: 20.623
+--------------
+23-08-06 17:30:16.699 : 
+epoch:4/10
+--------------
+train loss: 1.700e-02
+val loss: 1.225e-02, val PSNR: 21.021
+--------------
+23-08-06 17:37:41.877 : 
+epoch:5/10
+--------------
+train loss: 1.487e-02
+val loss: 1.163e-02, val PSNR: 21.277
+--------------
+23-08-06 17:45:06.807 : 
+epoch:6/10
+--------------
+train loss: 1.387e-02
+val loss: 1.156e-02, val PSNR: 21.202
+--------------
+23-08-06 17:52:31.793 : 
+epoch:7/10
+--------------
+train loss: 1.329e-02
+val loss: 1.158e-02, val PSNR: 21.256
+--------------
+23-08-06 17:59:57.039 : 
+epoch:8/10
+--------------
+train loss: 1.322e-02
+val loss: 1.132e-02, val PSNR: 21.267
+--------------
+23-08-06 18:07:21.891 : 
+epoch:9/10
+--------------
+train loss: 1.290e-02
+val loss: 1.132e-02, val PSNR: 21.292
+--------------
+23-08-06 18:14:47.184 : 
+epoch:10/10
+--------------
+train loss: 1.280e-02
+val loss: 1.131e-02, val PSNR: 21.298
+--------------
+23-08-06 18:14:47.185 : Pruning trial number 22. Used 1hs 14min 11s on pruned training ¯\_(ツ)_/¯
+23-08-06 18:14:47.192 : Trial number 23 with parameters:
+lr = 7.827820682816169e-06
+tv_weight = 2.533729480716935e-06
+23-08-06 18:22:12.808 : 
+epoch:1/10
+--------------
+train loss: 2.064e-02
+val loss: 1.420e-02, val PSNR: 20.362
+--------------
+23-08-06 18:29:38.391 : 
+epoch:2/10
+--------------
+train loss: 1.796e-02
+val loss: 1.384e-02, val PSNR: 20.450
+--------------
+23-08-06 18:37:03.124 : 
+epoch:3/10
+--------------
+train loss: 1.768e-02
+val loss: 1.298e-02, val PSNR: 20.563
+--------------
+23-08-06 18:44:28.045 : 
+epoch:4/10
+--------------
+train loss: 1.781e-02
+val loss: 1.223e-02, val PSNR: 20.967
+--------------
+23-08-06 18:44:28.046 : Pruning trial number 23. Used 0hs 29min 40s on pruned training ¯\_(ツ)_/¯
+23-08-06 18:44:28.053 : Trial number 24 with parameters:
+lr = 0.00022360303069799523
+tv_weight = 1.0220971022952664e-07
+23-08-06 18:51:53.735 : 
+epoch:1/10
+--------------
+train loss: 2.046e-02
+val loss: 1.359e-02, val PSNR: 20.157
+--------------
+23-08-06 18:59:18.582 : 
+epoch:2/10
+--------------
+train loss: 1.819e-02
+val loss: 1.298e-02, val PSNR: 20.604
+--------------
+23-08-06 19:06:43.410 : 
+epoch:3/10
+--------------
+train loss: 1.774e-02
+val loss: 1.251e-02, val PSNR: 20.628
+--------------
+23-08-06 19:14:08.809 : 
+epoch:4/10
+--------------
+train loss: 1.651e-02
+val loss: 1.204e-02, val PSNR: 21.086
+--------------
+23-08-06 19:21:33.694 : 
+epoch:5/10
+--------------
+train loss: 1.428e-02
+val loss: 1.152e-02, val PSNR: 21.209
+--------------
+23-08-06 19:28:58.691 : 
+epoch:6/10
+--------------
+train loss: 1.372e-02
+val loss: 1.141e-02, val PSNR: 21.264
+--------------
+23-08-06 19:36:23.708 : 
+epoch:7/10
+--------------
+train loss: 1.309e-02
+val loss: 1.145e-02, val PSNR: 21.256
+--------------
+23-08-06 19:36:23.709 : Pruning trial number 24. Used 0hs 51min 55s on pruned training ¯\_(ツ)_/¯
+23-08-06 19:36:23.709 : Best trial:
+FrozenTrial(number=7, state=TrialState.COMPLETE, values=[21.468696582778982], datetime_start=datetime.datetime(2023, 8, 6, 4, 47, 31, 417162), datetime_complete=datetime.datetime(2023, 8, 6, 6, 1, 24, 336115), params={'lr': 4.1063809598016566e-05, 'tv_weight': 1.4672973112037351e-07}, user_attrs={}, system_attrs={}, intermediate_values={0: 20.26723213136038, 1: 19.892062879011682, 2: 20.83683880185073, 3: 21.17414878708921, 4: 21.18565232214024, 5: 21.301475758461297, 6: 21.26780413257529, 7: 21.418000679831255, 8: 21.429341140049186, 9: 21.468696582778982}, distributions={'lr': FloatDistribution(high=0.1, log=True, low=1e-06, step=None), 'tv_weight': FloatDistribution(high=0.01, log=True, low=1e-07, step=None)}, trial_id=7, value=None)
+23-08-06 19:36:23.709 : Saving study information at optuna_hparams
+23-08-06 19:36:24.156 : Hyperparameters study ended
