@@ -35,8 +35,8 @@
     , "test": {
       "name": "test_dataset"            // just name
       , "dataset_type": "ffdnet"         // "dncnn" | "dnpatch" for dncnn,  | "fdncnn" | "ffdnet" | "sr" | "srmd" | "dpsr" | "plain" | "plainpatch"
-      , "dataroot_H": "testsets/ground-truth"  // path of H testing dataset
-      , "dataroot_L": "testsets/simulations"   // path of L testing dataset
+      , "dataroot_H": "valsets/ground-truth"  // path of H testing dataset
+      , "dataroot_L": "valsets/simulations"   // path of L testing dataset
       , "sigma_test": 10 // 15, 25, 50 for DnCNN and ffdnet
     }
   }
