@@ -193,13 +193,12 @@ class TVLoss(nn.Module):
         self.MSEloss = nn.MSELoss()
 
     def forward(self, x, gt):
-        batch_size = x.size()[0]
         h_x = x.size()[2]
         w_x = x.size()[3]
         h_tv = torch.sum(torch.abs((x[:, :, 1:, :] - x[:, :, :h_x - 1, :])))
         w_tv = torch.sum(torch.abs((x[:, :, :, 1:] - x[:, :, :, :w_x - 1])))
-        tv = (h_tv + w_tv)/batch_size
-        mse = (self.MSEloss(x,gt))/batch_size
+        tv = h_tv + w_tv
+        mse = self.MSEloss(x,gt)
         loss = mse + self.tv_loss_weight * tv
         # print(f'\nTotal loss: {loss},\nMSE loss: {mse},\nTV: {loss-mse}\n')
         return loss
