@@ -13,7 +13,7 @@
   }
 
   , "optuna":{
-     "n_trials": 25
+     "n_trials": 50
     ,"trial_epochs": 10  // Maximum epochs per trial
     ,"metric": "edgeJaccard"   // "edgeJaccard" | "PSNR" | "SSIM" | "CER" | "MSE"
     
@@ -37,7 +37,7 @@
       , "dataset_type": "ffdnet"         // "dncnn" | "dnpatch" for dncnn,  | "fdncnn" | "ffdnet" | "sr" | "srmd" | "dpsr" | "plain" | "plainpatch"
       , "dataroot_H": "valsets/ground-truth"  // path of H testing dataset
       , "dataroot_L": "valsets/simulations"   // path of L testing dataset
-      , "sigma_test": 10 // 15, 25, 50 for DnCNN and ffdnet
+      , "sigma_test": 15 // 15, 25, 50 for DnCNN and ffdnet
     }
   }
 

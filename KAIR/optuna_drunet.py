@@ -77,11 +77,16 @@ torch.cuda.manual_seed_all(seed)
 
 for phase, dataset_opt in opt['datasets'].items():
     if phase == 'train':
+
+        batch_size = dataset_opt['dataloader_batch_size']
+        patch_size = dataset_opt['H_size']
         train_set = define_Dataset(dataset_opt)
         # Keep only one third of the dataset
         indexes = torch.randperm(len(train_set))[:len(train_set)//4]
         train_set = Subset(train_set, indexes)
-        train_size = int(math.floor(len(train_set) / dataset_opt['dataloader_batch_size']))
+        train_size = int(math.floor(len(train_set) / batch_size))
+        message = f'Training dataset with {train_size} batches (batch size={batch_size}) of {patch_size}x{patch_size} images.'
+        logger.info(message)
         train_loader = DataLoader(  train_set,
                                     batch_size=dataset_opt['dataloader_batch_size'],
                                     shuffle=dataset_opt['dataloader_shuffle'],
@@ -94,6 +99,8 @@ for phase, dataset_opt in opt['datasets'].items():
         # Keep only one third of the dataset
         indexes = torch.randperm(len(test_set))[:len(test_set)//2]
         test_set = Subset(test_set, indexes)
+        message = f'Validation dataset of {len(test_set)} images.'
+        logger.info(message)
         val_loader = DataLoader(test_set, batch_size=1,
                                     shuffle=False, num_workers=1,
                                     drop_last=False, pin_memory=True)
@@ -282,10 +289,10 @@ def train_model(trial, model, dataset, metric_dict, num_epochs=25):
 def objective(trial):
 
     # Set learning rate suggestions for trial
-    trial_lr = trial.suggest_loguniform("lr", 1e-7, 1e-3)
+    trial_lr = trial.suggest_float("lr", 1e-7, 1e-3, log=True)
     opt['train']['G_optimizaer_lr'] = trial_lr
 
-    trial_tvweight = trial.suggest_loguniform("tv_weight", 1e-11, 1e-6)
+    trial_tvweight = trial.suggest_float("tv_weight", 1e-11, 1e-6, log=True)
     opt['train']["G_tvloss_weight"] = trial_tvweight
 
     message = f'Trial number {trial.number} with parameters:\n'
@@ -345,7 +352,7 @@ sampler = optuna.samplers.TPESampler()
 study = optuna.create_study(
         sampler=sampler,
         pruner=optuna.pruners.MedianPruner( 
-            n_startup_trials=5, n_warmup_steps=3, interval_steps=3
+            n_startup_trials=10, n_warmup_steps=3, interval_steps=3
         ),
         direction=metric_dict['direction'])
 
