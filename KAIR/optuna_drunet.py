@@ -117,29 +117,33 @@ def define_model(opt):
 def define_metric(metric_str):
 
     metric_dict = {}
-    metric_dict['name'] = metric_str
 
     if metric_str == 'PSNR':
         metric_dict['func'] = util.calculate_psnr
         metric_dict['direction'] = 'maximize'
+        metric_dict['name'] = 'PSNR'
 
     elif metric_str == 'SSIM':
         metric_dict['func'] = util.calculate_ssim
         metric_dict['direction'] = 'maximize'
+        metric_dict['name'] = 'SSIM'
     
     # TODO IMPLEMENTAR
     # elif metric_str == 'CER':
     #     metric_dict['func'] = utilOCR.calculate_cer
     #     metric_dict['direction'] = 'minimize'
+    #     metric_dict['name'] = 'CER'
 
     elif metric_str == 'edgeJaccard':
         metric_dict['func'] = util.calculate_edge_jaccard
         metric_dict['direction'] = 'maximize'
+        metric_dict['name'] = 'edgeJaccard'
 
     else:
         # If none of above, choose MSE
-        metric_dict['func'] = nn.MSELoss
+        metric_dict['func'] = nn.MSELoss()
         metric_dict['direction'] = 'minimize'
+        metric_dict['name'] = 'MSE'
     
     return metric_dict
 
@@ -278,10 +282,10 @@ def train_model(trial, model, dataset, metric_dict, num_epochs=25):
 def objective(trial):
 
     # Set learning rate suggestions for trial
-    trial_lr = trial.suggest_loguniform("lr", 1e-6, 1e-1)
+    trial_lr = trial.suggest_loguniform("lr", 1e-7, 1e-3)
     opt['train']['G_optimizaer_lr'] = trial_lr
 
-    trial_tvweight = trial.suggest_loguniform("tv_weight", 1e-7, 1e-2)
+    trial_tvweight = trial.suggest_loguniform("tv_weight", 1e-11, 1e-6)
     opt['train']["G_tvloss_weight"] = trial_tvweight
 
     message = f'Trial number {trial.number} with parameters:\n'
