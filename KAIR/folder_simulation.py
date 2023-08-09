@@ -45,8 +45,8 @@ def image_transmition_simulation(I, blanking=False):
     
     return I_TMDS_Tx, I_TMDS.shape
 
-def image_capture_simulation(I_Tx, h_total, v_total, N_harmonic, noise_std=0, 
-                             fps=60, freq_error=0, phase_error=0):
+def image_capture_simulation(I_Tx, h_total, v_total, N_harmonic, sdr_rate = 50e6,
+                             noise_std=0, fps=60, freq_error=0, phase_error=0):
     
     # Compute pixelrate and bitrate
     px_rate = h_total*v_total*fps
@@ -76,11 +76,9 @@ def image_capture_simulation(I_Tx, h_total, v_total, N_harmonic, noise_std=0,
 
     # Harmonic oscilator (including frequency and phase error)
     baseband_exponential = np.exp(2j*np.pi*(harm+freq_error)*t_continuous + 1j*phase_error)
-    
-    usrp_rate = 50e6
 
     # AM modulation and SDR sampling
-    I_Rx = signal.resample_poly(I_Tx_noisy*baseband_exponential,up=int(usrp_rate), down=sample_rate)
+    I_Rx = signal.resample_poly(I_Tx_noisy*baseband_exponential,up=int(sdr_rate), down=sample_rate)
 
     # Reshape signal to the image size
     I_capture = signal.resample(I_Rx, h_total*v_total).reshape(v_total,h_total)
@@ -143,6 +141,7 @@ def main(simulation_options_path = 'options/tempest_simulation.json'):
     # Get tempest options
     blanking = options['options']['blanking']
     fps = options['options']['frames_per_second']
+    sdr_rate = options['options']['sdr_rate']
     harmonics = options['options']['random']['harmonics']
     freq_error_range = options['options']['random']['freq_error']
     phase_error_range = options['options']['random']['phase_error']
@@ -184,7 +183,7 @@ def main(simulation_options_path = 'options/tempest_simulation.json'):
         I_Tx, resolution = image_transmition_simulation(I, blanking=blanking)
         v_res, h_res, _ = resolution
 
-        I_capture = image_capture_simulation(I_Tx, h_res, v_res, N_harmonic, 
+        I_capture = image_capture_simulation(I_Tx, h_res, v_res, N_harmonic, sdr_rate,
                                              sigma, fps, freq_error, phase_error)
         
         path = os.path.join(output_folder,image)

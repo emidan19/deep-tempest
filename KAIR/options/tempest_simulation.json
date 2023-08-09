@@ -1,10 +1,10 @@
 {
     "paths": {
-        "folder_original_images": "testsets/web_images_test",    
-        "__comment1__": "Insert input (original images) folder",
+        "folder_original_images": "web_imgs_tmp/test",    
+        "__comment1__": "Insert input folder (original images)",
 
         "folder_simulated_images": "testsets/simulations",
-        "__comment2__": "Insert output (tempest degraded images) folder"
+        "__comment2__": "Insert output folder (tempest degraded images)"
     },
     
     "options": {
@@ -13,6 +13,9 @@
 
         "frames_per_second": 60, 
         "__comment2__": "fps of video",
+
+        "sdr_rate": 50e6, 
+        "__comment3__": "sampling rate of SDR",
 
         "random": {
 
