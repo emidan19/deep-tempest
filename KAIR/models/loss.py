@@ -182,6 +182,8 @@ class TVLoss(nn.Module):
         https://github.com/jxgu1016/Total_Variation_Loss.pytorch
 
         # Adapted by Emilio Martínez (emiliomartinez98@gmail.com)
+        # Now using anisotropic version: 
+        # (https://towardsdatascience.com/pytorch-implementation-of-perceptual-losses-for-real-time-style-transfer-8d608e2e9902)
         
         Args:
             tv_loss_weight (int):
@@ -194,11 +196,12 @@ class TVLoss(nn.Module):
         batch_size = x.size()[0]
         h_x = x.size()[2]
         w_x = x.size()[3]
-        count_h = self.tensor_size(x[:, :, 1:, :])
-        count_w = self.tensor_size(x[:, :, :, 1:])
-        h_tv = torch.pow((x[:, :, 1:, :] - x[:, :, :h_x - 1, :]), 2).sum()
-        w_tv = torch.pow((x[:, :, :, 1:] - x[:, :, :, :w_x - 1]), 2).sum()
-        loss = self.MSEloss(x,gt) + self.tv_loss_weight * 2 * (h_tv / count_h + w_tv / count_w) / batch_size
+        h_tv = torch.sum(torch.abs((x[:, :, 1:, :] - x[:, :, :h_x - 1, :])))
+        w_tv = torch.sum(torch.abs((x[:, :, :, 1:] - x[:, :, :, :w_x - 1])))
+        tv = (h_tv + w_tv)/batch_size
+        mse = (self.MSEloss(x,gt))/batch_size
+        loss = mse + self.tv_loss_weight * tv
+        # print(f'\nTotal loss: {loss},\nMSE loss: {mse},\nTV: {loss-mse}\n')
         return loss
 
     @staticmethod
