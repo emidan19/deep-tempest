@@ -122,7 +122,7 @@ def main(json_path='options/train_drunet.json'):
                 train_sampler = DistributedSampler(train_set, shuffle=dataset_opt['dataloader_shuffle'], drop_last=True, seed=seed)
                 train_loader = DataLoader(train_set,
                                           batch_size=dataset_opt['dataloader_batch_size']//opt['num_gpu'],
-                                          shuffle=False,
+                                          shuffle=True,
                                           num_workers=dataset_opt['dataloader_num_workers']//opt['num_gpu'],
                                           drop_last=True,
                                           pin_memory=True,
@@ -207,7 +207,6 @@ def main(json_path='options/train_drunet.json'):
         # Epoch
         epoch_loss = epoch_loss/train_size
 
-        logs = model.current_log()  # such as loss
         message = '<epoch:{:3d}, iter:{:8,d}, lr:{:.3e}> G_loss: {:.3e} '.format(current_epoch, 
                                                                                 current_step, 
                                                                                 model.current_learning_rate(),
@@ -230,6 +229,7 @@ def main(json_path='options/train_drunet.json'):
             avg_psnr = 0.0
             avg_ssim = 0.0
             avg_loss = 0.0
+            avg_edgeJaccard = 0.0
             idx = 0
 
             for test_data in test_loader:
@@ -264,23 +264,26 @@ def main(json_path='options/train_drunet.json'):
                 # -----------------------
                 current_psnr = util.calculate_psnr(E_img, H_img, border=border)
                 current_ssim = util.calculate_ssim(E_img, H_img, border=border)
+                current_edgeJaccard = util.calculate_edge_jaccard(E_img, H_img)
                 # -----------------------
                 # calculate loss
                 # -----------------------
                 current_loss = model.G_lossfn(E_visual, H_visual)
 
-                logger.info('{:->4d}--> {:>10s} | PSNR = {:<4.2f}dB ; SSIM = {:.3f} ; G_loss = {:.3e}'.format(idx, image_name_ext, current_psnr, current_ssim, current_loss))
+                logger.info('{:->4d}--> {:>10s} | PSNR = {:<4.2f}dB ; SSIM = {:.3f} ; edgeJaccard = {:.3f} ; G_loss = {:.3e}'.format(idx, image_name_ext, current_psnr, current_ssim, current_edgeJaccard, current_loss))
 
                 avg_psnr += current_psnr
                 avg_ssim += current_ssim
+                avg_edgeJaccard += current_edgeJaccard
                 avg_loss += current_loss
 
             avg_psnr = avg_psnr / idx
             avg_ssim = avg_ssim / idx
+            avg_edgeJaccard = avg_edgeJaccard / idx
             avg_loss = avg_loss / idx
 
             # testing log
-            logger.info('<epoch:{:3d}, iter:{:8,d}, Average PSNR : {:<.2f}dB, Average SSIM : {:.3f}, Average loss : {:.3e}\n'.format(current_epoch, current_step, avg_psnr, avg_ssim, avg_loss))
+            logger.info('<epoch:{:3d}, iter:{:8,d}, Average PSNR : {:<.2f}dB, Average SSIM : {:.3f}, Average edgeJaccard : {:.3f}, Average loss : {:.3e}\n'.format(current_epoch, current_step, avg_psnr, avg_ssim, avg_edgeJaccard, avg_loss))
 
 if __name__ == '__main__':
     main()
