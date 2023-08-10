@@ -82,7 +82,7 @@ for phase, dataset_opt in opt['datasets'].items():
         patch_size = dataset_opt['H_size']
         train_set = define_Dataset(dataset_opt)
         # Keep only one third of the dataset
-        indexes = torch.randperm(len(train_set))[:len(train_set)//4]
+        indexes = torch.randperm(len(train_set))[:len(train_set)//20]
         train_set = Subset(train_set, indexes)
         train_size = int(math.floor(len(train_set) / batch_size))
         message = f'Training dataset with {train_size} batches (batch size={batch_size}) of {patch_size}x{patch_size} images.'
@@ -97,7 +97,7 @@ for phase, dataset_opt in opt['datasets'].items():
     elif phase == 'test':
         test_set = define_Dataset(dataset_opt)
         # Keep only one third of the dataset
-        indexes = torch.randperm(len(test_set))[:len(test_set)//2]
+        indexes = torch.randperm(len(test_set))[:len(test_set)//6]
         test_set = Subset(test_set, indexes)
         message = f'Validation dataset of {len(test_set)} images.'
         logger.info(message)
@@ -180,8 +180,13 @@ def train_model(trial, model, dataset, metric_dict, num_epochs=25):
         # -------------------------------
         # Training phase
         # ------------------------------- 
+
+        idx = 0
+
         for i, train_data in enumerate(train_loader):
             
+            idx += 1
+
             current_step += 1
 
             # -------------------------------
@@ -214,7 +219,7 @@ def train_model(trial, model, dataset, metric_dict, num_epochs=25):
             epoch_loss += model.current_log()['G_loss']     
 
         # Train loss and metric
-        avg_train_loss = epoch_loss/train_size
+        avg_train_loss = epoch_loss / idx
         # avg_train_metric = epoch_metric/train_size
 
         message_train = f'\nepoch:{epoch+1}/{num_epochs}\n'+'-'*14+'\ntrain loss: {:.3e}\n'.format(avg_train_loss)
@@ -292,7 +297,7 @@ def objective(trial):
     trial_lr = trial.suggest_float("lr", 1e-7, 1e-3, log=True)
     opt['train']['G_optimizaer_lr'] = trial_lr
 
-    trial_tvweight = trial.suggest_float("tv_weight", 1e-11, 1e-6, log=True)
+    trial_tvweight = trial.suggest_float("tv_weight", 1e-8, 1e2, log=True)
     opt['train']["G_tvloss_weight"] = trial_tvweight
 
     message = f'Trial number {trial.number} with parameters:\n'
@@ -352,7 +357,7 @@ sampler = optuna.samplers.TPESampler()
 study = optuna.create_study(
         sampler=sampler,
         pruner=optuna.pruners.MedianPruner( 
-            n_startup_trials=10, n_warmup_steps=3, interval_steps=3
+            n_startup_trials=10, n_warmup_steps=4, interval_steps=2
         ),
         direction=metric_dict['direction'])
 

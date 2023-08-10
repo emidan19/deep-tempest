@@ -172,8 +172,10 @@ def main(json_path='options/train_drunet.json'):
         if opt['dist']:
             train_sampler.set_epoch(current_epoch)
 
+        idx = 0
         for i, train_data in enumerate(train_loader):
 
+            idx += 1
             current_step += 1
 
             # -------------------------------
@@ -204,8 +206,8 @@ def main(json_path='options/train_drunet.json'):
         # Training information
         # -------------------------------      
 
-        # Epoch
-        epoch_loss = epoch_loss/train_size
+        # Epoch loss
+        epoch_loss = epoch_loss / idx
 
         message = '<epoch:{:3d}, iter:{:8,d}, lr:{:.3e}> G_loss: {:.3e} '.format(current_epoch, 
                                                                                 current_step, 
