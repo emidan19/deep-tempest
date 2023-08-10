@@ -6,6 +6,7 @@ from scipy import signal
 from matplotlib import pyplot as plt
 from PIL import Image
 
+
 # Definir una red neuronal simple
 class Model_qm(nn.Module):
     def __init__(self):
