@@ -1,7 +1,8 @@
 import numpy as np
 from matplotlib import pyplot as plt
 from scipy import signal
-from scipy.fft import fft, ifft, fftshift
+import cv2 as cv
+from scipy.spatial import distance_matrix
 
 def autocorr(x):
 	"""Compute autocorrelation function of 1-D array
@@ -463,3 +464,267 @@ def TMDS_serial(I):
   del(channel_list)
 
   return Iserials
+def remove_outliers(I, radius=3, threshold=20):
+    """  
+    Replaces a pixel by the median of the pixels in the surrounding if it deviates from the median by more than a certain value (the threshold).
+    """
+
+    # Copy input
+    I_output = I.copy()
+
+    # Apply median filter
+    I_median = cv.medianBlur(I,radius)
+
+    # Replace with median value where difference with median exceedes threshold
+    where_replace = np.abs(I-I_median) > threshold
+    I_output[where_replace] = I_median[where_replace]
+
+    return I_output
+
+def adjust_dynamic_range(I):
+
+    I_output = I.astype('float32')
+    I_output = (I_output - I_output.min()) / (I_output.max() - I_output.min())
+    I_output = 255 * I_output
+    return I_output.astype('uint8')
+
+def find_intersection(line1, line2):
+    """Finds the intersection of two lines given in Hesse normal form.
+
+    Returns closest integer pixel locations.
+    See https://stackoverflow.com/a/383527/5087436
+    """
+    rho1, theta1 = line1
+    rho2, theta2 = line2
+    A = np.array([
+        [np.cos(theta1), np.sin(theta1)],
+        [np.cos(theta2), np.sin(theta2)]
+    ])
+    b = np.array([[rho1], [rho2]])
+    x0, y0 = np.linalg.solve(A, b)
+    x0, y0 = int(np.round(x0)), int(np.round(y0))
+
+    # Return as row-column coordinates
+    return [y0, x0]
+def apply_blanking_shift(I, h_active=1600, v_active=900, 
+                         h_blanking=200,v_blanking=100, 
+                         pad_len=300, debug=False):
+    """  
+    Find
+    """
+    
+    if debug:
+        # Show original image
+        plt.figure(figsize=(12,10))
+        plt.title(f'Original image ')
+        plt.imshow(I)
+        plt.axis('off')
+        plt.show()
+
+    # Color to RGB
+    I_gray = cv.cvtColor(I,cv.COLOR_BGR2GRAY)
+    # I_gray = cv.medianBlur(I_gray,3)
+    I_gray = cv.GaussianBlur(I_gray,ksize=(5,5),sigmaX=3,sigmaY=3)
+    # I_gray = cv.blur(I_gray,(3,3))
+
+    # Wrap-padding image to get whole blanking pattern
+    pad_size_gray = ((pad_len,0),(pad_len,0))
+    pad_size = ((pad_len,0),(pad_len,0),(0,0))
+    I_gray = np.pad(I_gray,pad_size_gray,'wrap')
+    I = np.pad(I,pad_size,'wrap')
+
+    # Edge-detector with Canny filter with empirical parameters
+    I_edge = cv.Canny(I_gray,40,50,apertureSize = 3)    # sin blur
+    
+
+    if debug:
+        # Show padded image and edges
+        plt.figure()
+        plt.title(f'Original image wrap-padded {pad_len} pixels up and left sided')
+        plt.imshow(I)
+        plt.axis('off')
+        plt.show()
+        plt.figure()
+        plt.title('Canny edged image')
+        plt.imshow(I_edge,cmap='gray')
+        plt.axis('off')
+        plt.show()
+
+    # Hough Transform resolution and minimum votes threshold
+    theta_step = np.pi/2
+    rho_step = 1
+    # votes_thrs = 255    # sin blur
+    votes_thrs = 80
+    rho_max = np.sqrt(I_gray.shape[0]**2 + I_gray.shape[1]**2)
+
+    # Find Hough Transform
+    lines = cv.HoughLines(I_edge, rho_step, theta_step, votes_thrs, None, 0, 0)
+
+    if debug:
+        # Show detected lines
+        I_lines = I_gray.copy()
+        for line in lines:
+            rho = line[0][0]
+            theta = line[0][1]
+            a = np.cos(theta)
+            b = np.sin(theta)
+            x0 = a * rho
+            y0 = b * rho
+            pt1 = (int(x0 + rho_max*(-b)), int(y0 + rho_max*(a)))
+            pt2 = (int(x0 - rho_max*(-b)), int(y0 - rho_max*(a)))
+
+            cv.line(I_lines, pt1, pt2, (255,0,0), 1, cv.LINE_AA)
+
+        plt.figure()
+        plt.title('All detected lines')
+        plt.imshow(I_lines)
+        plt.axis('off')
+        plt.show()
+
+    # Angle and rho arrays
+    lines_angles = lines[:,0,1]
+    lines_rhos = lines[:,0,0]
+
+    # Find unique lines angles detected
+    unique_angles = np.unique(lines_angles)
+    blankings = [h_blanking, v_blanking]
+
+    # Initiate blanking lines variable
+    blanking_lines = []
+
+    for angle, blanking in zip(unique_angles, blankings):
+        
+        # Keep lines with certain angle
+        angle_lines = lines[lines[:,0,1]==angle]
+        angle_lines = angle_lines[:,0,:]
+
+        # Keep the pair with rho distance that equals blanking
+        # First, compute the distance matrix over all rhos:
+        rho_angle_lines = np.array(angle_lines[:,0]).reshape(-1,1)
+
+        rho_distances = np.abs(np.abs(distance_matrix(rho_angle_lines, rho_angle_lines)) - blanking)
+
+        # Find minimum index
+        pair_lines_idx = np.unravel_index(rho_distances.argmin(), rho_distances.shape)
+
+        # Add blanking limit line
+        for line in pair_lines_idx:
+            blanking_lines.append(angle_lines[line])
+
+    # List to array
+    blanking_lines = np.array(blanking_lines)
+
+    # Show blanking limit lines
+    if debug:    
+        I_lines = I_gray.copy()
+
+        for line in blanking_lines:
+            rho = line[0]
+            theta = line[1]
+            a = np.cos(theta)
+            b = np.sin(theta)
+            x0 = a * rho
+            y0 = b * rho
+            pt1 = (int(x0 + rho_max*(-b)), int(y0 + rho_max*(a)))
+            pt2 = (int(x0 - rho_max*(-b)), int(y0 - rho_max*(a)))
+
+            cv.line(I_lines, pt1, pt2, (255,0,0), 3, cv.LINE_AA)
+
+        plt.figure(figsize=(12,10))
+        plt.title('Blanking limit lines')
+        plt.imshow(I_lines)
+        plt.axis('off')
+        plt.show()
+
+    # Initialize top-left corner blanking lines to find intersection
+    # These lines statisfies to be the ones with bigger rho value
+    blanking_start = []
+    unique_angles = np.unique(blanking_lines[:,1])
+    for angulo in unique_angles:
+        angle_lines = blanking_lines[blanking_lines[:,1]==angulo]
+        max_rho_line = angle_lines[np.argmax(angle_lines[:,0])]
+        blanking_start.append(max_rho_line)
+
+    if len(blanking_start)!=2:
+        return -1
+
+    if debug:
+        I_lines = I_gray.copy()
+        for line in blanking_start:
+            rho = line[0]
+            theta = line[1]
+            a = np.cos(theta)
+            b = np.sin(theta)
+            x0 = a * rho
+            y0 = b * rho
+            pt1 = (int(x0 + rho_max*(-b)), int(y0 + rho_max*(a)))
+            pt2 = (int(x0 - rho_max*(-b)), int(y0 - rho_max*(a)))
+
+            cv.line(I_lines, pt1, pt2, (255,0,0), 3, cv.LINE_AA)
+            
+        plt.figure(figsize=(12,10))
+        plt.title('Blanking start lines')
+        plt.imshow(I_lines)
+        plt.axis('off')
+        plt.show()
+    
+    # Find blanking start lines intersection coordinates
+    x_shift, y_shift = find_intersection(blanking_start[0],blanking_start[1])
+
+    # Adjust to active image only (remove all blanking)
+    I_shift = I[pad_len:,pad_len:]
+    I_shift = np.roll(I_shift, -x_shift+pad_len, axis=0)
+    I_shift = np.roll(I_shift, -y_shift+pad_len, axis=1)
+    I_shift = I_shift[:v_active,:h_active]
+
+    if debug:
+        plt.figure(figsize=(12,10))
+        plt.title('Blanking removed image')
+        plt.imshow(I_shift)
+        plt.axis('off')
+        plt.show()
+    
+    return I_shift
+
+def preprocess_raw_capture(I, h_active, v_active, 
+                           h_blanking, v_blanking, debug=False):
+    """  
+    Center raw captured image, filter noise and adjust the contrast
+    """
+
+    # Center image. Returns -1 if no sufficient lines where detected
+    # In the latter case, use image as is without centering
+    is_centered = True
+    I_shift_fix = apply_blanking_shift(I,
+                                       h_active=h_active, v_active=v_active,
+                                       h_blanking=h_blanking, v_blanking=v_blanking,
+                                       debug=debug
+                                       )
+    if np.shape(I_shift_fix) == ():
+        I_shift_fix = I.copy()
+        is_centered = False
+    
+    # Remove outliers with median thresholding heuristic
+    # Default: radius=3, threshold=20
+    I_no_outliers = remove_outliers(I_shift_fix)
+
+    # Stretch dynamic range to [0,255]
+    I_out = adjust_dynamic_range(I_no_outliers)
+
+    if debug:
+        plt.figure(figsize=(12,10))
+        ax0 = plt.subplot(3,1,1)
+        ax0.imshow(I_shift_fix, interpolation='none')
+        ax0.set_title('Centered image'*is_centered + 'Image'*(~is_centered))
+        ax0.axis('off')
+        ax1 = plt.subplot(3,1,2, sharex=ax0, sharey=ax0)
+        ax1.imshow(I_no_outliers, interpolation='none')
+        ax1.set_title('Outliers removed')
+        ax1.axis('off')
+        ax1 = plt.subplot(3,1,3, sharex=ax0, sharey=ax0)
+        ax1.imshow(I_out, interpolation='none')
+        ax1.set_title('Contrast adjusted')
+        ax1.axis('off')
+        plt.show()
+
+    return I_out

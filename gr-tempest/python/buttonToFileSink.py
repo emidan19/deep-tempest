@@ -16,15 +16,16 @@ from PIL import Image
 
 ### Deep-TEMPEST imports
 import os
-import math
 import argparse
-import time
-import random
 import torch
 import sys
+
+# Adding gr-tempest/python folder to system path
+dtutils_path = '/home/emidan19/deep-tempest/gr-tempest/python'
+sys.path.insert(0,dtutils_path)
+from DTutils import preprocess_raw_capture, apply_blanking_shift
+
 # Adding KAIR folder to the system path
-# current_file_path = os.path.abspath(__file__)
-# sys.path.insert(0, os.path.join(current_file_path,'../../KAIR/'))
 kair_path = '/home/emidan19/deep-tempest/KAIR'
 sys.path.insert(0,kair_path)
 from utils import utils_option as option
@@ -109,32 +110,49 @@ class buttonToFileSink(gr.sync_block):
         self.message_port_register_in(pmt.intern("en")) #declare message port
         self.set_msg_handler(pmt.intern("en"), self.handle_msg) #declare handler for messages
         self.stream_image = [] # initialize list to apppend samples
+
+        # TODO: fancy active-blanking resolution identification 
+        self.V_active = (self.V_size==1125)*1080 + (self.V_size==1000)*900  + (self.V_size==750) *720  + (self.V_size==628) *600 + (self.V_size==525)*480
+        self.H_active = (self.H_size==2200)*1920 + (self.H_size==1800)*1600 + (self.H_size==1650)*1280 + (self.H_size==1056)*800 + (self.H_size==800)*640
+
+        self.V_blanking = self.V_size - self.V_active
+        self.H_blanking = self.H_size - self.H_active
+
         if enhance_image:
             # Load model
             self.model = load_enhancement_model()
             # Define inference function
             def inference (img):
-                # Preprocess image to network input
-                img_L = img[:,:,:2]
+                # Preprocess image to network input 
+                # (correct shift, remove sparkle noise and to float tensor)
+                img_L = preprocess_raw_capture(img, h_active=self.H_active, v_active=self.V_active,
+                                       h_blanking=self.H_blanking, v_blanking=self.V_blanking)
+                img_L = img_L[:,:,:2]
                 img_L = util.uint2single(img_L)
                 img_L = util.single2tensor4(img_L)
 
                 # Model inference on image
                 img_E = self.model(img_L)
                 img_E = util.tensor2uint(img_E)
+
                 return img_E
             
             self.inference = inference
         else:
-            # No enhancement. 
+            # No enhancement. Correct shift
             def inference(img):
-                return img
+                img_out = apply_blanking_shift(img, h_active=self.H_active, v_active=self.V_active,
+                                       h_blanking=self.H_blanking, v_blanking=self.V_blanking)
+                # Check for any errors. If so, return original image
+                if np.shape(img_out) == ():
+                    img_out = img.copy()
+                return img_out
             self.inference = inference
 
 
-    def work(self, input_items, output_items):      # Don't process, just save samples
-
-        self.available_samples = len(input_items[0]) #available samples at the input for read at this moment
+    def work(self, input_items, output_items):      
+        # Don't process, just save available samples
+        self.available_samples = len(input_items[0]) 
 
         if self.en == True:
 
@@ -143,19 +161,6 @@ class buttonToFileSink(gr.sync_block):
             self.stream_image = self.stream_image[-self.num_samples:]
 
             if len(self.stream_image)==self.num_samples:#or self.remaining2Save > 0:
-                
-                # if self.remaining2Save > 0 and self.remaining2Save < self.available_samples: #remaining to save from last time, don't care if true was pressed or not
-                #     self.savingSamples = self.remaining2Save
-                #     self.remaining2Save = 0 #no more remaining after this
-                # elif self.remaining2Save > 0: #the remaining still are more than available
-                #     self.savingSamples = self.available_samples #save whatever available
-                #     self.remaining2Save = self.remaining2Save - self.savingSamples # refresh whatever left to save next time
-                # else: #not remaining from last time but pressed true
-                #     if self.num_samples > self.available_samples: #too large for the available samples
-                #         self.savingSamples = self.available_samples # save whatever available and wait for the remaining
-                #         self.remaining2Save = self.num_samples - self.savingSamples #remaining to save
-                #     else:
-                #         self.savingSamples = self.num_samples # enough samples available when pressing button
                 
                 # Save the number of samples calculated before
                 self.save_samples() 

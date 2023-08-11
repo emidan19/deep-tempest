@@ -98,7 +98,7 @@ blocks:
     start: '0'
     step: '1'
     stop: int(4096*1.5)
-    value: '1056'
+    value: '1800'
     widget: counter
   states:
     bus_sink: false
@@ -111,7 +111,7 @@ blocks:
   id: variable
   parameters:
     comment: ''
-    value: '800'
+    value: '1600'
   states:
     bus_sink: false
     bus_source: false
@@ -143,7 +143,7 @@ blocks:
     start: '0'
     step: '1'
     stop: int(2160*1.5)
-    value: '628'
+    value: '1000'
     widget: counter
   states:
     bus_sink: false
@@ -156,7 +156,7 @@ blocks:
   id: variable
   parameters:
     comment: ''
-    value: '600'
+    value: '900'
   states:
     bus_sink: false
     bus_source: false
@@ -788,7 +788,7 @@ blocks:
     alias: ''
     blanking: 'True'
     comment: ''
-    image_file: /home/emidan19/deep-tempest/images/VAMO!!.png
+    image_file: /home/emidan19/deep-tempest/images/1600x900_google.png
     maxoutbuf: '0'
     minoutbuf: '0'
     mode: '1'
@@ -839,25 +839,6 @@ blocks:
     bus_structure: null
     coordinate: [2048, 924.0]
     rotation: 180
-    state: enabled
-- name: tempest_sync_detector_0_0
-  id: tempest_sync_detector
-  parameters:
-    affinity: ''
-    alias: ''
-    comment: ''
-    hblanking: interpolatedHblank
-    hscreen: interpolatedHscreen
-    maxoutbuf: '0'
-    minoutbuf: '0'
-    vblanking: Vblank
-    vscreen: Vsize-Vblank
-  states:
-    bus_sink: false
-    bus_source: false
-    bus_structure: null
-    coordinate: [1440, 676.0]
-    rotation: 0
     state: enabled
 - name: uhd_usrp_source_0
   id: uhd_usrp_source
@@ -1256,7 +1237,7 @@ blocks:
 connections:
 - [FFT_autocorrelation_0_0, '0', tempest_fft_peak_fine_sampling_sync_0_0, '0']
 - [Keep_1_in_N_Frames_0, '0', FFT_autocorrelation_0_0, '0']
-- [Keep_1_in_N_Frames_0, '0', tempest_sync_detector_0_0, '0']
+- [Keep_1_in_N_Frames_0, '0', blocks_delay_0_0, '0']
 - [analog_sig_source_x_0, '0', blocks_multiply_xx_0, '1']
 - [binary_serializer_0, '0', blocks_add_xx_0, '0']
 - [binary_serializer_0, '0', blocks_float_to_complex_0, '0']
@@ -1279,10 +1260,8 @@ connections:
 - [tempest_TMDS_image_source_0, '2', blocks_null_sink_0, '1']
 - [tempest_fft_peak_fine_sampling_sync_0_0, '0', qtgui_time_sink_x_1, '0']
 - [tempest_fft_peak_fine_sampling_sync_0_0, en, FFT_autocorrelation_0_0, en]
-- [tempest_fft_peak_fine_sampling_sync_0_0, en, tempest_sync_detector_0_0, en]
 - [tempest_fft_peak_fine_sampling_sync_0_0, rate, uhd_usrp_source_0, command]
 - [tempest_normalize_flow_0, '0', blocks_float_to_short_0, '0']
-- [tempest_sync_detector_0_0, '0', blocks_delay_0_0, '0']
 - [uhd_usrp_source_0, '0', Keep_1_in_N_Frames_0, '0']
 
 metadata:

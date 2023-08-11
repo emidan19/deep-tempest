@@ -41,14 +41,14 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [464, 148]
+    coordinate: [448, 148.0]
     rotation: 0
     state: enabled
 - name: Hsize
   id: variable
   parameters:
     comment: ''
-    value: '1800'
+    value: '2200'
   states:
     bus_sink: false
     bus_source: false
@@ -60,7 +60,7 @@ blocks:
   id: variable
   parameters:
     comment: ''
-    value: '1600'
+    value: '1920'
   states:
     bus_sink: false
     bus_source: false
@@ -77,14 +77,14 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [384, 148]
+    coordinate: [352, 148.0]
     rotation: 0
     state: enabled
 - name: Vsize
   id: variable
   parameters:
     comment: ''
-    value: '1000'
+    value: '1125'
   states:
     bus_sink: false
     bus_source: false
@@ -96,7 +96,7 @@ blocks:
   id: variable
   parameters:
     comment: ''
-    value: '900'
+    value: '1080'
   states:
     bus_sink: false
     bus_source: false
@@ -113,7 +113,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [304, 148]
+    coordinate: [280, 148.0]
     rotation: 0
     state: enabled
 - name: epsilon_channel
@@ -209,7 +209,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [232, 148]
+    coordinate: [216, 148.0]
     rotation: 0
     state: enabled
 - name: interpolatedHsize
@@ -285,8 +285,8 @@ blocks:
     orient: Qt.Horizontal
     rangeType: float
     start: '0'
-    step: 1e-4
-    stop: 2e-1
+    step: 1e-3
+    stop: '2'
     value: '0'
     widget: counter_slider
   states:
@@ -450,6 +450,22 @@ blocks:
     coordinate: [160, 408.0]
     rotation: 0
     state: enabled
+- name: blocks_complex_to_float_0
+  id: blocks_complex_to_float
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    vlen: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [824, 712.0]
+    rotation: 180
+    state: true
 - name: blocks_complex_to_mag_0
   id: blocks_complex_to_mag
   parameters:
@@ -463,9 +479,9 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [824, 656.0]
+    coordinate: [832, 568.0]
     rotation: 180
-    state: enabled
+    state: disabled
 - name: blocks_delay_0
   id: blocks_delay
   parameters:
@@ -736,7 +752,7 @@ blocks:
     alias: ''
     blanking: 'True'
     comment: ''
-    image_file: /home/emidan19/Desktop/deep-tempest/capturas/fine-tuning-images/Abolghasemi_Pay_Attention_-_Robustifying_a_Deep_Visuomotor_Policy_Through_Task-Focused_CVPR_2019_paper.png
+    image_file: /home/emidan19/Desktop/deep-tempest/drunet/notebooks/images/mattermost_screen.png
     maxoutbuf: '0'
     minoutbuf: '0'
     mode: '1'
@@ -750,7 +766,7 @@ blocks:
 - name: tempest_buttonToFileSink_0
   id: tempest_buttonToFileSink
   parameters:
-    Filename: /home/emidan19/Desktop/captura_simulada
+    Filename: /home/emidan19/Desktop/captura_simulada_shiftfix
     H_size: Hsize
     V_size: Vsize
     affinity: ''
@@ -896,7 +912,9 @@ connections:
 - [binary_serializer_0_0_0, '0', blocks_add_xx_0, '2']
 - [blocks_add_xx_0, '0', blocks_float_to_complex_0, '0']
 - [blocks_add_xx_0, '0', interp_fir_filter_xxx_0, '0']
+- [blocks_complex_to_float_0, '0', tempest_normalize_flow_0, '0']
 - [blocks_complex_to_mag_0, '0', tempest_normalize_flow_0, '0']
+- [blocks_delay_0, '0', blocks_complex_to_float_0, '0']
 - [blocks_delay_0, '0', blocks_complex_to_mag_0, '0']
 - [blocks_delay_0, '0', tempest_buttonToFileSink_0, '0']
 - [blocks_float_to_complex_0, '0', blocks_throttle_0_0, '0']
