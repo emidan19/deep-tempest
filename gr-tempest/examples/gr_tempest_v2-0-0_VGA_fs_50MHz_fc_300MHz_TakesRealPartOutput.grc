@@ -62,7 +62,7 @@ blocks:
     min_len: '200'
     orient: Qt.Horizontal
     rangeType: float
-    start: '1'
+    start: '0'
     step: '1'
     stop: '100'
     value: '10'
@@ -996,13 +996,13 @@ blocks:
 - name: tempest_buttonToFileSink_0
   id: tempest_buttonToFileSink
   parameters:
-    Filename: /home/emidan19/Desktop/captura_mejorada
+    Filename: /home/emidan19/Desktop/deep-tempest/capturas/fine-tuning-images/159/159
     H_size: Hsize
     V_size: Vsize
     affinity: ''
     alias: ''
     comment: ''
-    enhance_image: 'True'
+    enhance_image: 'False'
     input_width: interpolatedHsize
   states:
     bus_sink: false
@@ -1072,25 +1072,6 @@ blocks:
     bus_source: false
     bus_structure: null
     coordinate: [1048, 956.0]
-    rotation: 0
-    state: enabled
-- name: tempest_sync_detector_0
-  id: tempest_sync_detector
-  parameters:
-    affinity: ''
-    alias: ''
-    comment: ''
-    hblanking: interpolatedHblank
-    hscreen: interpolatedHscreen
-    maxoutbuf: '0'
-    minoutbuf: '0'
-    vblanking: Vblank
-    vscreen: Vsize-Vblank
-  states:
-    bus_sink: false
-    bus_source: false
-    bus_structure: null
-    coordinate: [960, 676.0]
     rotation: 0
     state: enabled
 - name: tempest_tempest_msgbtn_0
@@ -1528,14 +1509,12 @@ connections:
 - [blocks_multiply_xx_0_0, '0', blocks_complex_to_real_0, '0']
 - [blocks_multiply_xx_0_0, '0', tempest_buttonToFileSink_0, '0']
 - [blocks_throttle_0, '0', Keep_1_in_N_Frames_0, '0']
-- [interp_fir_filter_xxx_1, '0', tempest_sync_detector_0, '0']
+- [interp_fir_filter_xxx_1, '0', blocks_delay_0, '0']
 - [single_pole_iir_filter_xx_0, '0', blocks_complex_to_arg_0, '0']
 - [tempest_fft_peak_fine_sampling_sync_0_0, '0', qtgui_time_sink_x_1, '0']
-- [tempest_fft_peak_fine_sampling_sync_0_0, en, tempest_sync_detector_0, en]
 - [tempest_fft_peak_fine_sampling_sync_0_0, rate, uhd_usrp_source_0, command]
 - [tempest_normalize_flow_0, '0', blocks_float_to_short_0, '0']
 - [tempest_screenshot, pressed, tempest_buttonToFileSink_0, en]
-- [tempest_sync_detector_0, '0', blocks_delay_0, '0']
 - [tempest_tempest_msgbtn_0, pressed, tempest_fft_peak_fine_sampling_sync_0_0, en]
 - [uhd_usrp_source_0, '0', Keep_1_in_N_Frames_0, '0']
 
