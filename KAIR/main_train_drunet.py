@@ -267,10 +267,15 @@ def main(json_path='options/train_drunet.json'):
                 current_psnr = util.calculate_psnr(E_img, H_img, border=border)
                 current_ssim = util.calculate_ssim(E_img, H_img, border=border)
                 current_edgeJaccard = util.calculate_edge_jaccard(E_img, H_img)
+                
                 # -----------------------
                 # calculate loss
                 # -----------------------
-                current_loss = model.G_lossfn(E_visual, H_visual)
+                sizes = E_visual.size()
+
+                current_loss = model.G_lossfn(torch.reshape(E_visual,(1,1,sizes[1],sizes[2])),
+                                            torch.reshape(H_visual,(1,1,sizes[1],sizes[2])))
+        
 
                 logger.info('{:->4d}--> {:>10s} | PSNR = {:<4.2f}dB ; SSIM = {:.3f} ; edgeJaccard = {:.3f} ; G_loss = {:.3e}'.format(idx, image_name_ext, current_psnr, current_ssim, current_edgeJaccard, current_loss))
 
