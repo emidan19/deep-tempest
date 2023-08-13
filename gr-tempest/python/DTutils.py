@@ -510,7 +510,8 @@ def apply_blanking_shift(I, h_active=1600, v_active=900,
                          h_blanking=200,v_blanking=100, 
                          pad_len=300, debug=False):
     """  
-    Find
+    Correct capture shift to center image using VESA blanking information.
+    The image must not have geometric distortion (generaly caused by sampling error)
     """
     
     if debug:
@@ -531,7 +532,7 @@ def apply_blanking_shift(I, h_active=1600, v_active=900,
     pad_size_gray = ((pad_len,0),(pad_len,0))
     pad_size = ((pad_len,0),(pad_len,0),(0,0))
     I_gray = np.pad(I_gray,pad_size_gray,'wrap')
-    I = np.pad(I,pad_size,'wrap')
+    I_pad = np.pad(I,pad_size,'wrap')
 
     # Edge-detector with Canny filter with empirical parameters
     I_edge = cv.Canny(I_gray,40,50,apertureSize = 3)    # sin blur
@@ -541,7 +542,7 @@ def apply_blanking_shift(I, h_active=1600, v_active=900,
         # Show padded image and edges
         plt.figure()
         plt.title(f'Original image wrap-padded {pad_len} pixels up and left sided')
-        plt.imshow(I)
+        plt.imshow(I_pad)
         plt.axis('off')
         plt.show()
         plt.figure()
@@ -646,7 +647,8 @@ def apply_blanking_shift(I, h_active=1600, v_active=900,
         blanking_start.append(max_rho_line)
 
     if len(blanking_start)!=2:
-        return -1
+        print("Not enough lines detected. Returning original image")
+        return I
 
     if debug:
         I_lines = I_gray.copy()
@@ -672,7 +674,7 @@ def apply_blanking_shift(I, h_active=1600, v_active=900,
     x_shift, y_shift = find_intersection(blanking_start[0],blanking_start[1])
 
     # Adjust to active image only (remove all blanking)
-    I_shift = I[pad_len:,pad_len:]
+    I_shift = I_pad[pad_len:,pad_len:]
     I_shift = np.roll(I_shift, -x_shift+pad_len, axis=0)
     I_shift = np.roll(I_shift, -y_shift+pad_len, axis=1)
     I_shift = I_shift[:v_active,:h_active]
@@ -692,7 +694,7 @@ def preprocess_raw_capture(I, h_active, v_active,
     Center raw captured image, filter noise and adjust the contrast
     """
 
-    # Center image. Returns -1 if no sufficient lines where detected
+    # Center image. Returns input image if no sufficient lines where detected
     # In the latter case, use image as is without centering
     is_centered = True
     I_shift_fix = apply_blanking_shift(I,
@@ -700,9 +702,6 @@ def preprocess_raw_capture(I, h_active, v_active,
                                        h_blanking=h_blanking, v_blanking=v_blanking,
                                        debug=debug
                                        )
-    if np.shape(I_shift_fix) == ():
-        I_shift_fix = I.copy()
-        is_centered = False
     
     # Remove outliers with median thresholding heuristic
     # Default: radius=3, threshold=20
@@ -712,6 +711,8 @@ def preprocess_raw_capture(I, h_active, v_active,
     I_out = adjust_dynamic_range(I_no_outliers)
 
     if debug:
+        is_centered = (I == I_shift_fix)
+
         plt.figure(figsize=(12,10))
         ax0 = plt.subplot(3,1,1)
         ax0.imshow(I_shift_fix, interpolation='none')

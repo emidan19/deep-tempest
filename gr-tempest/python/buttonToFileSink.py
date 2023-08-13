@@ -143,9 +143,6 @@ class buttonToFileSink(gr.sync_block):
             def inference(img):
                 img_out = apply_blanking_shift(img, h_active=self.H_active, v_active=self.V_active,
                                        h_blanking=self.H_blanking, v_blanking=self.V_blanking)
-                # Check for any errors. If so, return original image
-                if np.shape(img_out) == ():
-                    img_out = img.copy()
                 return img_out
             self.inference = inference
 
