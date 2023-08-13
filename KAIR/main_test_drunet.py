@@ -167,9 +167,9 @@ def main(json_path='options/test_drunet.json'):
 
         logger.info(f'Inference of {img_name} completed. Saved at {img_dir}.')
 
-        # -----------------------
-        # calculate PSNR and SSIM
-        # -----------------------
+        # ----------------------------------
+        # calculate PSNR, SSIM and Jaccard
+        # ----------------------------------
         current_psnr = util.calculate_psnr(img_E, img_H, border=border)
         current_ssim = util.calculate_ssim(img_E, img_H, border=border)
         current_edgeJaccard = util.calculate_edge_jaccard(img_E, img_H)

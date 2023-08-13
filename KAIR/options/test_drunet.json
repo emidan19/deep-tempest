@@ -13,30 +13,19 @@
   }
 
   , "datasets": {
-    "train": {
-      "name": "train_dataset"           // just name
-      , "dataset_type": "ffdnet"         // "dncnn" | "dnpatch" for dncnn,  | "fdncnn" | "ffdnet" | "sr" | "srmd" | "dpsr" | "plain" | "plainpatch"
-      , "dataroot_H": "web_subset/ground_truth" // path of H training dataset
-      , "sigma": [0, 0]      // 15, 25, 50 for DnCNN | [0, 75] for FFDNet and FDnCNN
-      , "num_patches_per_image": 20   // number of random patches of training image
-      , "dataroot_L": "web_subset/capturas" // path of L training dataset, if using noisy H type: null
-      , "H_size": 128                    // patch size 40 | 64 | 96 | 128 | 192
-      , "dataloader_shuffle": false
-      , "dataloader_num_workers": 8
-      , "dataloader_batch_size": 64     // batch size 1 | 16 | 32 | 48 | 64 | 128
-    }
-    , "test": {
+
+     "test": {
       "name": "test_dataset"            // just name
       , "dataset_type": "ffdnet"         // "dncnn" | "dnpatch" for dncnn,  | "fdncnn" | "ffdnet" | "sr" | "srmd" | "dpsr" | "plain" | "plainpatch"
-      , "dataroot_H": "web_subset/ground_truth"  // path of H testing dataset
-      , "dataroot_L": "web_subset/capturas_splitter"   // path of L testing dataset
-      , "sigma_test": 0 // 15, 25, 50 for DnCNN and ffdnet
+      , "dataroot_H": "path/to/test/images/ground-truth"  // path of H testing dataset (if pathH=pathL we add noise)
+      , "dataroot_L": "path/to/test/images/noisy"         // path of L testing dataset
+      , "sigma_test": 20 // 15, 25, 50 for DnCNN and ffdnet
     }
   }
 
   , "netG": {
     "net_type": "drunet" // "dncnn" | "fdncnn" | "ffdnet" | "srmd" | "dpsr" | "srresnet0" |  "srresnet1" | "rrdbnet" 
-    , "in_nc": 2        // input channel number
+    , "in_nc": 1        // input channel number
     , "out_nc": 1       // ouput channel number
     , "nc": [64, 128, 256, 512]          // 64 for "dncnn"
     , "nb": 4          // 17 for "dncnn", 20 for dncnn3, 16 for "srresnet"

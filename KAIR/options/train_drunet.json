@@ -16,11 +16,10 @@
     "train": {
       "name": "train_dataset"           // just name
       , "dataset_type": "ffdnet"         // "dncnn" | "dnpatch" for dncnn,  | "fdncnn" | "ffdnet" | "sr" | "srmd" | "dpsr" | "plain" | "plainpatch"
-      , "dataroot_H": "trainsets/ground-truth"// path of H training dataset
-      , "dataroot_L": "trainsets/simulations" // path of L training dataset, if using noisy H type: null
+      , "dataroot_H": "path/to/train/images/ground-truth" // path of H training dataset
+      , "dataroot_L": "path/to/train/images/noisy" // path of L training dataset, if using noisy H type: null
       , "sigma": [0, 20]      // 15, 25, 50 for DnCNN | [0, 75] for FFDNet and FDnCNN
       , "use_all_patches": true     // use or not all image patches
-      , "skip_natural_patches": false// keep only non-natural image patches/text based image patches
       , "num_patches_per_image": 21   // number of random patches of training image, if not using all patches
       , "H_size": 256                    // patch size 40 | 64 | 96 | 128 | 192
       , "dataloader_shuffle": true
@@ -30,9 +29,9 @@
     , "test": {
       "name": "test_dataset"            // just name
       , "dataset_type": "ffdnet"         // "dncnn" | "dnpatch" for dncnn,  | "fdncnn" | "ffdnet" | "sr" | "srmd" | "dpsr" | "plain" | "plainpatch"
-      , "dataroot_H": "valsets/ground-truth"  // path of H testing dataset
-      , "dataroot_L": "valsets/simulations"   // path of L testing dataset
-      , "sigma_test": 15 // 15, 25, 50 for DnCNN and ffdnet
+      , "dataroot_H": "path/to/val/images/ground-truth"  // path of H testing dataset
+      , "dataroot_L": "path/to/val/images/noisy"   // path of L testing dataset
+      , "sigma_test": 20 // 15, 25, 50 for DnCNN and ffdnet
     }
   }
 
