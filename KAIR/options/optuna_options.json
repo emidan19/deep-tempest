@@ -8,24 +8,29 @@
   , "n_channels_datasetload": 3 // broadcast to image training set
 
   , "path": {
-    "root": "denoising"            // "denoising" | "superresolution"
-    , "pretrained_netG": null      // path of pretrained model
+    "root": "optuna_hparams"            // "denoising" | "superresolution"
+    , "pretrained_netG": "denoising/drunet/models/520_G.pth"    // path of pretrained model, if model from scratch type: null
+  }
+
+  , "optuna":{
+     "n_trials": 50
+    ,"trial_epochs": 10  // Maximum epochs per trial
+    ,"metric": "edgeJaccard"   // "edgeJaccard" | "PSNR" | "SSIM" | "CER" | "MSE"
+    
   }
 
   , "datasets": {
     "train": {
       "name": "train_dataset"           // just name
       , "dataset_type": "ffdnet"         // "dncnn" | "dnpatch" for dncnn,  | "fdncnn" | "ffdnet" | "sr" | "srmd" | "dpsr" | "plain" | "plainpatch"
-      , "dataroot_H": "trainsets/ground-truth"// path of H training dataset
+      , "dataroot_H": "trainsets/ground-truth" // path of H training dataset
       , "dataroot_L": "trainsets/simulations" // path of L training dataset, if using noisy H type: null
-      , "sigma": [0, 20]      // 15, 25, 50 for DnCNN | [0, 75] for FFDNet and FDnCNN
-      , "use_all_patches": true     // use or not all image patches
-      , "skip_natural_patches": false// keep only non-natural image patches/text based image patches
-      , "num_patches_per_image": 21   // number of random patches of training image, if not using all patches
+      , "sigma": [0, 15]      // 15, 25, 50 for DnCNN | [0, 75] for FFDNet and FDnCNN
+      , "num_patches_per_image": 21   // number of random patches of training image
       , "H_size": 256                    // patch size 40 | 64 | 96 | 128 | 192
       , "dataloader_shuffle": true
       , "dataloader_num_workers": 8
-      , "dataloader_batch_size": 32     // batch size 1 | 16 | 32 | 48 | 64 | 128
+      , "dataloader_batch_size": 28     // batch size 1 | 16 | 32 | 48 | 64 | 128
     }
     , "test": {
       "name": "test_dataset"            // just name
@@ -38,7 +43,7 @@
 
   , "netG": {
     "net_type": "drunet" // "dncnn" | "fdncnn" | "ffdnet" | "srmd" | "dpsr" | "srresnet0" |  "srresnet1" | "rrdbnet" 
-    , "in_nc": 1        // input channel number
+    , "in_nc": 2        // input channel number
     , "out_nc": 1       // ouput channel number
     , "nc": [64, 128, 256, 512]          // 64 for "dncnn"
     , "nb": 4          // 17 for "dncnn", 20 for dncnn3, 16 for "srresnet"
@@ -49,34 +54,32 @@
     , "upsample_mode": "convtranspose"  // "pixelshuffle" | "convtranspose" | "upconv"
     , "downsample_mode": "strideconv"   // "strideconv" | "avgpool" | "maxpool"
     , "bias": false//
-    , "init_type": "kaiming_normal"         // "orthogonal" | "normal" | "uniform" | "xavier_normal" | "xavier_uniform" | "kaiming_normal" | "kaiming_uniform"
+    , "init_type": "orthogonal"         // "orthogonal" | "normal" | "uniform" | "xavier_normal" | "xavier_uniform" | "kaiming_normal" | "kaiming_uniform"
     , "init_bn_type": "uniform"         // "uniform" | "constant"
     , "init_gain": 0.2
   }
 
   , "train": {
-      "epochs": 200                      // number of epochs to train
-    , "G_lossfn_type": "tv"               // "l1" preferred | tv | "l2sum" | "l2" | "ssim" 
+      "epochs": 1000                      // number of epochs to train
+    , "G_lossfn_type": "tv"               // "tv" | "l1" | "l2sum" | "l2" | "ssim" 
     , "G_lossfn_weight": 1.0            // default
     , "G_tvloss_weight": 1.0            // total variation weight
     , "G_tvloss_reduction": "mean"       // "sum" | "mean": Reduction for TV loss 
 
     , "G_optimizer_type": "adam"        // fixed, adam is enough
-    , "G_optimizer_lr": 1e-4 // learning rate
+    , "G_optimizer_lr": 1e-4           // learning rate
     , "G_optimizer_clipgrad": null      // unused
 
     , "G_scheduler_type": "MultiStepLR" // "MultiStepLR" is enough
-    , "G_scheduler_milestones": [] // as batch iters
-    , "G_scheduler_iter_step": 10180000 // use gamma factor on lr every this number of iter steps, null if using milestones
-    , "G_scheduler_gamma": 0.5  //
+    , "G_scheduler_milestones": [1600,  3200,  4800,  6400,  8000,  9600, 11200, 12800, 14400]
+    , "G_scheduler_gamma": 0.1  //
 
     , "G_regularizer_orthstep": null    // unused
     , "G_regularizer_clipstep": null    // unused
     
-    // epoch checkpoints
-    , "checkpoint_test": 1            // for testing print
-    , "checkpoint_test_save": 5       // for testing image saving
-    , "checkpoint_save": 10           // for saving model
-    , "checkpoint_print": 1           // for loss print
+    // iteration (batch step) checkpoints
+    , "checkpoint_test": 1600           // for testing
+    , "checkpoint_save": 3999           // for saving model
+    , "checkpoint_print": 16           // for print
   }
 }

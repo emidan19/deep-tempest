@@ -4,6 +4,7 @@ import random
 import numpy as np
 import torch
 import cv2
+from sklearn.metrics import jaccard_score
 from torchvision.utils import make_grid
 from datetime import datetime
 # import torchvision.transforms as transforms
@@ -618,6 +619,23 @@ def channel_convert(in_c, tar_type, img_list):
 # metric, PSNR, SSIM and PSNRB
 # --------------------------------------------
 '''
+
+# --------------------------------------------
+# Jaccard index over images edges (edgeJaccard)
+# --------------------------------------------
+def calculate_edge_jaccard(img1, img2):
+
+    # Empyrical edges thresholds
+    thr1, thr2 = 230, 400
+
+    # Canny filtering
+    img1_canny = (cv2.Canny(img1,thr1,thr2,apertureSize = 3) > 0)*1
+    img2_canny = (cv2.Canny(img2,thr1,thr2,apertureSize = 3) > 0)*1
+
+    # Jaccard index
+    edge_jaccard= jaccard_score(img1_canny.ravel(),img2_canny.ravel())
+
+    return edge_jaccard
 
 
 # --------------------------------------------

@@ -98,7 +98,7 @@ class ModelPlain(ModelBase):
         elif G_lossfn_type == 'charbonnier':
             self.G_lossfn = CharbonnierLoss(self.opt_train['G_charbonnier_eps']).to(self.device)
         elif G_lossfn_type == 'tv':
-            self.G_lossfn = TVLoss(self.opt_train['G_tvloss_weight']).to(self.device)
+            self.G_lossfn = TVLoss(self.opt_train['G_tvloss_weight'], self.opt_train['G_tvloss_reduction']).to(self.device)
         else:
             raise NotImplementedError('Loss type [{:s}] is not found.'.format(G_lossfn_type))
         self.G_lossfn_weight = self.opt_train['G_lossfn_weight']
@@ -125,8 +125,14 @@ class ModelPlain(ModelBase):
     # ----------------------------------------
     def define_scheduler(self):
         if self.opt_train['G_scheduler_type'] == 'MultiStepLR':
+ 
+            if self.opt_train['G_scheduler_iter_step'] is None:
+                iter_LR_updates = self.opt_train['G_scheduler_milestones']
+            else:
+                iter_LR_update_step = self.opt_train['G_scheduler_iter_step']
+                iter_LR_updates = list(range(iter_LR_update_step, int(1e6),iter_LR_update_step))
             self.schedulers.append(lr_scheduler.MultiStepLR(self.G_optimizer,
-                                                            self.opt_train['G_scheduler_milestones'],
+                                                            iter_LR_updates,
                                                             self.opt_train['G_scheduler_gamma']
                                                             ))
         elif self.opt_train['G_scheduler_type'] == 'CosineAnnealingWarmRestarts':
@@ -165,7 +171,10 @@ class ModelPlain(ModelBase):
     def optimize_parameters(self, current_step):
         self.G_optimizer.zero_grad()
         self.netG_forward()
-        G_loss = self.G_lossfn_weight * self.G_lossfn(self.E, self.H)
+        if self.opt_train['G_lossfn_type'] == 'tv':
+            G_loss = self.G_lossfn(self.E, self.H)
+        else:
+            G_loss = self.G_lossfn_weight * self.G_lossfn(self.E, self.H)
         G_loss.backward()
 
         # ------------------------------------

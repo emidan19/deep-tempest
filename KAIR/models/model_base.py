@@ -9,7 +9,8 @@ class ModelBase():
     def __init__(self, opt):
         self.opt = opt                         # opt
         self.save_dir = opt['path']['models']  # save models
-        self.device = torch.device('cuda' if opt['gpu_ids'] is not None else 'cpu')
+        # self.device = torch.device('cuda' if opt['gpu_ids'] is not None else 'cpu')
+        self.device = torch.device('cuda' if len(opt['gpu_ids']) != 0 else 'cpu')
         self.is_train = opt['is_train']        # training or not
         self.schedulers = []                   # schedulers
 
@@ -62,7 +63,8 @@ class ModelBase():
             scheduler.step(n)
 
     def current_learning_rate(self):
-        return self.schedulers[0].get_lr()[0]
+        # return self.schedulers[0].get_lr()[0]
+        return self.schedulers[0].get_lr()[-1] # Above lr seems always fixed
 
     def requires_grad(self, model, flag=True):
         for p in model.parameters():
