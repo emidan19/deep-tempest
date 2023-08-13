@@ -48,7 +48,7 @@ blocks:
   id: variable
   parameters:
     comment: ''
-    value: '2200'
+    value: '1800'
   states:
     bus_sink: false
     bus_source: false
@@ -60,7 +60,7 @@ blocks:
   id: variable
   parameters:
     comment: ''
-    value: '1920'
+    value: '1600'
   states:
     bus_sink: false
     bus_source: false
@@ -84,7 +84,7 @@ blocks:
   id: variable
   parameters:
     comment: ''
-    value: '1125'
+    value: '1000'
   states:
     bus_sink: false
     bus_source: false
@@ -96,7 +96,7 @@ blocks:
   id: variable
   parameters:
     comment: ''
-    value: '1080'
+    value: '900'
   states:
     bus_sink: false
     bus_source: false
@@ -146,9 +146,9 @@ blocks:
     min_len: '200'
     orient: Qt.Horizontal
     rangeType: float
-    start: '-1'
-    step: 1e-5
-    stop: '1'
+    start: -1e-5
+    step: 1e-6
+    stop: 1e-5
     value: '0'
     widget: counter_slider
   states:
@@ -752,7 +752,7 @@ blocks:
     alias: ''
     blanking: 'True'
     comment: ''
-    image_file: /home/emidan19/Desktop/deep-tempest/drunet/notebooks/images/mattermost_screen.png
+    image_file: /home/emidan19/Desktop/deep-tempest/capturas/fine-tuning-images/159.png
     maxoutbuf: '0'
     minoutbuf: '0'
     mode: '1'
@@ -778,7 +778,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [744, 892.0]
+    coordinate: [752, 900.0]
     rotation: 180
     state: true
 - name: tempest_fine_sampling_synchronization_0
