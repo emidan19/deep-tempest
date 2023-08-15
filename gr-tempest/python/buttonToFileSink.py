@@ -21,11 +21,13 @@ import torch
 import sys
 
 # Adding gr-tempest/python folder to system path
+# TODO fix path to utils
 dtutils_path = '/home/emidan19/deep-tempest/gr-tempest/python'
 sys.path.insert(0,dtutils_path)
-from DTutils import preprocess_raw_capture, apply_blanking_shift
+from DTutils import apply_blanking_shift, remove_outliers, adjust_dynamic_range
 
 # Adding KAIR folder to the system path
+# TODO fix path to KAIR library
 kair_path = '/home/emidan19/deep-tempest/KAIR'
 sys.path.insert(0,kair_path)
 from utils import utils_option as option
@@ -103,6 +105,7 @@ class buttonToFileSink(gr.sync_block):
         self.input_width = input_width
         self.H_size = H_size
         self.V_size = V_size
+        self.enhance_image = enhance_image
         self.num_samples = int(input_width*V_size)
         self.en = False #default
         self.remaining2Save = 0
@@ -118,34 +121,9 @@ class buttonToFileSink(gr.sync_block):
         self.V_blanking = self.V_size - self.V_active
         self.H_blanking = self.H_size - self.H_active
 
-        if enhance_image:
+        if self.enhance_image:
             # Load model
             self.model = load_enhancement_model()
-            # Define inference function
-            def inference (img):
-                # Preprocess image to network input 
-                # (correct shift, remove sparkle noise and to float tensor)
-                img_L = preprocess_raw_capture(img, h_active=self.H_active, v_active=self.V_active,
-                                       h_blanking=self.H_blanking, v_blanking=self.V_blanking)
-                img_L = img_L[:,:,:2]
-                img_L = util.uint2single(img_L)
-                img_L = util.single2tensor4(img_L)
-
-                # Model inference on image
-                img_E = self.model(img_L)
-                img_E = util.tensor2uint(img_E)
-
-                return img_E
-            
-            self.inference = inference
-        else:
-            # No enhancement. Correct shift
-            def inference(img):
-                img_out = apply_blanking_shift(img, h_active=self.H_active, v_active=self.V_active,
-                                       h_blanking=self.H_blanking, v_blanking=self.V_blanking)
-                return img_out
-            self.inference = inference
-
 
     def work(self, input_items, output_items):      
         # Don't process, just save available samples
@@ -192,14 +170,47 @@ class buttonToFileSink(gr.sync_block):
         # Date and time of screenshot
         date_time = datetime.now().strftime("%d-%m-%Y_%H:%M:%S") 
 
-        # Create inference if using deep-tempest enhacenment
-        captured_image = self.inference(captured_image)
+        # Fix shift with blanking redundance information
+        capture_fix = apply_blanking_shift(captured_image, h_active=self.H_active, v_active=self.V_active,
+                                       h_blanking=self.H_blanking, v_blanking=self.V_blanking)
+        
+        if self.enhance_image:
+                
+            #######################################################################
+            ###  Preprocess image and create inference with deep-learning model ###
+            #######################################################################
 
-        # Save image as png
-        im = Image.fromarray(captured_image)
-        im.save(self.Filename+'-gr-tempest_screenshot_'+date_time+'.png')
-        # Show image at runtime
-        im.show()
+            # Remove outliers with median thresholding heuristic
+            img_L = remove_outliers(capture_fix)
+            # Stretch dynamic range to [0,255]
+            img_L = adjust_dynamic_range(img_L)
+            img_L = img_L[:,:,:2]
+            # uint8 to tensor
+            img_L = util.uint2single(img_L)
+            img_L = util.single2tensor4(img_L)
+            # Model inference on image
+            img_E = self.model(img_L)
+            capture_fix_enhanced = util.tensor2uint(img_E)
+
+            # Save image as png
+            im = Image.fromarray(capture_fix_enhanced)
+            im.save(self.Filename+'-gr-tempest_screenshot_enhanced'+date_time+'.png')
+            
+            # Captured image vs enhanced image
+            height, width = capture_fix.shape[:2]
+            imgshow = np.zeros((height, 2*width))
+            imgshow[:,:width] = np.mean(capture_fix,axis=2).astype('uint8')
+            imgshow[:,width:] = capture_fix_enhanced
+            # Show images at runtime
+            im = Image.fromarray(imgshow)
+            im.show()
+
+        # Save complex capture image as png
+        im = Image.fromarray(capture_fix)
+        if not(self.enhance_image):
+            im.save(self.Filename+'-gr-tempest_screenshot_'+date_time+'.png')
+            # Show image at runtime
+            im.show()
 
 
     # Handler of msg
