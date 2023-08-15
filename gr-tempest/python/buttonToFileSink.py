@@ -95,7 +95,7 @@ class buttonToFileSink(gr.sync_block):
     f"""
     Block that saves num_samples of complex samples after recieving a TRUE boolean message in the 'en' port
     """
-    def __init__(self, Filename = "output.png", input_width=740, H_size=2200, V_size=1125, enhance_image=False):
+    def __init__(self, Filename = "output.png", input_width=740, H_size=2200, V_size=1125, remove_blanking=False, enhance_image=False):
         gr.sync_block.__init__(self,
             name="buttonToFileSink",
             in_sig=[(np.complex64)],
@@ -106,6 +106,7 @@ class buttonToFileSink(gr.sync_block):
         self.H_size = H_size
         self.V_size = V_size
         self.enhance_image = enhance_image
+        self.remove_blanking = remove_blanking
         self.num_samples = int(input_width*V_size)
         self.en = False #default
         self.remaining2Save = 0
@@ -170,9 +171,11 @@ class buttonToFileSink(gr.sync_block):
         # Date and time of screenshot
         date_time = datetime.now().strftime("%d-%m-%Y_%H:%M:%S") 
 
-        # Fix shift with blanking redundance information
-        capture_fix = apply_blanking_shift(captured_image, h_active=self.H_active, v_active=self.V_active,
-                                       h_blanking=self.H_blanking, v_blanking=self.V_blanking)
+        # Check if removing blanking
+        if self.remove_blanking:
+            # Fix shift with blanking redundance information
+            captured_image = apply_blanking_shift(captured_image, h_active=self.H_active, v_active=self.V_active,
+                                        h_blanking=self.H_blanking, v_blanking=self.V_blanking)
         
         if self.enhance_image:
                 
@@ -181,7 +184,7 @@ class buttonToFileSink(gr.sync_block):
             #######################################################################
 
             # Remove outliers with median thresholding heuristic
-            img_L = remove_outliers(capture_fix)
+            img_L = remove_outliers(captured_image)
             # Stretch dynamic range to [0,255]
             img_L = adjust_dynamic_range(img_L)
             img_L = img_L[:,:,:2]
@@ -190,27 +193,27 @@ class buttonToFileSink(gr.sync_block):
             img_L = util.single2tensor4(img_L)
             # Model inference on image
             img_E = self.model(img_L)
-            capture_fix_enhanced = util.tensor2uint(img_E)
+            capture_enhanced = util.tensor2uint(img_E)
 
             # Save image as png
-            im = Image.fromarray(capture_fix_enhanced)
-            im.save(self.Filename+'-gr-tempest_screenshot_enhanced'+date_time+'.png')
+            im = Image.fromarray(capture_enhanced)
+            im.save(self.Filename+'-gr-tempest_screenshot_enhanced_'+date_time+'.png')
             
             # Captured image vs enhanced image
-            height, width = capture_fix.shape[:2]
+            height, width = captured_image.shape[:2]
             imgshow = np.zeros((height, 2*width))
-            imgshow[:,:width] = np.mean(capture_fix,axis=2).astype('uint8')
-            imgshow[:,width:] = capture_fix_enhanced
+            imgshow[:,:width] = np.mean(captured_image,axis=2).astype('uint8')
+            imgshow[:,width:] = capture_enhanced
             # Show images at runtime
             im = Image.fromarray(imgshow)
             im.show()
 
         # Save complex capture image as png
-        im = Image.fromarray(capture_fix)
+        im_complex = Image.fromarray(captured_image)
+        im_complex.save(self.Filename+'-gr-tempest_screenshot_'+date_time+'.png')
         if not(self.enhance_image):
-            im.save(self.Filename+'-gr-tempest_screenshot_'+date_time+'.png')
             # Show image at runtime
-            im.show()
+            im_complex.show()
 
 
     # Handler of msg

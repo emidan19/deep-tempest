@@ -14,7 +14,7 @@ templates:
 #     * default
 parameters:
 - id: Filename
-  label: output directory
+  label: Output directory
   dtype: file_save
 - id: input_width
   label: Input width
@@ -28,6 +28,12 @@ parameters:
   label: Vertical pixels
   dtype: int
   default: "1125"
+- id: remove_blanking
+  label: Remove Blanking
+  dtype: bool
+  default: False
+  options: [False, True]
+  option_labels: ['No', 'Yes']
 - id: enhance_image
   label: Enhance Image
   dtype: bool
