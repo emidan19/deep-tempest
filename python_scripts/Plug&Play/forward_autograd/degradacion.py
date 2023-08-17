@@ -130,7 +130,7 @@ def g_taps(dim_vertical, dim_horizontal, armonico):
 
     # si armonico crece, necesito mas taps
     if (armonico < 5):
-        g_t = g_t[:100]
+        g_t = g_t[:30]
     else:
         g_t = g_t[:200]
 
