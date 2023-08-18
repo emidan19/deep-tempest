@@ -4,7 +4,7 @@ category: '[Tempest]'
 
 templates:
   imports: import tempest
-  make: tempest.buttonToFileSink(${Filename}, ${input_width}, ${H_size}, ${V_size}, ${enhance_image})
+  make: tempest.buttonToFileSink(${Filename}, ${input_width}, ${H_size}, ${V_size}, ${remove_blanking}, ${enhance_image})
 
 #  Make one 'parameters' list entry for every parameter you want settable from the GUI.
 #     Keys include:

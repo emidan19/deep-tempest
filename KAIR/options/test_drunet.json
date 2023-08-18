@@ -9,7 +9,7 @@
 
   , "path": {
     "root": "drunet_inference"            // "denoising" | "superresolution"
-    , "pretrained_netG": "denoising/drunet/models/520_G.pth"    // path of pretrained model, if model from scratch type: null
+    , "pretrained_netG": "denoising/drunet/models/50_G.pth"    // path of pretrained model, if model from scratch type: null
   }
 
   , "datasets": {

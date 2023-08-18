@@ -583,8 +583,12 @@ def apply_blanking_shift(I, h_active=1600, v_active=900,
         plt.show()
 
     # Angle and rho arrays
-    lines_angles = lines[:,0,1]
-    lines_rhos = lines[:,0,0]
+    try:
+      lines_angles = lines[:,0,1]
+    except:
+      print("No lines detected. Returning original image")
+      return I
+       
 
     # Find unique lines angles detected
     unique_angles = np.unique(lines_angles)
