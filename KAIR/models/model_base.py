@@ -131,11 +131,12 @@ class ModelBase():
     def describe_params(self, network):
         network = self.get_bare_model(network)
         msg = '\n'
-        msg += ' | {:^6s} | {:^6s} | {:^6s} | {:^6s} || {:<20s}'.format('mean', 'min', 'max', 'std', 'shape', 'param_name') + '\n'
-        for name, param in network.state_dict().items():
+        msg += '| {}\t| {:^6s} | {:^6s} | {:^6s} | {:^6s} || {:<20s}'.format('Train','mean', 'min', 'max', 'std', 'shape', 'param_name') + '\n'
+        for name, param in network.named_parameters():
             if not 'num_batches_tracked' in name:
+                is_trainable = param.requires_grad
                 v = param.data.clone().float()
-                msg += ' | {:>6.3f} | {:>6.3f} | {:>6.3f} | {:>6.3f} | {} || {:s}'.format(v.mean(), v.min(), v.max(), v.std(), v.shape, name) + '\n'
+                msg += '| {}\t| {:>6.3f} | {:>6.3f} | {:>6.3f} | {:>6.3f} | {} || {:s}'.format(is_trainable, v.mean(), v.min(), v.max(), v.std(), v.shape, name) + '\n'
         return msg
 
     """

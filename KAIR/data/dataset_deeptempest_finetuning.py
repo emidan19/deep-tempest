@@ -8,7 +8,7 @@ from utils.DTutils import is_natural_patch
 import itertools
 
 
-class DatasetFFDNet(data.Dataset):
+class DatasetDrunetFineTune(data.Dataset):
     """
     # -----------------------------------------
     # Get L/H/M for denosing on AWGN with a range of sigma.
@@ -19,7 +19,7 @@ class DatasetFFDNet(data.Dataset):
     """
 
     def __init__(self, opt):
-        super(DatasetFFDNet, self).__init__()
+        super(DatasetDrunetFineTune, self).__init__()
         self.opt = opt
         self.n_channels = opt['n_channels'] if opt['n_channels'] else 3
         self.n_channels_datasetload = opt['n_channels_datasetload'] if opt['n_channels_datasetload'] else 3
@@ -41,24 +41,23 @@ class DatasetFFDNet(data.Dataset):
         contains one or more L representations of the H image.
         """
 
-
-        self.paths_H = [f for f in os.listdir(opt['dataroot_H']) if os.path.isfile(f)]
+        assert os.path.isdir(opt['dataroot_H']), "No es dir"
+        self.paths_H = [f for f in os.listdir(opt['dataroot_H']) if os.path.isfile(os.path.join(opt['dataroot_H'],f))]
         #------------------------------------------------------------------------------------------------------
-        # For the above step one can use util.get_image_paths(), but it goes recursevely thought the tree dirs
+        # For the above step you can use util.get_image_paths(), but it goes recursevely throught the tree dirs
         #------------------------------------------------------------------------------------------------------
-
         paths_H_aux = []
         self.paths_L = []
 
         # Iterate over all image paths
         for H_file in self.paths_H:
             # filename = os.path.basename(H_file)
-            filename = H_file.split(".png") # TODO: the correct way to do it is with os.path.basename()
+            filename = H_file.split(".")[0] # TODO: the correct way to do it is with os.path.basename()
             L_folder = os.path.join(opt['dataroot_H'],filename)
             # For image at subfolder, append to L paths and repeat current H path
             for L_file in os.listdir(L_folder):
                 L_filepath = os.path.join(L_folder,L_file)
-                paths_H_aux.append(H_file)
+                paths_H_aux.append(os.path.join(opt['dataroot_H'],H_file))
                 self.paths_L.append(L_filepath)
 
         # Update H paths
@@ -79,11 +78,6 @@ class DatasetFFDNet(data.Dataset):
         # -------------------------------------
         H_path = self.paths_H[index]
         L_path = self.paths_L[index]
-
-        H_file, L_file = H_path.split('/')[-1], L_path.split('/')[-1]
-        H_name, L_name = H_file.split('.')[0], L_file.split('.')[0]
-        
-        assert H_name==L_name, f'Both high and low quality images MUST have same name.\nGot {H_name} and {L_name} respectively.'
 
         img_H = util.imread_uint(H_path, self.n_channels_datasetload)       
 
