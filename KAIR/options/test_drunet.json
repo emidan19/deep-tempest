@@ -9,7 +9,7 @@
 
   , "path": {
     "root": "drunet_inference"            // "denoising" | "superresolution"
-    , "pretrained_netG": "denoising/drunet/models/520_G.pth"    // path of pretrained model, if model from scratch type: null
+    , "pretrained_netG": "denoising/drunet/models/70_G.pth"    // path of pretrained model, if model from scratch type: null
   }
 
   , "datasets": {
@@ -28,8 +28,8 @@
     , "test": {
       "name": "test_dataset"            // just name
       , "dataset_type": "ffdnet"         // "dncnn" | "dnpatch" for dncnn,  | "fdncnn" | "ffdnet" | "sr" | "srmd" | "dpsr" | "plain" | "plainpatch"
-      , "dataroot_H": "web_subset/ground_truth"  // path of H testing dataset
-      , "dataroot_L": "web_subset/capturas_splitter"   // path of L testing dataset
+      , "dataroot_H": "web_subset/to_infere"  // path of H testing dataset
+      , "dataroot_L": "web_subset/to_infere"   // path of L testing dataset
       , "sigma_test": 0 // 15, 25, 50 for DnCNN and ffdnet
     }
   }

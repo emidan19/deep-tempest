@@ -9,12 +9,12 @@
 
   , "path": {
     "root": "optuna_hparams"            // "denoising" | "superresolution"
-    , "pretrained_netG": "denoising/drunet/models/520_G.pth"    // path of pretrained model, if model from scratch type: null
+    , "pretrained_netG": "denoising/drunet/models/drunet_gray.pth"    // path of pretrained model, if model from scratch type: null
   }
 
   , "optuna":{
-     "n_trials": 50
-    ,"trial_epochs": 10  // Maximum epochs per trial
+     "n_trials": 30
+    ,"trial_epochs": 20  // Maximum epochs per trial
     ,"metric": "edgeJaccard"   // "edgeJaccard" | "PSNR" | "SSIM" | "CER" | "MSE"
     
   }
@@ -25,19 +25,19 @@
       , "dataset_type": "ffdnet"         // "dncnn" | "dnpatch" for dncnn,  | "fdncnn" | "ffdnet" | "sr" | "srmd" | "dpsr" | "plain" | "plainpatch"
       , "dataroot_H": "trainsets/ground-truth" // path of H training dataset
       , "dataroot_L": "trainsets/simulations" // path of L training dataset, if using noisy H type: null
-      , "sigma": [0, 15]      // 15, 25, 50 for DnCNN | [0, 75] for FFDNet and FDnCNN
+      , "sigma": [0, 20]      // 15, 25, 50 for DnCNN | [0, 75] for FFDNet and FDnCNN
       , "num_patches_per_image": 21   // number of random patches of training image
       , "H_size": 256                    // patch size 40 | 64 | 96 | 128 | 192
       , "dataloader_shuffle": true
       , "dataloader_num_workers": 8
-      , "dataloader_batch_size": 28     // batch size 1 | 16 | 32 | 48 | 64 | 128
+      , "dataloader_batch_size": 38     // batch size 1 | 16 | 32 | 48 | 64 | 128
     }
     , "test": {
       "name": "test_dataset"            // just name
       , "dataset_type": "ffdnet"         // "dncnn" | "dnpatch" for dncnn,  | "fdncnn" | "ffdnet" | "sr" | "srmd" | "dpsr" | "plain" | "plainpatch"
       , "dataroot_H": "valsets/ground-truth"  // path of H testing dataset
       , "dataroot_L": "valsets/simulations"   // path of L testing dataset
-      , "sigma_test": 15 // 15, 25, 50 for DnCNN and ffdnet
+      , "sigma_test": 20 // 15, 25, 50 for DnCNN and ffdnet
     }
   }
 

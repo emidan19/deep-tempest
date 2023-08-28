@@ -294,10 +294,10 @@ def train_model(trial, model, dataset, metric_dict, num_epochs=25):
 def objective(trial):
 
     # Set learning rate suggestions for trial
-    trial_lr = trial.suggest_float("lr", 1e-7, 1e-3, log=True)
+    trial_lr = trial.suggest_float("lr", 1e-5, 1e-1, log=True)
     opt['train']['G_optimizaer_lr'] = trial_lr
 
-    trial_tvweight = trial.suggest_float("tv_weight", 1e-8, 1e2, log=True)
+    trial_tvweight = trial.suggest_float("tv_weight", 1e-12, 1e-6, log=True)
     opt['train']["G_tvloss_weight"] = trial_tvweight
 
     message = f'Trial number {trial.number} with parameters:\n'

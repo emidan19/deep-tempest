@@ -9,7 +9,7 @@
 
   , "path": {
     "root": "denoising"            // "denoising" | "superresolution"
-    , "pretrained_netG": "denoising/drunet/models/520_G.pth"    // path of pretrained model, if model from scratch type: null
+    , "pretrained_netG": "denoising/drunet/models/70_G.pth"    // path of pretrained model, if model from scratch type: null
   }
 
   , "datasets": {
@@ -55,19 +55,19 @@
   }
 
   , "train": {
-      "epochs": 200                      // number of epochs to train
+      "epochs": 200                       // number of epochs to train
     , "G_lossfn_type": "tv"               // "l1" preferred | tv | "l2sum" | "l2" | "ssim" 
-    , "G_lossfn_weight": 1.0            // default
-    , "G_tvloss_weight": 1.0            // total variation weight
-    , "G_tvloss_reduction": "mean"       // "sum" | "mean": Reduction for TV loss 
+    , "G_lossfn_weight": 1.0              // default
+    , "G_tvloss_weight": 9.904078562098548e-08         // total variation weight
+    , "G_tvloss_reduction": "mean"        // "sum" | "mean": Reduction for TV loss 
 
     , "G_optimizer_type": "adam"        // fixed, adam is enough
-    , "G_optimizer_lr": 1e-4 // learning rate
+    , "G_optimizer_lr": 1e-4       // learning rate
     , "G_optimizer_clipgrad": null      // unused
 
     , "G_scheduler_type": "MultiStepLR" // "MultiStepLR" is enough
     , "G_scheduler_milestones": [] // as batch iters
-    , "G_scheduler_iter_step": 10180000 // use gamma factor on lr every this number of iter steps, null if using milestones
+    , "G_scheduler_iter_step": 90180000 // use gamma factor on lr every this number of iter steps, null if using milestones
     , "G_scheduler_gamma": 0.5  //
 
     , "G_regularizer_orthstep": null    // unused

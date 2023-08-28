@@ -1,3 +1,0 @@
-Este experimento fue hecho con la función objetivo de edgeJaccard a maximizar. 
-El update en cada epoca/step estuvo mal setteado. Por eso al ver la evolución de los trials la mayoría son descartados en la época 5 y no antes.
-Se considera fallido.
