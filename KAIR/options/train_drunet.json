@@ -4,7 +4,7 @@
   , "gpu_ids": [0]
 
   , "scale": 0       // broadcast to "netG" if SISR
-  , "n_channels": 1  // broadcast to "datasets", 1 for grayscale, 3 for color
+  , "n_channels": 1 // broadcast to "datasets", 1 for grayscale, 3 for color
   , "n_channels_datasetload": 3 // broadcast to image training set
 
   , "path": {
@@ -15,7 +15,7 @@
   , "datasets": {
     "train": {
       "name": "train_dataset"           // just name
-      , "dataset_type": "ffdnet"         // "dncnn" | "dnpatch" for dncnn,  | "fdncnn" | "ffdnet" | "sr" | "srmd" | "dpsr" | "plain" | "plainpatch"
+      , "dataset_type": "drunet_denoiser"         // "dncnn" | "dnpatch" for dncnn,  | "fdncnn" | "ffdnet" | "sr" | "srmd" | "dpsr" | "plain" | "plainpatch"
       , "dataroot_H": "path/to/train/images/ground-truth" // path of H training dataset
       , "dataroot_L": "path/to/train/images/noisy" // path of L training dataset, if using noisy H type: null
       , "sigma": [0, 20]      // 15, 25, 50 for DnCNN | [0, 75] for FFDNet and FDnCNN
@@ -37,7 +37,7 @@
 
   , "netG": {
     "net_type": "drunet" // "dncnn" | "fdncnn" | "ffdnet" | "srmd" | "dpsr" | "srresnet0" |  "srresnet1" | "rrdbnet" 
-    , "in_nc": 1        // input channel number
+    , "in_nc": 2        // input channel number
     , "out_nc": 1       // ouput channel number
     , "nc": [64, 128, 256, 512]          // 64 for "dncnn"
     , "nb": 4          // 17 for "dncnn", 20 for dncnn3, 16 for "srresnet"
@@ -54,10 +54,10 @@
   }
 
   , "train": {
-      "epochs": 200                      // number of epochs to train
+      "epochs": 50                   // number of epochs to train
     , "G_lossfn_type": "tv"               // "l1" preferred | tv | "l2sum" | "l2" | "ssim" 
     , "G_lossfn_weight": 1.0            // default
-    , "G_tvloss_weight": 1.0            // total variation weight
+    , "G_tvloss_weight": 1e-8            // total variation weight
     , "G_tvloss_reduction": "mean"       // "sum" | "mean": Reduction for TV loss 
 
     , "G_optimizer_type": "adam"        // fixed, adam is enough
@@ -74,8 +74,9 @@
     
     // epoch checkpoints
     , "checkpoint_test": 1            // for testing print
+    , "checkpoint_print": 1           // for loss print
     , "checkpoint_test_save": 5       // for testing image saving
     , "checkpoint_save": 10           // for saving model
-    , "checkpoint_print": 1           // for loss print
+
   }
 }

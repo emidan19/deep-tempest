@@ -26,6 +26,9 @@ def define_Dataset(dataset_opt):
     elif dataset_type in ['ffdnet', 'denoising-noiselevel']:
         from data.dataset_ffdnet import DatasetFFDNet as D
 
+    elif dataset_type in ['drunet_denoiser']:
+        from data.dataset_drunet_denoiser import DatasetFFDNet as D
+
     elif dataset_type in ['fdncnn', 'denoising-noiselevelmap']:
         from data.dataset_fdncnn import DatasetFDnCNN as D
 
