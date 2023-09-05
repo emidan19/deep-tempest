@@ -149,24 +149,29 @@ def sigmoid(x):
 
     return output
 
-def Pixel2Bit_diff(pixel):
+def Pixel2Bit_diff(pixel_unit):
     """ 
-        This functions takes a pixel (0-255) in float and calculates the 8 bit codification of it differetiably using a sigmoid
+        This functions takes a pixel (value between 0-1) in float and calculates the 8 bit codification of it differetiably using a sigmoid
     Inputs:	
 
-        -pixel: 2-D Nx1 tensor that contains all the pixels values from an image column to codificate in 8 bits (float)
+        -pixel_unit: 2-D Nx1 tensor that contains all the pixels values from an image column to code in 8 bits (float)
 
 
 	Outputs: 
     
         -output: 2-D tensor (Nx8) that contains the 8 bit form of all the pixels of the column of an image (float)
 	"""
-    pixel_aux = pixel.clone()
-    output = torch.zeros((pixel.shape[0],8), dtype= torch.float32)
+    pixel_aux = pixel_unit.clone()
+    # Output tensor with bits
+    output = torch.zeros((pixel_unit.shape[0],8), dtype= torch.float32)
+    # Iterate over negative powers of 2 (1/2, 1/4, ... , 1/128) to get bit representations
     for i in range(1,9):
-        output[:,i-1] = sigmoid(10*(pixel_aux-2**(8-i)+0.5))
-        ind_pixel_greater2Pow = (pixel_aux >= 2**(8-i)).nonzero().squeeze()
-        pixel_aux[ind_pixel_greater2Pow] = pixel_aux[ind_pixel_greater2Pow] - 2**(8-i)
+        # Represent the i-th bit between 0 and 1 float with sigmoid
+        output[:,i-1] = sigmoid(10*256*(pixel_aux - (2**(8-i)-0.5) / 256.0 ))
+        # Check which pixels are above the (-i)th power of 2
+        ind_pixel_greater2Pow = (pixel_aux >= (2**(8-i) / 256.0)).nonzero().squeeze()
+        # Substract that power of 2 for those pixels
+        pixel_aux[ind_pixel_greater2Pow] = pixel_aux[ind_pixel_greater2Pow] - (2**(8-i) / 256.0)
     return output
 
 
@@ -225,7 +230,7 @@ def forward(img):
         harmonic with a SDR (sampling,baseband modulation and LPF). Currently no AWGN is added.
     Inputs:	
 
-        -img: rows x columns image tensor (float)
+        -img: rows x columns image tensor within range [0,1] (float)
 
 
 	Outputs: 
