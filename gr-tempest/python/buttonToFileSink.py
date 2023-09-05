@@ -162,8 +162,7 @@ class buttonToFileSink(gr.sync_block):
         captured_image[:,:,1] = np.imag(captured_image_complex)
         # Stretching contrast and mantaining complex phase unchanged
         min_value, max_value = np.min(captured_image[:,:,:2]), np.max(captured_image[:,:,:2])
-        captured_image[:,:,0] = 255*(captured_image[:,:,0] - min_value) / (max_value - min_value)
-        captured_image[:,:,1] = 255*(captured_image[:,:,1] - min_value) / (max_value - min_value)
+        captured_image[:,:,:2] = 255*(captured_image[:,:,:2] - min_value) / (max_value - min_value)
 
         # Image to uint8
         captured_image = captured_image.astype('uint8')
