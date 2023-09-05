@@ -258,4 +258,11 @@ def forward(img):
     #apply the degradation to the TMDS bits by rows
     for i in range(rows):
         img_out[i,:] = line_degradation(img_cod[i,:].unsqueeze(0).unsqueeze(0), h_total=columns, v_total=rows, N_harmonic=3, sdr_rate = 50e6, fps=60)
-    return img_out
+    
+    #stretch output to [0,1] range
+    img_out_real = img_out.real()
+    img_out_imag = img_out.imag()
+    img_out_max = torch.max(img_out_real.max(), img_out_imag.max())
+    img_out_min = torch.min(img_out_real.min(), img_out_imag.max())
+    img_out_norm = (img_out - img_out_min) / (img_out_max - img_out_min)
+    return img_out_norm
