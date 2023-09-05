@@ -134,7 +134,7 @@ def main(json_path='options/test_drunet.json'):
         img_Htensor = util.uint2tensor4(img_H)
 
         if img_H.ndim == 3:
-            img_H = np.mean(img_H, axis=2)
+            img_H = np.mean(img_H, axis=2).astype('uint8')
 
         if L_path==H_path:
             img_L = img_H.copy()
@@ -148,6 +148,8 @@ def main(json_path='options/test_drunet.json'):
             noise_level = torch.FloatTensor([int(noise_sigma)])/255.0
             noise = torch.randn(img_Ltensor.size()).mul_(noise_level).float()
             img_Ltensor.add_(noise)
+            noise_level_map = torch.ones_like(img_Ltensor)*noise_level
+            img_Ltensor = torch.cat((img_Ltensor, noise_level_map), dim=1)
         img_Ltensor = img_Ltensor.to(device)
 
         # Inference on image
@@ -157,6 +159,7 @@ def main(json_path='options/test_drunet.json'):
         # -----------------------
         # save noisy L
         # -----------------------
+        img_L = util.tensor2uint(img_Ltensor[:,0,:,:])
         save_img_path = os.path.join(img_dir, '{:s}_{}std.png'.format(img_name, noise_sigma))
         util.imsave(img_L, save_img_path)
         # -----------------------

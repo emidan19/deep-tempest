@@ -9,23 +9,23 @@
 
   , "path": {
     "root": "drunet_inference"            // "denoising" | "superresolution"
-    , "pretrained_netG": "denoising/drunet/models/520_G.pth"    // path of pretrained model, if model from scratch type: null
+    , "pretrained_netG": "/home/gabriel/Escritorio/deep-tempest/KAIR/denoising/drunet/models/6_G.pth"    // path of pretrained model, if model from scratch type: null
   }
 
   , "datasets": {
 
      "test": {
       "name": "test_dataset"            // just name
-      , "dataset_type": "ffdnet"         // "dncnn" | "dnpatch" for dncnn,  | "fdncnn" | "ffdnet" | "sr" | "srmd" | "dpsr" | "plain" | "plainpatch"
-      , "dataroot_H": "path/to/test/images/ground-truth"  // path of H testing dataset (if pathH=pathL we add noise)
-      , "dataroot_L": "path/to/test/images/noisy"         // path of L testing dataset
-      , "sigma_test": 20 // 15, 25, 50 for DnCNN and ffdnet
+      , "dataset_type": "drunet_denoiser"         // "dncnn" | "dnpatch" for dncnn,  | "fdncnn" | "ffdnet" | "sr" | "srmd" | "dpsr" | "plain" | "plainpatch"
+      , "dataroot_H": "/home/gabriel/Descargas/deeptempest-dataset/testsets/ground-truth"  // path of H testing dataset (if pathH=pathL we add noise)
+      , "dataroot_L": "/home/gabriel/Descargas/deeptempest-dataset/testsets/ground-truth"         // path of L testing dataset
+      , "sigma_test": 50 // 15, 25, 50 for DnCNN and ffdnet
     }
   }
 
   , "netG": {
     "net_type": "drunet" // "dncnn" | "fdncnn" | "ffdnet" | "srmd" | "dpsr" | "srresnet0" |  "srresnet1" | "rrdbnet" 
-    , "in_nc": 1        // input channel number
+    , "in_nc": 2        // input channel number
     , "out_nc": 1       // ouput channel number
     , "nc": [64, 128, 256, 512]          // 64 for "dncnn"
     , "nb": 4          // 17 for "dncnn", 20 for dncnn3, 16 for "srresnet"

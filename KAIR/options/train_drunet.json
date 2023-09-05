@@ -9,29 +9,29 @@
 
   , "path": {
     "root": "denoising"            // "denoising" | "superresolution"
-    , "pretrained_netG": null      // path of pretrained model
+    , "pretrained_netG": "/home/gabriel/Escritorio/deep-tempest/KAIR/denoising/drunet/models/6_G.pth" // path of pretrained model
   }
 
   , "datasets": {
     "train": {
       "name": "train_dataset"           // just name
       , "dataset_type": "drunet_denoiser"         // "dncnn" | "dnpatch" for dncnn,  | "fdncnn" | "ffdnet" | "sr" | "srmd" | "dpsr" | "plain" | "plainpatch"
-      , "dataroot_H": "path/to/train/images/ground-truth" // path of H training dataset
-      , "dataroot_L": "path/to/train/images/noisy" // path of L training dataset, if using noisy H type: null
-      , "sigma": [0, 20]      // 15, 25, 50 for DnCNN | [0, 75] for FFDNet and FDnCNN
+      , "dataroot_H": "/home/gabriel/Descargas/deeptempest-dataset/trainsets/ground-truth" // path of H training dataset
+      , "dataroot_L": "/home/gabriel/Descargas/deeptempest-dataset/trainsets/ground-truth" // path of L training dataset, if using noisy H type: null
+      , "sigma": [0, 75]      // 15, 25, 50 for DnCNN | [0, 75] for FFDNet and FDnCNN
       , "use_all_patches": true     // use or not all image patches
       , "num_patches_per_image": 21   // number of random patches of training image, if not using all patches
       , "H_size": 256                    // patch size 40 | 64 | 96 | 128 | 192
       , "dataloader_shuffle": true
       , "dataloader_num_workers": 8
-      , "dataloader_batch_size": 32     // batch size 1 | 16 | 32 | 48 | 64 | 128
+      , "dataloader_batch_size": 16     // batch size 1 | 16 | 32 | 48 | 64 | 128
     }
     , "test": {
       "name": "test_dataset"            // just name
-      , "dataset_type": "ffdnet"         // "dncnn" | "dnpatch" for dncnn,  | "fdncnn" | "ffdnet" | "sr" | "srmd" | "dpsr" | "plain" | "plainpatch"
-      , "dataroot_H": "path/to/val/images/ground-truth"  // path of H testing dataset
-      , "dataroot_L": "path/to/val/images/noisy"   // path of L testing dataset
-      , "sigma_test": 20 // 15, 25, 50 for DnCNN and ffdnet
+      , "dataset_type": "drunet_denoiser"         // "dncnn" | "dnpatch" for dncnn,  | "fdncnn" | "ffdnet" | "sr" | "srmd" | "dpsr" | "plain" | "plainpatch"
+      , "dataroot_H": "/home/gabriel/Descargas/deeptempest-dataset/valsets/ground-truth"  // path of H testing dataset
+      , "dataroot_L": "/home/gabriel/Descargas/deeptempest-dataset/valsets/ground-truth"   // path of L testing dataset
+      , "sigma_test": 50 // 15, 25, 50 for DnCNN and ffdnet
     }
   }
 
@@ -75,8 +75,8 @@
     // epoch checkpoints
     , "checkpoint_test": 1            // for testing print
     , "checkpoint_print": 1           // for loss print
-    , "checkpoint_test_save": 5       // for testing image saving
-    , "checkpoint_save": 10           // for saving model
+    , "checkpoint_test_save": 2       // for testing image saving
+    , "checkpoint_save": 1           // for saving model
 
   }
 }

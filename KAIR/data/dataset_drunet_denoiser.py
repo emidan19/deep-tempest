@@ -106,7 +106,8 @@ class DatasetFFDNet(data.Dataset):
                 # ---------------------------------
                 noise = torch.randn(img_L.size()).mul_(noise_level).float()
                 img_L.add_(noise)
-                img_L = torch.cat((img_L, noise), dim=0)
+                noise_level_map = torch.ones_like(img_L)*noise_level
+                img_L = torch.cat((img_L, noise_level_map), dim=0)
 
         else:
             """
@@ -145,7 +146,8 @@ class DatasetFFDNet(data.Dataset):
                 # ---------------------------------
                 noise = torch.randn(img_L.size()).mul_(noise_level).float()
                 img_L.add_(noise)
-                img_L = torch.cat((img_L, noise), dim=0)
+                noise_level_map = torch.ones_like(img_L)*noise_level
+                img_L = torch.cat((img_L, noise_level_map), dim=0)
 
 
 
