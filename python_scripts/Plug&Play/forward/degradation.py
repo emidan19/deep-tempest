@@ -245,24 +245,21 @@ def forward(img):
     pixels_column = torch.zeros(rows)
     pixel_column_bits = torch.zeros((rows,8),dtype = torch.float32)
     bits_cod_column =  torch.zeros((rows,10), dtype = torch.float32)
-    #codification of all the image
+    # codification of all the image
     img_cod = torch.zeros((rows,columns*10),dtype = torch.complex64)
     #output image definition (complex)
     img_out = torch.zeros((rows,columns),dtype=torch.complex64)
-    #TMDS codification of all the image doing it by columns
+    # TMDS codification of all the image doing it by columns
     for j in range(columns):
         pixels_column = img[:,j]
         pixel_column_bits = Pixel2Bit_diff(pixels_column)
         bits_cod_column,cnt_column = TMDS_diff(pixel_column_bits, cnt_column)
         img_cod[:,j*10:(j+1)*10] = bits_cod_column
-    #apply the degradation to the TMDS bits by rows
+    # apply the degradation to the TMDS bits by rows
     for i in range(rows):
         img_out[i,:] = line_degradation(img_cod[i,:].unsqueeze(0).unsqueeze(0), h_total=columns, v_total=rows, N_harmonic=3, sdr_rate = 50e6, fps=60)
     
-    #stretch output to [0,1] range
-    img_out_real = img_out.real()
-    img_out_imag = img_out.imag()
-    img_out_max = torch.max(img_out_real.max(), img_out_imag.max())
-    img_out_min = torch.min(img_out_real.min(), img_out_imag.max())
-    img_out_norm = (img_out - img_out_min) / (img_out_max - img_out_min)
+    # normalize by maximum magnitude
+    max_img_out_abs = torch.max(img_out.abs())
+    img_out_norm = img_out / max_img_out_abs
     return img_out_norm
