@@ -25,7 +25,7 @@
             "sigma": null,          
             "__comment2__":"Gaussian noise with random sigma over specified range [sigma1, simga2]",
 
-            "freq_error": [0,100],   
+            "freq_error": [0,50],   
             "__comment3__": "Random frequency error (Hz) over specified range [f1, f2]",
 
             "phase_error": [-1,1],

@@ -82,7 +82,7 @@ for phase, dataset_opt in opt['datasets'].items():
         patch_size = dataset_opt['H_size']
         train_set = define_Dataset(dataset_opt)
         # Keep only one third of the dataset
-        indexes = torch.randperm(len(train_set))[:len(train_set)//20]
+        indexes = torch.randperm(len(train_set))[:len(train_set)//4]
         train_set = Subset(train_set, indexes)
         train_size = int(math.floor(len(train_set) / batch_size))
         message = f'Training dataset with {train_size} batches (batch size={batch_size}) of {patch_size}x{patch_size} images.'
@@ -97,7 +97,7 @@ for phase, dataset_opt in opt['datasets'].items():
     elif phase == 'test':
         test_set = define_Dataset(dataset_opt)
         # Keep only one third of the dataset
-        indexes = torch.randperm(len(test_set))[:len(test_set)//6]
+        indexes = torch.randperm(len(test_set))[:len(test_set)//2]
         test_set = Subset(test_set, indexes)
         message = f'Validation dataset of {len(test_set)} images.'
         logger.info(message)
@@ -294,10 +294,10 @@ def train_model(trial, model, dataset, metric_dict, num_epochs=25):
 def objective(trial):
 
     # Set learning rate suggestions for trial
-    trial_lr = trial.suggest_float("lr", 1e-5, 1e-1, log=True)
+    trial_lr = trial.suggest_float("lr", 1e-6, 1e-3, log=True)
     opt['train']['G_optimizaer_lr'] = trial_lr
 
-    trial_tvweight = trial.suggest_float("tv_weight", 1e-12, 1e-6, log=True)
+    trial_tvweight = trial.suggest_float("tv_weight", 1e-13, 1e-6, log=True)
     opt['train']["G_tvloss_weight"] = trial_tvweight
 
     message = f'Trial number {trial.number} with parameters:\n'

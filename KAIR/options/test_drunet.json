@@ -15,7 +15,7 @@
   , "datasets": {
     "train": {
       "name": "train_dataset"           // just name
-      , "dataset_type": "ffdnet"         // "dncnn" | "dnpatch" for dncnn,  | "fdncnn" | "ffdnet" | "sr" | "srmd" | "dpsr" | "plain" | "plainpatch"
+      , "dataset_type": "drunet"         // "dncnn" | "dnpatch" for dncnn,  | "fdncnn" | "ffdnet" | "sr" | "srmd" | "dpsr" | "plain" | "plainpatch"
       , "dataroot_H": "web_subset/ground_truth" // path of H training dataset
       , "sigma": [0, 0]      // 15, 25, 50 for DnCNN | [0, 75] for FFDNet and FDnCNN
       , "num_patches_per_image": 20   // number of random patches of training image
