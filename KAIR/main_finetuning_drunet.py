@@ -151,9 +151,9 @@ def main(json_path='options/train_drunet_finetuning.json'):
     model.init_train()
     
     ############################################
-    ###   Freeze first half of UNet layers   ###
+    ###   Freeze DRUNet layers   ###
     ############################################
-    frozen_layers = np.array(["m_head", "m_down1", "m_down2", "m_down3"])
+    frozen_layers = np.array(opt["netG"]["frozen_layers"])
 
     for name, param in model.netG.named_parameters():
         if np.any(frozen_layers == str(name).split(".")[1]):
