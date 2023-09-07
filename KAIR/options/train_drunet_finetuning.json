@@ -8,7 +8,7 @@
   , "n_channels_datasetload": 3 // broadcast to image training set
 
   , "path": {
-    "root": "finetuning"            // "denoising" | "superresolution"
+    "root": "finetuning_border"  // "finetuning_{border, middle}"
     , "pretrained_netG": "denoising/drunet/models/140_G.pth"    // path of pretrained model, if model from scratch type: null
   }
 
@@ -52,17 +52,19 @@
     , "init_type": "kaiming_normal"         // "orthogonal" | "normal" | "uniform" | "xavier_normal" | "xavier_uniform" | "kaiming_normal" | "kaiming_uniform"
     , "init_bn_type": "uniform"         // "uniform" | "constant"
     , "init_gain": 0.2
+    , "frozen_layers": ["m_down3", "m_body", "m_up3"]   // ["m_down3", "m_body", "m_up3"] for border layers finetuning
+                                                        // ["m_head", "m_down1", "m_down2", "m_up2", "m_up1", "m_tail"] for middle layers
   }
 
   , "train": {
-      "epochs": 200                       // number of epochs to train
-    , "G_lossfn_type": "tv"               // "l1" preferred | tv | "l2sum" | "l2" | "ssim" 
+      "epochs": 20                       // number of epochs to train
+    , "G_lossfn_type": "l2"               // "l1" preferred | tv | "l2sum" | "l2" | "ssim" 
     , "G_lossfn_weight": 1.0              // default
     , "G_tvloss_weight": 9.904078562098548e-08         // total variation weight
     , "G_tvloss_reduction": "mean"        // "sum" | "mean": Reduction for TV loss 
 
     , "G_optimizer_type": "adam"        // fixed, adam is enough
-    , "G_optimizer_lr": 1e-4       // learning rate
+    , "G_optimizer_lr": 5.5435483950260915e-05       // learning rate
     , "G_optimizer_clipgrad": null      // unused
 
     , "G_scheduler_type": "MultiStepLR" // "MultiStepLR" is enough
