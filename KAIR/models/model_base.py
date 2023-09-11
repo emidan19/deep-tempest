@@ -122,6 +122,7 @@ class ModelBase():
         msg = '\n'
         msg += 'Networks name: {}'.format(network.__class__.__name__) + '\n'
         msg += 'Params number: {}'.format(sum(map(lambda x: x.numel(), network.parameters()))) + '\n'
+        msg += 'Learning params number: {}'.format(sum(map(lambda x: (x.numel())*x.requires_grad, network.parameters()))) + '\n'
         msg += 'Net structure:\n{}'.format(str(network)) + '\n'
         return msg
 

@@ -54,6 +54,7 @@
     , "init_gain": 0.2
     , "frozen_layers": ["m_down3", "m_body", "m_up3"]   // ["m_down3", "m_body", "m_up3"] for border layers finetuning
                                                         // ["m_head", "m_down1", "m_down2", "m_up2", "m_up1", "m_tail"] for middle layers
+                                                                                      // ["m_head", "m_down1", "m_body", "m_up1", "m_tail"] for halfway layers
   }
 
   , "train": {
