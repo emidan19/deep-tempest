@@ -175,7 +175,12 @@ class buttonToFileSink(gr.sync_block):
             # Fix shift with blanking redundance information
             captured_image = apply_blanking_shift(captured_image, h_active=self.H_active, v_active=self.V_active,
                                         h_blanking=self.H_blanking, v_blanking=self.V_blanking)
-        
+            
+            # Remove outliers with median thresholding heuristic
+            img_L = remove_outliers(captured_image)
+            # Stretch dynamic range to [0,255]
+            captured_image = adjust_dynamic_range(img_L)
+
         if self.enhance_image:
                 
             #######################################################################
