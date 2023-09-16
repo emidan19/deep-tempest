@@ -1,5 +1,5 @@
 id: tempest_buttonToFileSink
-label: buttonToFileSink
+label: Save Capture
 category: '[Tempest]'
 
 templates:
