@@ -161,17 +161,17 @@ def Pixel2Bit_diff(pixel_unit):
     
         -output: 2-D tensor (Nx8) that contains the 8 bit form of all the pixels of the column of an image (float)
 	"""
-    pixel_aux = pixel_unit.clone()
+    substract = torch.zeros_like(pixel_unit)
     # Output tensor with bits
     output = torch.zeros((pixel_unit.shape[0],8), dtype= torch.float32)
     # Iterate over negative powers of 2 (1/2, 1/4, ... , 1/128) to get bit representations
     for i in range(1,9):
         # Represent the i-th bit between 0 and 1 float with sigmoid
-        output[:,i-1] = sigmoid(10*256*(pixel_aux - (2**(8-i)-0.5) / 256.0 ))
+        output[:,i-1] = sigmoid(10*255*(pixel_unit - substract - (2**(8-i)/255.0) + 1/(2*255)))
         # Check which pixels are above the (-i)th power of 2
-        ind_pixel_greater2Pow = (pixel_aux >= (2**(8-i) / 256.0)).nonzero().squeeze()
+        ind_pixel_greater2Pow = (pixel_unit - substract >= (2**(8-i)/256.0)).nonzero().squeeze()
         # Substract that power of 2 for those pixels
-        pixel_aux[ind_pixel_greater2Pow] = pixel_aux[ind_pixel_greater2Pow] - (2**(8-i) / 256.0)
+        substract[ind_pixel_greater2Pow] = substract[ind_pixel_greater2Pow] + (2**(8-i)/255.0)
     return output
 
 
@@ -258,8 +258,5 @@ def forward(img):
     # apply the degradation to the TMDS bits by rows
     for i in range(rows):
         img_out[i,:] = line_degradation(img_cod[i,:].unsqueeze(0).unsqueeze(0), h_total=columns, v_total=rows, N_harmonic=3, sdr_rate = 50e6, fps=60)
-    
-    # normalize by maximum magnitude
-    max_img_out_abs = torch.max(img_out.abs())
-    img_out_norm = img_out / max_img_out_abs
-    return img_out_norm
+
+    return img_out
