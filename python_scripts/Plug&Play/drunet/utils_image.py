@@ -1059,7 +1059,12 @@ def max_entropy_thrs(img):
 
     return img_out
 
-def patches_max_entropy_thrs(img, patch_size=64):
+def patches_max_entropy_thrs(img, patch_size=128):
+
+    # If patch size not positive, return
+    # global max entropy thresholding
+    if patch_size <=0 :
+        return max_entropy_thrs(img)
 
     H, W = img.shape[:2]
     num_patches = (H*W)//(patch_size**2)
@@ -1083,6 +1088,29 @@ def patches_max_entropy_thrs(img, patch_size=64):
 
     return img_out
     
+def max_entropy_init(img_tempest, patch_size=128):
+    """  
+    Get initialization for Plug-and-Play deep-tempest restoration
+    using max entropy thresholding. 
+
+    Input image (numpy uint8 array) must have two channels: in-phase (chn 0) and quadrature (chn 1).
+
+    If patch_size is non positive, global thresholding is applied.
+    """
+
+    # Split both in-phase and quadrature channels
+    img_tempest_phase, img_tempest_quadr = img_tempest[:,:,0], img_tempest[:,:,1]
+
+    # Threshold both with max-entropy
+    img_phase_thrs = patches_max_entropy_thrs(img_tempest_phase, patch_size = patch_size)
+    img_quadr_thrs = patches_max_entropy_thrs(img_tempest_quadr, patch_size = patch_size)
+
+    # Multiply both thresholded images
+    img_thr_init = img_phase_thrs * img_quadr_thrs
+
+    # Return as uint
+
+    return 255 * img_thr_init
 
 if __name__ == '__main__':
     img = imread_uint('test.bmp', 3)
