@@ -223,6 +223,50 @@ def line_degradation(I_line, h_total=1800, v_total=1000, N_harmonic=3, sdr_rate 
 
     return I_line_out
 
+def image_degradation(I, h_total=1800, v_total=1000, N_harmonic=3, sdr_rate = 50e6, fps=60):
+    """  
+    Inputs:
+    I_line (torch tensor): input image with size (v_total, 10 * h_total), given by TMDS 8/10 bit coding
+    h_total (int): horizontal resolution (pixels)
+    v_total (int): vertical resolution (pixels)
+    N_harmonic (int): number of pixel frequency harmonic
+    sdr_rate (float): sampling rate of SDR
+
+    Output:
+    I_line (complex torch tensor):  degradeted image resampling with (v_total, h_total)
+                                    
+    """
+
+    # Compute pixelrate and bitrate
+    px_rate = h_total*v_total*fps
+    bit_rate = 10*px_rate
+
+    # Continuous samples (interpolate)
+    interpolator = int(np.ceil(N_harmonic/5)) # Condition for sampling rate and
+    sample_rate = interpolator*bit_rate
+    Nsamples = 10*h_total
+        
+    # Continuous time array (note it is math-equivalent to use Nsamples=10*h_total*v_total)
+    t_continuous = (torch.arange(Nsamples)/sample_rate).repeat(1,v_total)
+
+    # AM modulation frequency according to pixel harmonic
+    harm = N_harmonic*px_rate
+
+    # Harmonic oscilator (including frequency and phase error)
+    baseband_exponential = torch.exp(-2j*np.pi*harm*t_continuous)
+    # Baseband representation
+    I_baseband = torch.flatten(I).unsqueeze(0).unsqueeze(0) * baseband_exponential
+
+    # AM modulation and SDR sampling
+    resampler = transforms.Resample(sample_rate, sdr_rate)
+
+    # Reshape signal to the image size
+    I_out = nn.functional.interpolate(resampler(torch.real(I_baseband)),h_total*v_total,mode='linear') + 1j*nn.functional.interpolate(resampler(torch.imag(I_baseband)),h_total*v_total,mode='linear')
+    
+    I_out = torch.reshape(I_out, (1, v_total, h_total))
+
+    return I_out
+
 def forward(img):
 
     """ 
@@ -255,8 +299,5 @@ def forward(img):
         pixel_column_bits = Pixel2Bit_diff(pixels_column)
         bits_cod_column,cnt_column = TMDS_diff(pixel_column_bits, cnt_column)
         img_cod[:,j*10:(j+1)*10] = bits_cod_column
-    # apply the degradation to the TMDS bits by rows
-    for i in range(rows):
-        img_out[i,:] = line_degradation(img_cod[i,:].unsqueeze(0).unsqueeze(0), h_total=columns, v_total=rows, N_harmonic=3, sdr_rate = 50e6, fps=60)
-
+    img_out = image_degradation(img_cod, h_total=columns, v_total=rows, N_harmonic=3, sdr_rate = 50e6, fps=60)
     return img_out
