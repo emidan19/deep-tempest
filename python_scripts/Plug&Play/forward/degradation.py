@@ -263,7 +263,7 @@ def image_degradation(I, h_total=1800, v_total=1000, N_harmonic=3, sdr_rate = 50
     # Reshape signal to the image size
     I_out = nn.functional.interpolate(resampler(torch.real(I_baseband)),h_total*v_total,mode='linear') + 1j*nn.functional.interpolate(resampler(torch.imag(I_baseband)),h_total*v_total,mode='linear')
     
-    I_out = torch.reshape(I_out, (1, v_total, h_total))
+    I_out = torch.reshape(I_out, (v_total, h_total))
 
     return I_out
 
