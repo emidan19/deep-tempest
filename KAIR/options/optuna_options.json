@@ -1,0 +1,39 @@
+{
+  "task": "tempest-PnP"  //  root/task/images-models-options
+ 
+  , "path": {
+    "root": "optuna_hparams"            // "denoising" | "superresolution"
+    , "pretrained_netG": "denoising/drunet/models/520_G.pth"    // path of pretrained model, if model from scratch type: null
+  }
+
+  , "plugnplay":{
+     "lambda": 0.07
+    ,"sigma1": 1
+    ,"sigma2": 50
+    ,"lr_data_term": 1e-4
+    ,"iters_data_term": 10
+    ,"iters_pnp": 8
+    }
+  , "optuna":{
+     "n_trials": 50
+    ,"trial_epochs": 10  // Maximum epochs per trial
+    ,"metric": "edgeJaccard"   // "edgeJaccard" | "PSNR" | "SSIM" | "CER" | "MSE"
+    
+  }
+  , "netG": {
+    "net_type": "drunet" // "dncnn" | "fdncnn" | "ffdnet" | "srmd" | "dpsr" | "srresnet0" |  "srresnet1" | "rrdbnet" 
+    , "in_nc": 1        // input channel number
+    , "out_nc": 1       // ouput channel number
+    , "nc": [64, 128, 256, 512]          // 64 for "dncnn"
+    , "nb": 4          // 17 for "dncnn", 20 for dncnn3, 16 for "srresnet"
+    , "gc": 32          // unused
+    , "ng": 2           // unused
+    , "reduction": 16  // unused
+    , "act_mode": "R"  // "BR" for BN+ReLU | "R" for ReLU
+    , "upsample_mode": "convtranspose"  // "pixelshuffle" | "convtranspose" | "upconv"
+    , "downsample_mode": "strideconv"   // "strideconv" | "avgpool" | "maxpool"
+    , "bias": false//
+    , "init_type": "orthogonal"         // "orthogonal" | "normal" | "uniform" | "xavier_normal" | "xavier_uniform" | "kaiming_normal" | "kaiming_uniform"
+    , "init_bn_type": "uniform"         // "uniform" | "constant"
+    , "init_gain": 0.2
+  }
