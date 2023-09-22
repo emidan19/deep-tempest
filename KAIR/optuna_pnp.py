@@ -242,11 +242,11 @@ def train_model(trial, dataset, metric_dict, denoiser_model=denoiser_model, pnp_
                                          lr = lr, k_print = k_print_data_term, plot = False)
             
             logger.info("Save output of data term optimization")
-            xk_outpath = os.path.join(xk_images_dir,f"x_{pnp_iter+1}_trial{trial.number}.png")
+            xk_outpath = os.path.join(xk_images_dir,f"trial{trial.number}_x_{pnp_iter+1}.png")
             Image.fromarray(util.tensor2uint(x_i)).save(xk_outpath)
 
             # Save optimization history of dataterm
-            optim_history_outpath = os.path.join(opt_hist_dir,f"dataterm_hist_iter{pnp_iter+1}_trial{trial.number}.pdf")
+            optim_history_outpath = os.path.join(opt_hist_dir,f"trial{trial.number}_dataterm_hist_iter{pnp_iter+1}.pdf")
             plt.figure(figsize = (7,5))
             plt.plot(np.array(optim_history_i) / total_pixels, 'r*')
             plt.xlabel("Data term iterations")
@@ -277,7 +277,7 @@ def train_model(trial, dataset, metric_dict, denoiser_model=denoiser_model, pnp_
             z_opt = (z_opt - min_z_opt)/(max_z_opt - min_z_opt)
 
             logger.info("Save output of denoiser model")
-            zk_outpath = os.path.join(zk_images_dir,f"z_{pnp_iter+1}_trial{trial.number}.png")
+            zk_outpath = os.path.join(zk_images_dir,f"trial{trial.number}_z_{pnp_iter+1}.png")
             Image.fromarray(util.tensor2uint(z_opt)).save(zk_outpath)
 
             # z_next = z_opt.detach().clone()
@@ -349,10 +349,12 @@ def objective(trial):
 
 def save_optuna_info(study):
 
-    root_dir = opt['path']['root']
+    root_dir = out_dir
 
-    # Save page for plot contour
-    fig = optuna.visualization.plot_contour(study, params=['tv_weight','lr'])
+    # Save page for plot contour for the two most important params
+    params_importance = optuna.importance.get_param_importances(study)
+    two_importanter_params = sorted(params_importance, key=params_importance.get, reverse=True)[:2]
+    fig = optuna.visualization.plot_contour(study, params=two_importanter_params)
     fig.write_html(os.path.join(root_dir,'optuna_plot_contour.html'))
     # Save page for plot slice
     fig = optuna.visualization.plot_slice(study)
