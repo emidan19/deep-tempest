@@ -1,26 +1,43 @@
 {
-  "task": "tempest-PnP"  //  root/task/images-models-options
+  "task": ""  //  root/task/images-models-options
  
   , "path": {
     "root": "optuna_hparams"            // "denoising" | "superresolution"
-    , "pretrained_netG": "denoising/drunet/models/520_G.pth"    // path of pretrained model, if model from scratch type: null
-    , "images": "path/to/images"
+    , "pretrained_netG": "denoising/drunet/models/28_G.pth"    // path of pretrained model, if model from scratch type: null
   }
+  , "n_channels": 1  // broadcast to "datasets", 1 for grayscale, 3 for color
+  , "gpu_ids": [0]
 
   , "plugnplay":{
      "lambda": 0.07
-    ,"noise_sigma": 20
+    ,"noise_sigma": 10      // Default 10
     ,"sigma1": 1
     ,"sigma2": 50
-    ,"lr_data_term": 1e-4
-    ,"iters_data_term": 10
+    ,"lr_data_term": 1e-4   // Default 1e-4
+    ,"iters_data_term": 5  // Default 10
     ,"iters_pnp": 8
     }
   , "optuna":{
-     "n_trials": 50
+     "n_trials": 2
     ,"metric": "CER"   // "edgeJaccard" | "PSNR" | "SSIM" | "CER" | "MSE"
     
   }
+
+  , "datasets": {
+    "train": {
+      "name": "train_dataset"           // just name
+      , "dataset_type": "ffdnet"         // "dncnn" | "dnpatch" for dncnn,  | "fdncnn" | "ffdnet" | "sr" | "srmd" | "dpsr" | "plain" | "plainpatch"
+      , "dataroot_H": "trainsets/train_pnp" // path of H training dataset
+      , "dataroot_L": "trainsets/simulations" // path of L training dataset, if using noisy H type: null
+    }
+    , "test": {
+      "name": "test_dataset"            // just name
+      , "dataset_type": "ffdnet"         // "dncnn" | "dnpatch" for dncnn,  | "fdncnn" | "ffdnet" | "sr" | "srmd" | "dpsr" | "plain" | "plainpatch"
+      , "dataroot_H": "valsets/ground-truth"  // path of H testing dataset
+      , "dataroot_L": "valsets/simulations"   // path of L testing dataset
+    }
+  }
+
   , "netG": {
     "net_type": "drunet" // "dncnn" | "fdncnn" | "ffdnet" | "srmd" | "dpsr" | "srresnet0" |  "srresnet1" | "rrdbnet" 
     , "in_nc": 1        // input channel number
@@ -38,3 +55,28 @@
     , "init_bn_type": "uniform"         // "uniform" | "constant"
     , "init_gain": 0.2
   }
+  , "train": {
+    "epochs": 1000                      // number of epochs to train
+  , "G_lossfn_type": "tv"               // "tv" | "l1" | "l2sum" | "l2" | "ssim" 
+  , "G_lossfn_weight": 1.0            // default
+  , "G_tvloss_weight": 1.0            // total variation weight
+  , "G_tvloss_reduction": "mean"       // "sum" | "mean": Reduction for TV loss 
+
+  , "G_optimizer_type": "adam"        // fixed, adam is enough
+  , "G_optimizer_lr": 1e-4           // learning rate
+  , "G_optimizer_clipgrad": null      // unused
+
+  , "G_scheduler_type": "MultiStepLR" // "MultiStepLR" is enough
+  , "G_scheduler_milestones": [1600,  3200,  4800,  6400,  8000,  9600, 11200, 12800, 14400]
+  , "G_scheduler_gamma": 0.1  //
+
+  , "G_regularizer_orthstep": null    // unused
+  , "G_regularizer_clipstep": null    // unused
+  
+  // iteration (batch step) checkpoints
+  , "checkpoint_test": 1600           // for testing
+  , "checkpoint_save": 3999           // for saving model
+  , "checkpoint_print": 16           // for print
+}
+
+}

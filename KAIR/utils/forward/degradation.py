@@ -27,14 +27,14 @@ class Model_qm(nn.Module):
 #----------------------------------------Model Instances------------------------------------------------------------#
 
 q_m_XOR = Model_qm()
-state_dict_XOR = torch.load('forward/q_m_XOR.pth')
+state_dict_XOR = torch.load('utils/forward/q_m_XOR.pth')
 q_m_XOR.load_state_dict(state_dict_XOR)
 #input must be tensor with float (each bit)
 def q_m_XOR_diff(bits):
     return q_m_XOR(bits)
 
 q_m_XNOR = Model_qm()
-state_dict_XNOR = torch.load('forward/q_m_XNOR.pth')
+state_dict_XNOR = torch.load('utils/forward/q_m_XNOR.pth')
 q_m_XNOR.load_state_dict(state_dict_XNOR)
 #input must be tensor with float (each bit)
 def q_m_XNOR_diff(bits):

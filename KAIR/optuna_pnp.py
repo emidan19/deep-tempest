@@ -1,3 +1,5 @@
+import sys
+sys.path.insert(1, 'utils')
 import os.path
 import argparse
 import time
@@ -7,17 +9,19 @@ import torch
 import torch.nn as nn
 import optuna
 import time
+from matplotlib import pyplot as plt
+from skimage.io import imread
+from PIL import Image
 
 from utils import utils_logger
 from utils import utils_image as util
 from utils import utils_option as option
-from utils.utils_dist import get_dist_info, init_dist
 from utils import utils_pnp as pnp
 from models.drunet.network_unet import UNetRes as net
 
 '''
 # ----------------------------------------
-# Step--1 (prepare opt)
+# Step--1 (prepare opt and create dict)
 # ----------------------------------------
 '''
 
@@ -30,19 +34,20 @@ parser.add_argument('--local_rank', type=int, default=0)
 parser.add_argument('--dist', default=False)
 
 opt = option.parse(parser.parse_args().opt, is_train=True)
-opt['dist'] = parser.parse_args().dist
-
-# ----------------------------------------
-# distributed settings
-# ----------------------------------------
-if opt['dist']:
-    init_dist('pytorch')
-opt['rank'], opt['world_size'] = get_dist_info()
 
 # ----------------------------------------
 # return None for missing key
 # ----------------------------------------
 opt = option.dict_to_nonedict(opt)
+
+# Create directories
+out_dir = opt['path']['log']
+xk_images_dir = os.path.join(out_dir,"xk")
+zk_images_dir = os.path.join(out_dir,"zk")
+opt_hist_dir = os.path.join(out_dir,"opt_history")
+for dir_path in [out_dir, xk_images_dir, zk_images_dir, opt_hist_dir]:
+    if not os.path.isdir(dir_path):
+        os.mkdir(dir_path)
 
 # Set logger
 logger_name = 'optuna_hparams'
@@ -60,7 +65,7 @@ message = 'Loading images'
 logger.info(message)
 
 try:
-    H_paths = util.get_image_paths(opt["path"]["images"])
+    H_paths = util.get_image_paths(opt["datasets"]["train"]["dataroot_H"])
 except Exception as e:
      logger.info(f"Error loading images path. Exiting with following exception:\n{str(e)}")
      exit()
@@ -77,8 +82,8 @@ message = 'Loading denoiser model'
 logger.info(message)
 try:
     # load model
-    denoiser_model_path = os.path.join('./drunet/26_G.pth')
-    denoiser_model = net(in_nc=1+1, out_nc=1, nc=[64, 128, 256, 512], nb=4, act_mode='R', downsample_mode="strideconv", upsample_mode="convtranspose")
+    denoiser_model_path = os.path.join(opt["path"]["pretrained_netG"])
+    denoiser_model = net(in_nc=1+1, out_nc=1, nc=[64, 128, 256, 512], nb=4, act_mode='R', downsample_mode="strideconv", upsample_mode="convtranspose", bias=False)
     denoiser_model.load_state_dict(torch.load(denoiser_model_path), strict=True)
     denoiser_model.eval()
     for _, v in denoiser_model.named_parameters():
@@ -87,22 +92,6 @@ except Exception as e:
      logger.info(f"Error loading denoiser model. Exiting with following exception:\n{str(e)}")
      exit()
 
-
-# Define model function with optuna hyperparameters
-def define_model(opt):
-
-    #######################################
-    ### opt tiene las opciones del PnP: ###
-    ### *lr, lambda, sigma1, sigma2,    ###
-    ### *prior (denoiser),              ###
-    ### *iter_data_term, iter_PNP       ###
-    #######################################
-
-    #########################################################################
-    # LLENAR CON MODELO PLUG AND PLAY ( {y,z0, x0} --> MODEL --> {zk, xk} ) #
-    #########################################################################
-    
-    return model
 
 def define_metric(metric_str):
 
@@ -118,9 +107,8 @@ def define_metric(metric_str):
         metric_dict['direction'] = 'maximize'
         metric_dict['name'] = 'SSIM'
     
-    # TODO IMPLEMENTAR
     elif metric_str == 'CER':
-        metric_dict['func'],_ = util.calculate_cer_wer
+        metric_dict['func'] = util.calculate_cer_wer
         metric_dict['direction'] = 'minimize'
         metric_dict['name'] = 'CER'
 
@@ -139,50 +127,183 @@ def define_metric(metric_str):
 
 def train_model(trial, dataset, metric_dict, denoiser_model=denoiser_model, pnp_opt=opt['plugnplay']):
 
-
-
     metric = metric_dict['func']
     metric_direction = metric_dict['direction']
 
     best_metric = -1e6*(metric_direction=='maximize') + 1e6*(metric_direction=='minimize')
 
+    idx = 0
+
+    # Fixing image shape as 800x1000 for faster computation
+    total_height, total_width = 800, 1000
+
+    # Plug and Play options
+    noise_level_model = pnp_opt["noise_sigma"]/255.0
+    modelSigma1 = pnp_opt["sigma1"]
+    modelSigma2 = pnp_opt["sigma2"]
+    num_iter = pnp_opt["iters_pnp"]
+    max_iter_data_term = pnp_opt["iters_data_term"]
+    lr = pnp_opt["lr_data_term"]
+    lam = pnp_opt["lambda"]
+    eps_data_term = 1e-4
+    k_print_data_term = 50
+    sigma_blur = 5
+
+    degradation = 'hdmi'
+
     # Time tracker
     since = time.time()
 
-
-    idx = 0
-
     for i, H_path in enumerate(dataset):
+
+        logger.info(f"Running Plug and Play {i+1}/{len(dataset)}\nImage {H_path}")
         
         idx += 1
 
-        
+        # Load original image red channel
+        x_gt = imread(H_path)[:,:,0]
 
-        # TODO: Get y, x0 and z0 from original image
+        height, width = x_gt.shape
+        center_h, center_w = height//2, width//2
+
+        # Crop image to size (total_height, total_width)
+        x_gt = x_gt[center_h-total_height//2 : center_h+total_height//2, center_w-total_width//2 : center_w+total_width//2]
+
+        # To tensor float image
+        x_gt = torch.tensor(x_gt)
+        x_gt = util.uint2single(x_gt)
+        x_gt = torch.tensor(x_gt)
 
         # TODO: Run PNP with pnp_opt
-
         
+        total_pixels = x_gt.shape[0] * x_gt.shape[1]
 
-        avg_metric = # TODO: assign metric value
-
-        # Update if validation metric is better (lower when minimizing, greater when maximizing)
-        maximizing = ( (avg_metric > best_metric) and metric_dict['direction'] == 'maximize')
-        minimizing = ( (avg_metric < best_metric) and metric_dict['direction'] == 'minimize') 
-
-        val_metric_is_better = maximizing or minimizing                       
-
-        if val_metric_is_better:
-                        best_metric = avg_metric
+        # store |z_k+1 - z^k| 
+        # diff_z_record = []
         
-        # Report trial epoch and check if should prune
-        trial.report(avg_metric, epoch)
-        if trial.should_prune():
-            time_elapsed = time.time() - since
-            logger.info('Pruning trial number {}. Used {:.0f}hs {:.0f}min {:.0f}s on pruned training ¯\_(ツ)_/¯'.format(
-                trial.number ,time_elapsed // (60*60), (time_elapsed // 60)%60, time_elapsed % 60)
-                )
-            raise optuna.TrialPruned()
+        # # store |z_k - x_gt| 
+        # diff_x_gt_record = []
+
+        y_obs = pnp.observation(degradation, x_gt, noise_level_model, sigma_blur)
+        # y_obs_save = y_obs.detach()
+        logger.info("Save observation y")
+        # Absolute value
+        y_abs_np = util.tensor2single(torch.abs(y_obs))
+        y_abs_np = (255*(y_abs_np-y_abs_np.min())/(y_abs_np.max()-y_abs_np.min())).astype('uint8')
+        y_abs_outpath = os.path.join(out_dir,"y_abs.png")
+        Image.fromarray(y_abs_np).save(y_abs_outpath)
+        # Real value
+        y_real_np = util.tensor2single(torch.real(y_obs))
+        y_real_np = (255*(y_real_np-y_real_np.min())/(y_real_np.max()-y_real_np.min())).astype('uint8')
+        y_real_outpath = os.path.join(out_dir,"y_real.png")
+        Image.fromarray(y_real_np).save(y_real_outpath)
+        # Imag value
+        y_imag_np = util.tensor2single(torch.imag(y_obs))
+        y_imag_np = (255*(y_imag_np-y_imag_np.min())/(y_imag_np.max()-y_imag_np.min())).astype('uint8')
+        y_imag_outpath = os.path.join(out_dir,"y_imag.png")
+        Image.fromarray(y_imag_np).save(y_imag_outpath)
+
+        # precalculation of parameters for each iteration
+        alphas, sigmas = pnp.get_alpha_sigma(sigma=max(0.255/255., noise_level_model), 
+                                             iter_num = num_iter, modelSigma1 = modelSigma1, modelSigma2 = modelSigma2, 
+                                             w = 1.0, lam = lam)
+        
+        logger.info(f"Alphas\n{alphas}")
+
+        logger.info(f"Sigmas\n{sigmas}")
+
+        alphas, sigmas = torch.tensor(alphas), torch.tensor(sigmas)
+
+        # Get initializations z0 and x0 from observation y
+        x_0 = pnp.max_entropy_thresh(y_obs)
+        z_0 = x_0
+
+        z_opt = z_0
+        x_0_data_term = x_0 
+
+        logger.info("Save initialization")
+        z0_outpath = os.path.join(zk_images_dir,"z_0.png")
+        Image.fromarray(util.tensor2uint(z_opt)).save(z0_outpath)
+        x0_outpath = os.path.join(xk_images_dir,"x_0.png")
+        Image.fromarray(util.tensor2uint(z_opt)).save(x0_outpath)
+
+        # iterate algorithm num_iter times
+        for pnp_iter in range(num_iter):
+            
+            logger.info('Plug & Play iteration {}'.format(pnp_iter+1))
+            
+            # z_prev = z_opt.detach().clone()
+
+            # optimize data term
+            logger.info(f"Executing data-term optimization at iter {pnp_iter+1}")
+            x_i, optim_history_i = pnp.optimize_data_term(degradation, x_gt, z_opt, x_0_data_term, y_obs, pnp_iter, 
+                                         sigma_blur, total_pixels, alpha = alphas[pnp_iter], 
+                                         max_iter = max_iter_data_term, eps = eps_data_term, 
+                                         lr = lr, k_print = k_print_data_term, plot = False)
+            
+            logger.info("Save output of data term optimization")
+            xk_outpath = os.path.join(xk_images_dir,f"x_{pnp_iter+1}_trial{trial.number}.png")
+            Image.fromarray(util.tensor2uint(x_i)).save(xk_outpath)
+
+            # Save optimization history of dataterm
+            optim_history_outpath = os.path.join(opt_hist_dir,f"dataterm_hist_iter{pnp_iter+1}_trial{trial.number}.pdf")
+            plt.figure(figsize = (7,5))
+            plt.plot(np.array(optim_history_i) / total_pixels, 'r*')
+            plt.xlabel("Data term iterations")
+            plt.ylabel("Objective function (norm by size)")
+            plt.grid()
+            plt.title("Objective Function")
+            plt.savefig(optim_history_outpath, format="pdf",bbox_inches='tight') 
+            # plt.show()
+
+            # initial condition of data term optimization in k'th iteration of plug&play algorithm is the solution of data term optiization in k-1'th iteration of plug&play
+            x_0_data_term = x_i
+
+            # adjust dimensions
+            x_i = x_i.detach().numpy()
+            # [H,W] --> [H, W, 1]
+            x_i = np.expand_dims(x_i, axis=2)
+            x_i_dim4 = util.single2tensor4(x_i)
+            x_i_dim4 = torch.cat((x_i_dim4, torch.FloatTensor([sigmas[pnp_iter]]).repeat(1, 1, x_i_dim4.shape[2], x_i_dim4.shape[3])), dim=1)
+
+            # forward denoiser model
+            logger.info('Enter Forward. Sigma = {}. Iteration {}'.format(sigmas[pnp_iter], pnp_iter+1))
+            z_opt = denoiser_model(x_i_dim4)
+            z_opt = z_opt[0,0,:,:]
+
+            # normalize z_opt between [0, 1]. [H,W]
+            min_z_opt = z_opt.min()
+            max_z_opt = z_opt.max()
+            z_opt = (z_opt - min_z_opt)/(max_z_opt - min_z_opt)
+
+            logger.info("Save output of denoiser model")
+            zk_outpath = os.path.join(zk_images_dir,f"z_{pnp_iter+1}_trial{trial.number}.png")
+            Image.fromarray(util.tensor2uint(z_opt)).save(zk_outpath)
+
+            # z_next = z_opt.detach().clone()
+            
+            # # calculate |z_k+1 - z_k| / total_pixels
+            # diff_z = torch.norm(z_next - z_prev).detach()
+            # diff_z_record.append(diff_z)
+
+            # # calculate |z_k - x_gt| / total_pixels
+            # diff_x_gt = torch.norm(z_next - x_gt).detach()
+            # diff_x_gt_record.append(diff_x_gt)
+        
+            # Compute metric between original and restored images 
+            current_metric,_ = metric(util.tensor2uint(z_opt), util.tensor2uint(x_gt))
+
+            # Update if validation metric is better (lower when minimizing, greater when maximizing)
+            maximizing = ( (current_metric > best_metric) and metric_dict['direction'] == 'maximize')
+            minimizing = ( (current_metric < best_metric) and metric_dict['direction'] == 'minimize') 
+
+            current_metric_is_better = maximizing or minimizing                       
+
+            if current_metric_is_better:
+                best_metric = current_metric
+            
+            # Report trial epoch and check if should prune
+            trial.report(current_metric, pnp_iter+1) ### cambiar a paso de PnP
 
 
     # Whole optuna parameters searching time
@@ -199,7 +320,7 @@ def objective(trial):
     trial_lambda = trial.suggest_float("lambda", 1e-3, 1e2)
     opt['plugnplay']['lambda'] = trial_lambda
 
-    trial_iters_pnp = trial.suggest_int("iters_pnp", 3, 10)
+    trial_iters_pnp = trial.suggest_int("iters_pnp", 2, 3) #TODO must be [3,10]
     opt['plugnplay']['iters_pnp'] = trial_iters_pnp
 
     trial_sigma1 = trial.suggest_float("sigma1", 10, 50)
@@ -221,9 +342,6 @@ def objective(trial):
     metric_dict = define_metric(opt['optuna']['metric'])
 
     best_metric = train_model(trial, H_paths, metric_dict, denoiser_model=denoiser_model, pnp_opt=opt['plugnplay'])    
-    
-    # Save best model for each trial
-    # torch.save(best_model.state_dict(), f"model_trial_{trial.number}.pth")
 
     # Return metric (Objective Value) of the current trial
 

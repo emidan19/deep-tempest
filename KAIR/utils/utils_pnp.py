@@ -7,7 +7,7 @@ import torch
 
 import utils_image as util
 from forward.degradation import forward
-from drunet.utils_image import max_entropy_init
+from utils_image import max_entropy_init
 
 from torchvision.transforms.functional import gaussian_blur
 
@@ -101,6 +101,7 @@ def optimize_data_term(degradation, x_gt, z_k_prev, x_0, y_obs, i, sigma_blur, t
 
     Output:
     x_opt (torch tensor shape [H,W]): image result of optimizing objective function. [0, 1] Dynamic Range.  
+    OF_record (list): Values of thw objective function over iterations
     """
 
     # store |x^{k+1} - x^{k}| 
@@ -125,11 +126,12 @@ def optimize_data_term(degradation, x_gt, z_k_prev, x_0, y_obs, i, sigma_blur, t
 
     x_opt.requires_grad = True
 
-    # print initial condition image x_0
-    plt.figure(figsize = (10,8))
-    plt.imshow(x_opt.detach(), cmap = 'gray')
-    plt.title('Data term initial condition x_0')
-    plt.show()
+    if plot:
+        # print initial condition image x_0
+        plt.figure(figsize = (10,8))
+        plt.imshow(x_opt.detach(), cmap = 'gray')
+        plt.title('Data term initial condition x_0')
+        plt.show()
 
     # define optimizer
     optimizer = torch.optim.Adam([x_opt], lr=lr)
@@ -240,20 +242,24 @@ def optimize_data_term(degradation, x_gt, z_k_prev, x_0, y_obs, i, sigma_blur, t
         plt.legend()
         plt.show()
     
-    return x_opt
+    return x_opt, OF_record
 
 def observation(degradation, x, noise_level_img, sigma_blur):
     y = apply_degradation(x, degradation, sigma_blur)
-    y = y + torch.normal(mean = 0, std = noise_level_img, size = (y.shape[0], y.shape[1]))
+    noise_inphase = torch.normal(mean = 0, std = noise_level_img, size = (y.shape[0], y.shape[1]))
+    noise_inquadr = torch.normal(mean = 0, std = noise_level_img, size = (y.shape[0], y.shape[1]))
+    y = y + noise_inphase + 1j*noise_inquadr
     return y
 
-def plug_and_play_optimization(degradation, x_gt, z_0, x_0, denoiser_prior, noise_level_img, modelSigma1, modelSigma2, lam, sigma_blur = 3,num_iter = 5000, max_iter_data_term = 1000,  eps_data_term = 1e-4, lr = 0.1, k_print_data_term = 10):
+def plug_and_play_optimization(degradation, x_gt, initializacion_from_y, denoiser_prior, noise_level_img, 
+                               modelSigma1, modelSigma2, lam, sigma_blur = 3,
+                               num_iter = 5000, max_iter_data_term = 1000,  eps_data_term = 1e-4, 
+                               lr = 0.1, k_print_data_term = 10):
     """
     Inputs:
     degradation (char): 'hdmi' for HDMI degradation function. 'blur' for gaussian blur degradation function.
     x_gt (torch tensor shape [H,W]): ground truth image. [0,1] Dynamic range.
-    z_0 (torch tensor shape [H,W]): initial condition image for Plug and Play algorithm. [0,1] Dynamic range.
-    x_0 (torch tensor shape [H,W]): initial condition image with parameter 'requires_grad = True' for data term optimization subproblem. [0,1] Dynamic range.
+    initializacion_from_y: function that takes observation image and process to get PnP initialization
     denoiser_prior: deep denoiser model for denoising prior. KAIR's torch model class
     noise_level_img (float): image noise level.
     modelSigma1 (float): upper bound of noise level interval for sigma_k.
@@ -281,6 +287,20 @@ def plug_and_play_optimization(degradation, x_gt, z_0, x_0, denoiser_prior, nois
     # store jaccard score between x_gt and z_opt 
     #jacc_score_record = []
     
+
+
+    noise_level_model = noise_level_img   
+    # generate observation y_obs
+    y_obs = observation(degradation, x_gt, noise_level_model, sigma_blur)
+    # precalculation of parameters for each iteration
+    alphas, sigmas = get_alpha_sigma(sigma=max(0.255/255., noise_level_model), iter_num = num_iter, modelSigma1 = modelSigma1, modelSigma2 = modelSigma2, w = 1.0, lam = lam)
+    alphas, sigmas = torch.tensor(alphas), torch.tensor(sigmas)
+
+    # Get initializations z0 and x0 from observation y
+    x_0 = initializacion_from_y(y_obs)
+    z_0 = x_0
+    print('Dynamic Range of x_0 = [{},{}]'.format(x_0.min(), x_0.max()))
+
     # print initial condition image z_0
     plt.figure(figsize = (10,8))
     plt.imshow(z_0.detach(), cmap = 'gray')
@@ -290,13 +310,6 @@ def plug_and_play_optimization(degradation, x_gt, z_0, x_0, denoiser_prior, nois
     z_opt = z_0
 
     x_0_data_term = x_0 
-
-    noise_level_model = noise_level_img   
-    # generate observation y_obs
-    y_obs = observation(degradation, x_gt, noise_level_model, sigma_blur)
-    # precalculation of parameters for each iteration
-    alphas, sigmas = get_alpha_sigma(sigma=max(0.255/255., noise_level_model), iter_num = num_iter, modelSigma1 = modelSigma1, modelSigma2 = modelSigma2, w = 1.0, lam = lam)
-    alphas, sigmas = torch.tensor(alphas), torch.tensor(sigmas)
 
     print('los valores de alpha son: {}'.format(alphas))
     print('los valores de sigma son: {}'.format(sigmas))
@@ -309,13 +322,7 @@ def plug_and_play_optimization(degradation, x_gt, z_0, x_0, denoiser_prior, nois
         z_prev = z_opt.detach().clone()
 
         # optimize data term
-        #alphas[i] = alpha
-        #print('alpha = {}. Iteration {}'.format(alphas[i], i))
-
-        print(x_0_data_term.requires_grad)
         x_i = optimize_data_term(degradation, x_gt, z_opt, x_0_data_term, y_obs, i, sigma_blur, total_pixels, alpha = alphas[i], max_iter = max_iter_data_term, eps = eps_data_term, lr = lr, k_print = k_print_data_term, plot = True)
-        # output of optimize_data_term is float32 [H,W] array in range [0.0, 1.0]
-        #print('Dynamic Range of output at iteration {} of optimize_data_term = [{}, {}]'.format(i, x_i.min(), x_i.max()))
         
         # initial condition of data term optimization in k'th iteration of plug&play algorithm is the solution of data term optiization in k-1'th iteration of plug&play
         x_0_data_term = x_i
@@ -331,13 +338,11 @@ def plug_and_play_optimization(degradation, x_gt, z_0, x_0, denoiser_prior, nois
         print('Enter Forward. Sigma = {}. Iteration {}'.format(sigmas[i], i))
         z_opt = denoiser_prior(x_i_dim4)
         z_opt = z_opt[0,0,:,:]
-        #print('Dynamic Range of output of cnn at iteration {} is [{}, {}]'.format(i, z_opt.min(), z_opt.max()))
 
         # normalize z_opt between [0, 1]. [H,W]
         min_z_opt = z_opt.min()
         max_z_opt = z_opt.max()
         z_opt = (z_opt - min_z_opt)/(max_z_opt - min_z_opt)
-        #print('Dynamic Range of z_opt after normalize at iteration {} is [{}, {}]'.format(i, z_opt.min(), z_opt.max()))
 
         # print output of denoiser model
         plt.figure(figsize = (10, 6))
@@ -355,11 +360,6 @@ def plug_and_play_optimization(degradation, x_gt, z_0, x_0, denoiser_prior, nois
         diff_x_gt = torch.norm(z_next - x_gt).detach()
         diff_x_gt_record.append(diff_x_gt)
 
-        # calculate jaccard score between x_gt and z_opt
-        #x_gt_8b = single2uint(x_gt.detach())
-        #z_opt_8b = single2uint(z_opt.detach())
-        #jaccard_score = calculate_edge_jaccard(x_gt_8b, z_opt_8b)
-        #jacc_score_record.append(jaccard_score)
 
 
     plt.figure(figsize = (7,5))
@@ -373,12 +373,6 @@ def plug_and_play_optimization(degradation, x_gt, z_0, x_0, denoiser_prior, nois
     plt.grid()
     plt.title('|z_i+1 - z_i| / total_pixels')
     plt.show()
-
-    #plt.figure(figsize = (7,5))
-    #plt.plot(jacc_score_record, 'r')
-    #plt.grid()
-    #plt.title('Jaccard score between x_gt and z_opt')
-    #plt.show()
 
     return z_opt
 
