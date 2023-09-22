@@ -1,6 +1,3 @@
-import os
-import random
-import math
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -9,28 +6,10 @@ from skimage.io import imread, imsave
 import torch
 
 import utils_image as util
-from forward.degradation import *
 from forward.degradation import forward
-from drunet.network_unet import UNetRes as net
 from drunet.utils_image import max_entropy_init
 
-from collections import OrderedDict
-import cv2
 from torchvision.transforms.functional import gaussian_blur
-
-
-"""  
-########################
-# Load DRUNet denoiser #
-########################
-"""
-
-model_path = os.path.join('./drunet/26_G.pth')
-model = net(in_nc=1+1, out_nc=1, nc=[64, 128, 256, 512], nb=4, act_mode='R', downsample_mode="strideconv", upsample_mode="convtranspose")
-model.load_state_dict(torch.load(model_path), strict=True)
-model.eval()
-for _, v in model.named_parameters():
-    v.requires_grad = False
 
 def get_alpha_sigma(sigma=2.55/255, iter_num=15, modelSigma1=49.0, modelSigma2=2.55, w=1.0, lam = 0.23):
     '''
