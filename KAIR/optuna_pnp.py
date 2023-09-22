@@ -1,16 +1,10 @@
 import os.path
-import math
 import argparse
 import time
-import random
 import numpy as np
-from collections import OrderedDict
 import logging
-from torch.utils.data import DataLoader
-from torch.utils.data.distributed import DistributedSampler
 import torch
 import torch.nn as nn
-from torch.utils.data import Subset
 import optuna
 import time
 
@@ -18,9 +12,8 @@ from utils import utils_logger
 from utils import utils_image as util
 from utils import utils_option as option
 from utils.utils_dist import get_dist_info, init_dist
-
-from data.select_dataset import define_Dataset
-from models.select_model import define_Model
+from utils import utils_pnp as pnp
+from models.drunet.network_unet import UNetRes as net
 
 '''
 # ----------------------------------------
@@ -58,59 +51,42 @@ logger = logging.getLogger(logger_name)
 logger.info(option.dict2str(opt))
 
 '''
-# ----------------------------------------
-# Step--2 (create dataloader)
-# ----------------------------------------
+# ------------------------------------------------------------
+# Step--2 (create dataloader) TODO: cargar imagen a ajustar
+# ------------------------------------------------------------
 '''
 
-message = 'Loading train and val datasets'
+message = 'Loading images'
 logger.info(message)
 
-seed = opt['train']['manual_seed']
-if seed is None:
-    seed = random.randint(1, 10000)
-logger.info('Random seed: {}'.format(seed))
-random.seed(seed)
-np.random.seed(seed)
-torch.manual_seed(seed)
-torch.cuda.manual_seed_all(seed)
+try:
+    H_paths = util.get_image_paths(opt["path"]["images"])
+except Exception as e:
+     logger.info(f"Error loading images path. Exiting with following exception:\n{str(e)}")
+     exit()
 
-for phase, dataset_opt in opt['datasets'].items():
-    if phase == 'train':
-
-        batch_size = dataset_opt['dataloader_batch_size']
-        patch_size = dataset_opt['H_size']
-        train_set = define_Dataset(dataset_opt)
-        # Keep only one third of the dataset
-        indexes = torch.randperm(len(train_set))[:len(train_set)//20]
-        train_set = Subset(train_set, indexes)
-        train_size = int(math.floor(len(train_set) / batch_size))
-        message = f'Training dataset with {train_size} batches (batch size={batch_size}) of {patch_size}x{patch_size} images.'
-        logger.info(message)
-        train_loader = DataLoader(  train_set,
-                                    batch_size=dataset_opt['dataloader_batch_size'],
-                                    shuffle=dataset_opt['dataloader_shuffle'],
-                                    num_workers=dataset_opt['dataloader_num_workers'],
-                                    drop_last=True,
-                                    pin_memory=True)
-
-    elif phase == 'test':
-        test_set = define_Dataset(dataset_opt)
-        # Keep only one third of the dataset
-        indexes = torch.randperm(len(test_set))[:len(test_set)//6]
-        test_set = Subset(test_set, indexes)
-        message = f'Validation dataset of {len(test_set)} images.'
-        logger.info(message)
-        val_loader = DataLoader(test_set, batch_size=1,
-                                    shuffle=False, num_workers=1,
-                                    drop_last=False, pin_memory=True)
-    else:
-        raise NotImplementedError("Phase [%s] is not recognized." % phase)
-
-message = f'Datasets loaded.'
+message = f'Dataset loaded.'
 logger.info(message)
 
-dataset = {'train':train_loader, 'val':val_loader}
+"""  
+# ----------------------------
+Step--3 load denoiser prior
+# ----------------------------
+"""
+message = 'Loading denoiser model'
+logger.info(message)
+try:
+    # load model
+    denoiser_model_path = os.path.join('./drunet/26_G.pth')
+    denoiser_model = net(in_nc=1+1, out_nc=1, nc=[64, 128, 256, 512], nb=4, act_mode='R', downsample_mode="strideconv", upsample_mode="convtranspose")
+    denoiser_model.load_state_dict(torch.load(denoiser_model_path), strict=True)
+    denoiser_model.eval()
+    for _, v in denoiser_model.named_parameters():
+        v.requires_grad = False
+except Exception as e:
+     logger.info(f"Error loading denoiser model. Exiting with following exception:\n{str(e)}")
+     exit()
+
 
 # Define model function with optuna hyperparameters
 def define_model(opt):
@@ -143,10 +119,10 @@ def define_metric(metric_str):
         metric_dict['name'] = 'SSIM'
     
     # TODO IMPLEMENTAR
-    # elif metric_str == 'CER':
-    #     metric_dict['func'] = utilOCR.calculate_cer
-    #     metric_dict['direction'] = 'minimize'
-    #     metric_dict['name'] = 'CER'
+    elif metric_str == 'CER':
+        metric_dict['func'],_ = util.calculate_cer_wer
+        metric_dict['direction'] = 'minimize'
+        metric_dict['name'] = 'CER'
 
     elif metric_str == 'edgeJaccard':
         metric_dict['func'] = util.calculate_edge_jaccard
@@ -161,126 +137,46 @@ def define_metric(metric_str):
     
     return metric_dict
 
-def train_model(trial, model, dataset, metric_dict, num_epochs=25):
+def train_model(trial, dataset, metric_dict, denoiser_model=denoiser_model, pnp_opt=opt['plugnplay']):
 
-    # Load dataset and metrics
-    train_loader = dataset['train']
-    val_loader = dataset['val']
+
 
     metric = metric_dict['func']
     metric_direction = metric_dict['direction']
 
     best_metric = -1e6*(metric_direction=='maximize') + 1e6*(metric_direction=='minimize')
 
-    current_step = 0
-
     # Time tracker
     since = time.time()
 
-    # Iter over epoch
-    for epoch in range(num_epochs):
 
-        epoch_loss = 0.0
+    idx = 0
 
-        # epoch_metric = 0.0
+    for i, H_path in enumerate(dataset):
+        
+        idx += 1
 
-        # -------------------------------
-        # Training phase
-        # ------------------------------- 
+        
 
-        idx = 0
+        # TODO: Get y, x0 and z0 from original image
 
-        for i, train_data in enumerate(train_loader):
-            
-            idx += 1
+        # TODO: Run PNP with pnp_opt
 
-            current_step += 1
+        
 
-            # -------------------------------
-            # 1) update learning rate
-            # -------------------------------
-            model.update_learning_rate(current_step)
-
-            # -------------------------------
-            # 2) feed patch pairs
-            # -------------------------------
-            model.feed_data(train_data)
-
-            # -------------------------------
-            # 3) optimize parameters
-            # -------------------------------
-            model.optimize_parameters(current_step)
-
-            # -------------------------------
-            # 4) training information (loss and metric)
-            # -------------------------------
-
-            # visuals = model.current_visuals()
-            # E_visual = visuals['E']
-            # E_img = util.tensor2uint(E_visual)
-            # H_visual = visuals['H']
-            # H_img = util.tensor2uint(H_visual)
-
-            # epoch_metric += metric(H_img, E_img)
-
-            epoch_loss += model.current_log()['G_loss']     
-
-        # Train loss and metric
-        avg_train_loss = epoch_loss / idx
-        # avg_train_metric = epoch_metric/train_size
-
-        message_train = f'\nepoch:{epoch+1}/{num_epochs}\n'+'-'*14+'\ntrain loss: {:.3e}\n'.format(avg_train_loss)
-
-
-        # -------------------------------
-        # Validation phase
-        # -------------------------------
-        val_metric = 0.0
-        avg_val_loss = 0.0
-        idx = 0
-
-        for val_data in val_loader:
-            idx += 1
-
-            model.feed_data(val_data)
-            model.test()
-
-            visuals = model.current_visuals()
-            E_visual = visuals['E']
-            E_img = util.tensor2uint(E_visual)
-            H_visual = visuals['H']
-            H_img = util.tensor2uint(H_visual)
-
-            sizes = E_visual.size()
-
-            current_loss = model.G_lossfn(torch.reshape(E_visual,(1,1,sizes[1],sizes[2])),
-                                          torch.reshape(H_visual,(1,1,sizes[1],sizes[2])))
-
-            avg_val_loss += current_loss
-            val_metric += metric(H_img, E_img)
-
-        # Val loss and metric
-        avg_val_loss = avg_val_loss/idx
-        avg_val_metric = val_metric/idx
-
-        message_val = 'val loss: {:.3e}, val {}: {:.3f}\n'.format(avg_val_loss,
-                                                                    metric_dict['name'],
-                                                                    avg_val_metric
-                                                                    )
-        # Write epoch log
-        logger.info(message_train + message_val +'-'*14)
+        avg_metric = # TODO: assign metric value
 
         # Update if validation metric is better (lower when minimizing, greater when maximizing)
-        maximizing = ( (avg_val_metric > best_metric) and metric_dict['direction'] == 'maximize')
-        minimizing = ( (avg_val_metric < best_metric) and metric_dict['direction'] == 'minimize') 
+        maximizing = ( (avg_metric > best_metric) and metric_dict['direction'] == 'maximize')
+        minimizing = ( (avg_metric < best_metric) and metric_dict['direction'] == 'minimize') 
 
         val_metric_is_better = maximizing or minimizing                       
 
         if val_metric_is_better:
-                        best_metric = avg_val_metric
+                        best_metric = avg_metric
         
         # Report trial epoch and check if should prune
-        trial.report(avg_val_metric, epoch)
+        trial.report(avg_metric, epoch)
         if trial.should_prune():
             time_elapsed = time.time() - since
             logger.info('Pruning trial number {}. Used {:.0f}hs {:.0f}min {:.0f}s on pruned training ¯\_(ツ)_/¯'.format(
@@ -300,25 +196,31 @@ def train_model(trial, model, dataset, metric_dict, num_epochs=25):
 def objective(trial):
 
     # Set learning rate suggestions for trial
-    trial_lr = trial.suggest_float("lr", 1e-7, 1e-3, log=True)
-    opt['train']['G_optimizaer_lr'] = trial_lr
+    trial_lambda = trial.suggest_float("lambda", 1e-3, 1e2)
+    opt['plugnplay']['lambda'] = trial_lambda
 
-    trial_tvweight = trial.suggest_float("tv_weight", 1e-8, 1e2, log=True)
-    opt['train']["G_tvloss_weight"] = trial_tvweight
+    trial_iters_pnp = trial.suggest_int("iters_pnp", 3, 10)
+    opt['plugnplay']['iters_pnp'] = trial_iters_pnp
+
+    trial_sigma1 = trial.suggest_float("sigma1", 10, 50)
+    opt['plugnplay']['sigma1'] = trial_sigma1
+
+    # sigma2 < sigma1. Force it to be 9 stdev less tops
+    trial_sigma2 = trial.suggest_float("sigma2", 1, trial_sigma1-9)
+    opt['plugnplay']['sigma2'] = trial_sigma2
 
     message = f'Trial number {trial.number} with parameters:\n'
-    message = message+f'lr = {trial_lr}\n'
-    message = message+f'tv_weight = {trial_tvweight}'
+    message = message+f'lambda = {trial_lambda}\n'
+    message = message+f'iters_pnp = {trial_iters_pnp}\n'
+    message = message+f'sigma1 = {trial_sigma1}\n'
+    message = message+f'sigma2 = {trial_sigma2}'
 
     logger.info(message)
-
-    # Generate the model and optimizers
-    model = define_model(opt)
 
     # Select metric specified at options
     metric_dict = define_metric(opt['optuna']['metric'])
 
-    best_metric = train_model(trial, model, dataset, metric_dict, num_epochs=opt['optuna']['trial_epochs'])    
+    best_metric = train_model(trial, H_paths, metric_dict, denoiser_model=denoiser_model, pnp_opt=opt['plugnplay'])    
     
     # Save best model for each trial
     # torch.save(best_model.state_dict(), f"model_trial_{trial.number}.pth")

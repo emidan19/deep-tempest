@@ -8,6 +8,8 @@ from sklearn.metrics import jaccard_score
 from torchvision.utils import make_grid
 from datetime import datetime
 # import torchvision.transforms as transforms
+import pytesseract
+import fastwer
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
@@ -1011,6 +1013,32 @@ def imresize_np(img, scale, antialiasing=True):
         out_2.squeeze_()
 
     return out_2.numpy()
+
+'''
+# -------------------------
+# Evaluation metric code 
+# --------------------------------------------
+# Emilio Martínez (emiliomartinez98@gmail.com) 8/2023
+'''
+
+def calculate_cer_wer(img_E, img_H):
+    """  
+    Computes CER and WER between original and estimated images using 
+    image-to-text transcription with tesseract OCR
+
+    Returns:
+    cer, wer (tuple): character error rate and word error rate
+    """
+    # Transcribe ground-truth image to text
+    text_H = pytesseract.image_to_string(img_H).strip().replace('\n',' ')
+
+    # Transcribe estimated image to text
+    text_E = pytesseract.image_to_string(img_E).strip().replace('\n',' ')
+
+    cer = fastwer.score_sent(text_E, text_H, char_level=True)
+    wer = fastwer.score_sent(text_E, text_H)
+
+    return cer, wer
 
 
 if __name__ == '__main__':
