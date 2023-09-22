@@ -38,6 +38,7 @@
     }
   }
 
+  // Unused settings below
   , "netG": {
     "net_type": "drunet" // "dncnn" | "fdncnn" | "ffdnet" | "srmd" | "dpsr" | "srresnet0" |  "srresnet1" | "rrdbnet" 
     , "in_nc": 1        // input channel number

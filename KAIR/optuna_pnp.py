@@ -394,7 +394,7 @@ study.optimize(func=objective, n_trials=opt['optuna']['n_trials'])
 message = 'Best trial:\n'+str(study.best_trial)
 logger.info(message)
 
-logger.info('Saving study information at ' + opt['path']['root'])
+logger.info('Saving study information at ' + out_dir)
 save_optuna_info(study)
 
 logger.info('Hyperparameters study ended')
