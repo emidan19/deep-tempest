@@ -28,7 +28,7 @@ from models.select_model import define_Model
 '''
 
 
-def main(json_path='options/train_drunet_finetuning.json'):
+def main(json_path='options/train_drunet.json'):
 
     '''
     # ----------------------------------------
@@ -61,6 +61,10 @@ def main(json_path='options/train_drunet_finetuning.json'):
     # -->-->-->-->-->-->-->-->-->-->-->-->-->-
 
     init_epoch_G, init_path_G = option.find_last_checkpoint(opt['path']['models'], net_type='G')
+    # init_iter_G, init_path_G = option.find_last_checkpoint(opt['path']['models'], net_type='G', pretrained_path = opt['path']['pretrained_netG'])
+    #init_epoch_optimizerG, init_path_optimizerG = option.find_last_checkpoint(opt['path']['models'], net_type='optimizerG')
+    #opt['path']['pretrained_optimizerG'] = init_path_optimizerG
+    #current_epoch = max(init_epoch_G, init_epoch_optimizerG)
     current_epoch = init_epoch_G
 
     border = opt['scale']
@@ -81,7 +85,7 @@ def main(json_path='options/train_drunet_finetuning.json'):
     # configure logger
     # ----------------------------------------
     if opt['rank'] == 0:
-        logger_name = 'finetuning'
+        logger_name = 'train'
         utils_logger.logger_info(logger_name, os.path.join(opt['path']['log'], logger_name+'.log'))
         logger = logging.getLogger(logger_name)
         logger.info(option.dict2str(opt))
@@ -131,39 +135,18 @@ def main(json_path='options/train_drunet_finetuning.json'):
                                           drop_last=True,
                                           pin_memory=True)
 
-        elif phase == 'test':
-            test_set = define_Dataset(dataset_opt)
-            test_loader = DataLoader(test_set, batch_size=1,
-                                     shuffle=False, num_workers=1,
-                                     drop_last=False, pin_memory=True)
-        else:
-            raise NotImplementedError("Phase [%s] is not recognized." % phase)
+    '''
+    # ----------------------------------------
+    # Step--3 (initialize model)
+    # ----------------------------------------
+    '''
 
-    '''
-    # -----------------------------------------------------------
-    # Step--3 (initialize model and freeze first half of layers)
-    # -----------------------------------------------------------
-    '''
-    ############################################
-    ### Load model and set weights trainable ###
-    ############################################
     model = define_Model(opt)
-    
-    ############################################
-    ###   Freeze DRUNet layers   ###
-    ############################################
-    frozen_layers = np.array(opt["netG"]["frozen_layers"])
-
-    for name, param in model.netG.named_parameters():
-        print(f"\nLayer {name} has {param.numel()}\n")
-        if np.any(frozen_layers == str(name).split(".")[1]):
-            param.requires_grad = False
-
+    model.init_train()
     if opt['rank'] == 0:
         logger.info(model.info_network())
         logger.info(model.info_params())
 
-    model.init_train()
     '''
     # ----------------------------------------
     # Step--4 (main training)
@@ -232,74 +215,6 @@ def main(json_path='options/train_drunet_finetuning.json'):
             logger.info('Saving the model.')
             model.save(current_epoch)
 
-        # -------------------------------
-        # Testing
-        # -------------------------------
-        if current_epoch % opt['train']['checkpoint_test'] == 0 and opt['rank'] == 0:
-
-            avg_psnr = 0.0
-            avg_ssim = 0.0
-            avg_loss = 0.0
-            avg_edgeJaccard = 0.0
-            idx = 0
-
-            for test_data in test_loader:
-                idx += 1
-
-                image_name_ext = os.path.basename(test_data['L_path'][0])
-                img_name, ext = os.path.splitext(image_name_ext)
-                
-                model.feed_data(test_data)
-                model.test()
-
-                visuals = model.current_visuals()
-                E_visual = visuals['E']
-                E_img = util.tensor2uint(E_visual)
-                H_visual = visuals['H']
-                H_img = util.tensor2uint(H_visual)
-
-                # -----------------------
-                # save estimated image E
-                # -----------------------
-
-                if current_epoch % opt['train']['checkpoint_test_save'] == 0:
-
-                    img_dir = os.path.join(opt['path']['images'], img_name)
-                    util.mkdir(img_dir)
-
-                    save_img_path = os.path.join(img_dir, '{:s}_{:d}.png'.format(img_name, current_epoch))
-                    util.imsave(E_img, save_img_path)
-
-                # -----------------------
-                # calculate PSNR and SSIM
-                # -----------------------
-                current_psnr = util.calculate_psnr(E_img, H_img, border=border)
-                current_ssim = util.calculate_ssim(E_img, H_img, border=border)
-                current_edgeJaccard = util.calculate_edge_jaccard(E_img, H_img)
-                
-                # -----------------------
-                # calculate loss
-                # -----------------------
-                sizes = E_visual.size()
-
-                current_loss = model.G_lossfn(torch.reshape(E_visual,(1,1,sizes[1],sizes[2])),
-                                            torch.reshape(H_visual,(1,1,sizes[1],sizes[2])))
         
-
-                logger.info('{:->4d}--> {:>10s} | PSNR = {:<4.2f}dB ; SSIM = {:.3f} ; edgeJaccard = {:.3f} ; G_loss = {:.3e}'.format(idx, image_name_ext, current_psnr, current_ssim, current_edgeJaccard, current_loss))
-
-                avg_psnr += current_psnr
-                avg_ssim += current_ssim
-                avg_edgeJaccard += current_edgeJaccard
-                avg_loss += current_loss
-
-            avg_psnr = avg_psnr / idx
-            avg_ssim = avg_ssim / idx
-            avg_edgeJaccard = avg_edgeJaccard / idx
-            avg_loss = avg_loss / idx
-
-            # testing log
-            logger.info('<epoch:{:3d}, iter:{:8,d}, Average PSNR : {:<.2f}dB, Average SSIM : {:.3f}, Average edgeJaccard : {:.3f}, Average loss : {:.3e}\n'.format(current_epoch, current_step, avg_psnr, avg_ssim, avg_edgeJaccard, avg_loss))
-
 if __name__ == '__main__':
     main()

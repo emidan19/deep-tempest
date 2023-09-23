@@ -77,7 +77,6 @@ def main(json_path='options/evaluation.json'):
     '''
     avg_psnr = 0.0
     avg_ssim = 0.0
-    avg_loss = 0.0
     avg_edgeJaccard = 0.0
     avg_cer = 0.0
     avg_wer = 0.0
@@ -120,10 +119,11 @@ def main(json_path='options/evaluation.json'):
     avg_psnr = avg_psnr / idx
     avg_ssim = avg_ssim / idx
     avg_edgeJaccard = avg_edgeJaccard / idx
-    avg_loss = avg_loss / idx
+    avg_cer = avg_cer / idx
+    avg_wer = avg_wer / idx
 
     # Average log
-    logger.info('[Average metrics] PSNR : {:<4.2f}dB, SSIM = {:.3f} : edgeJaccard = {:.3f} : CER = {:.3f}% : WER = {:.3f}%'.format(current_psnr, current_ssim, current_edgeJaccard, current_cer, current_wer))
+    logger.info('[Average metrics] PSNR : {:<4.2f}dB, SSIM = {:.3f} : edgeJaccard = {:.3f} : CER = {:.3f}% : WER = {:.3f}%'.format(avg_psnr, avg_ssim, avg_edgeJaccard, avg_cer, avg_wer))
 
 if __name__ == '__main__':
     main()

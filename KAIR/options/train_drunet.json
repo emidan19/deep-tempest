@@ -9,15 +9,15 @@
 
   , "path": {
     "root": "denoising"            // "denoising" | "superresolution"
-    , "pretrained_netG": "denoising/drunet/models/70_G.pth"    // path of pretrained model, if model from scratch type: null
+    , "pretrained_netG": "denoising/drunet/models/170_G.pth"    // path of pretrained model, if model from scratch type: null
   }
 
   , "datasets": {
     "train": {
       "name": "train_dataset"           // just name
       , "dataset_type": "ffdnet"         // "dncnn" | "dnpatch" for dncnn,  | "fdncnn" | "ffdnet" | "sr" | "srmd" | "dpsr" | "plain" | "plainpatch"
-      , "dataroot_H": "trainsets/ground-truth"// path of H training dataset
-      , "dataroot_L": "trainsets/simulations" // path of L training dataset, if using noisy H type: null
+      , "dataroot_H": "train_val/ground-truth"// path of H training dataset
+      , "dataroot_L": "train_val/simulations" // path of L training dataset, if using noisy H type: null
       , "sigma": [0, 20]      // 15, 25, 50 for DnCNN | [0, 75] for FFDNet and FDnCNN
       , "use_all_patches": true     // use or not all image patches
       , "skip_natural_patches": false// keep only non-natural image patches/text based image patches
@@ -30,8 +30,8 @@
     , "test": {
       "name": "test_dataset"            // just name
       , "dataset_type": "ffdnet"         // "dncnn" | "dnpatch" for dncnn,  | "fdncnn" | "ffdnet" | "sr" | "srmd" | "dpsr" | "plain" | "plainpatch"
-      , "dataroot_H": "valsets/ground-truth"  // path of H testing dataset
-      , "dataroot_L": "valsets/simulations"   // path of L testing dataset
+      , "dataroot_H": null  // path of H testing dataset
+      , "dataroot_L": null   // path of L testing dataset
       , "sigma_test": 15 // 15, 25, 50 for DnCNN and ffdnet
     }
   }
@@ -55,14 +55,14 @@
   }
 
   , "train": {
-      "epochs": 200                       // number of epochs to train
+      "epochs": 10                       // number of epochs to train
     , "G_lossfn_type": "tv"               // "l1" preferred | tv | "l2sum" | "l2" | "ssim" 
     , "G_lossfn_weight": 1.0              // default
-    , "G_tvloss_weight": 9.904078562098548e-08         // total variation weight
+    , "G_tvloss_weight": 2.225479128512864e-13         // total variation weight
     , "G_tvloss_reduction": "mean"        // "sum" | "mean": Reduction for TV loss 
 
     , "G_optimizer_type": "adam"        // fixed, adam is enough
-    , "G_optimizer_lr": 1e-4       // learning rate
+    , "G_optimizer_lr": 1.5435483950260915e-05       // learning rate
     , "G_optimizer_clipgrad": null      // unused
 
     , "G_scheduler_type": "MultiStepLR" // "MultiStepLR" is enough

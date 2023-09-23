@@ -1012,6 +1012,99 @@ def imresize_np(img, scale, antialiasing=True):
 
     return out_2.numpy()
 
+"""  
+Maximum Entropy Thresholding
+
+The below code is reused from:
+https://github.com/imadtoubal/Maximum-Entropy-Thresholding-Implementation-in-Python
+
+Incorporating a basic local thresholding by patches
+"""
+
+# Helper function for calculating entropy
+def entp(x):
+    temp = np.multiply(x, np.log(x))
+    temp[np.isnan(temp)] = 0
+    return temp
+
+def max_entropy_thrs(img):
+    """  
+    Apply max entropy to input image img
+    """
+
+    h, w = img.shape
+
+    H = cv2.calcHist([img],[0],None,[256],[0,256])
+    H = H / np.sum(H)
+    theta = np.zeros(256)
+    Hf = np.zeros(256)
+    Hb = np.zeros(256)
+
+    for T in range(1,255):
+        Hf[T] = - np.sum( entp(H[:T-1] / np.sum(H[1:T-1])) )
+        Hb[T] = - np.sum( entp(H[T:] / np.sum(H[T:])) )
+        theta[T] = Hf[T] + Hb[T]
+
+    theta_max = np.argmax(theta)
+    img_out = (img > theta_max)
+    num_white_pixels = np.sum(img_out)
+    if num_white_pixels < (h * w - num_white_pixels):
+        img_out = np.invert(img_out)
+
+    return img_out
+
+def patches_max_entropy_thrs(img, patch_size=128):
+
+    # If patch size not positive, return
+    # global max entropy thresholding
+    if patch_size <=0 :
+        return max_entropy_thrs(img)
+
+    H, W = img.shape[:2]
+    num_patches = (H*W)//(patch_size**2)
+
+    img_out = np.zeros_like(img)
+
+    for index in range(num_patches):
+
+        # Move within patches from left to right, above to below        
+        img_patch_index = index % num_patches  # Resets to 0 every time index overflows num_patches
+        h_index = patch_size*((img_patch_index*patch_size)//W)  
+        w_index = patch_size*(((img_patch_index*patch_size)%W )//patch_size)
+
+        h_index = min(h_index, H - patch_size)
+        w_index = min(w_index, W - patch_size)
+
+        # Threshold image patch
+        patch_thresholded = max_entropy_thrs(img[h_index:h_index+patch_size,w_index:w_index+patch_size])
+        # Assign threshold to output
+        img_out[h_index:h_index+patch_size,w_index:w_index+patch_size] = patch_thresholded
+
+    return img_out
+    
+def max_entropy_init(img_tempest, patch_size=128):
+    """  
+    Get initialization for Plug-and-Play deep-tempest restoration
+    using max entropy thresholding. 
+
+    Input image (numpy uint8 array) must have two channels: in-phase (chn 0) and quadrature (chn 1).
+
+    If patch_size is non positive, global thresholding is applied.
+    """
+
+    # Split both in-phase and quadrature channels
+    img_tempest_phase, img_tempest_quadr = img_tempest[:,:,0], img_tempest[:,:,1]
+
+    # Threshold both with max-entropy
+    img_phase_thrs = patches_max_entropy_thrs(img_tempest_phase, patch_size = patch_size)
+    img_quadr_thrs = patches_max_entropy_thrs(img_tempest_quadr, patch_size = patch_size)
+
+    # Multiply both thresholded images
+    img_thr_init = img_phase_thrs * img_quadr_thrs
+
+    # Return as uint
+
+    return (255 * img_thr_init).astype("uint8")
 
 if __name__ == '__main__':
     img = imread_uint('test.bmp', 3)

@@ -8,15 +8,15 @@
   , "n_channels_datasetload": 3 // broadcast to image training set
 
   , "path": {
-    "root": "finetuning_border"  // "finetuning_{border, middle}"
-    , "pretrained_netG": "denoising/drunet/models/140_G.pth"    // path of pretrained model, if model from scratch type: null
+    "root": "max_entropy_thrs_test"  // "finetuning_{border, middle}"
+    , "pretrained_netG": "finetuning_down2_down3_up3_up2/drunet/models/100_G.pth"    // path of pretrained model, if model from scratch type: null
   }
 
   , "datasets": {
     "train": {
       "name": "train_dataset"           // just name
       , "dataset_type": "drunet_finetune"         // "dncnn" | "dnpatch" for dncnn,  | "fdncnn" | "ffdnet" | "sr" | "srmd" | "dpsr" | "plain" | "plainpatch"
-      , "dataroot_H": "finetuning_images/train"// path of H training dataset
+      , "dataroot_H": null // path of H training dataset
       , "dataroot_L": null // path of L training dataset, not used for finetuning
       , "sigma": [0, 0]      // 15, 25, 50 for DnCNN | [0, 75] for FFDNet and FDnCNN
       , "use_all_patches": true     // use or not all image patches
@@ -25,12 +25,12 @@
       , "H_size": 256                    // patch size 40 | 64 | 96 | 128 | 192
       , "dataloader_shuffle": true
       , "dataloader_num_workers": 8
-      , "dataloader_batch_size": 32     // batch size 1 | 16 | 32 | 48 | 64 | 128
+      , "dataloader_batch_size": 36     // batch size 1 | 16 | 32 | 48 | 64 | 128
     }
     , "test": {
       "name": "test_dataset"            // just name
       , "dataset_type": "drunet_finetune"         // "drunet" | "drunet_finetune" | "dncnn" | "dnpatch" for dncnn,  | "fdncnn" | "ffdnet" | "sr" | "srmd" | "dpsr" | "plain" | "plainpatch"
-      , "dataroot_H": "finetuning_images/val"  // path of H testing dataset
+      , "dataroot_H": "finetuning_images/test"  // path of H testing dataset
       , "dataroot_L": null   // path of L testing dataset, not used for finetuning
       , "sigma_test": 0 // 15, 25, 50 for DnCNN and ffdnet
     }
@@ -48,24 +48,24 @@
     , "act_mode": "R"  // "BR" for BN+ReLU | "R" for ReLU
     , "upsample_mode": "convtranspose"  // "pixelshuffle" | "convtranspose" | "upconv"
     , "downsample_mode": "strideconv"   // "strideconv" | "avgpool" | "maxpool"
-    , "bias": false//
+    , "bias": false //
     , "init_type": "kaiming_normal"         // "orthogonal" | "normal" | "uniform" | "xavier_normal" | "xavier_uniform" | "kaiming_normal" | "kaiming_uniform"
     , "init_bn_type": "uniform"         // "uniform" | "constant"
     , "init_gain": 0.2
-    , "frozen_layers": ["m_down3", "m_body", "m_up3"]   // ["m_down3", "m_body", "m_up3"] for border layers finetuning
-                                                        // ["m_head", "m_down1", "m_down2", "m_up2", "m_up1", "m_tail"] for middle layers
+    , "frozen_layers": ["m_head", "m_down1", "m_down2", "m_down3", "m_body", "m_up1", "m_tail"]   // ["m_down3", "m_body", "m_up3"] for border layers finetuning
+                                                                                      // ["m_head", "m_down1", "m_down2", "m_up2", "m_up1", "m_tail"] for middle layers
                                                                                       // ["m_head", "m_down1", "m_body", "m_up1", "m_tail"] for halfway layers
   }
 
   , "train": {
-      "epochs": 20                       // number of epochs to train
-    , "G_lossfn_type": "l2"               // "l1" preferred | tv | "l2sum" | "l2" | "ssim" 
+      "epochs": 50                       // number of epochs to train
+    , "G_lossfn_type": "tv"               // "l1" preferred | tv | "l2sum" | "l2" | "ssim" 
     , "G_lossfn_weight": 1.0              // default
-    , "G_tvloss_weight": 9.904078562098548e-08         // total variation weight
+    , "G_tvloss_weight": 2.225479128512864e-13         // total variation weight
     , "G_tvloss_reduction": "mean"        // "sum" | "mean": Reduction for TV loss 
 
     , "G_optimizer_type": "adam"        // fixed, adam is enough
-    , "G_optimizer_lr": 5.5435483950260915e-05       // learning rate
+    , "G_optimizer_lr": 4.630645185e-05       // learning rate
     , "G_optimizer_clipgrad": null      // unused
 
     , "G_scheduler_type": "MultiStepLR" // "MultiStepLR" is enough
