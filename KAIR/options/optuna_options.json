@@ -14,11 +14,11 @@
     ,"sigma1": 1
     ,"sigma2": 50
     ,"lr_data_term": 1e-4   // Default 1e-4
-    ,"iters_data_term": 5  // Default 10
+    ,"iters_data_term": 30  // Default 30
     ,"iters_pnp": 8
     }
   , "optuna":{
-     "n_trials": 2
+     "n_trials": 10
     ,"metric": "CER"   // "edgeJaccard" | "PSNR" | "SSIM" | "CER" | "MSE"
     
   }

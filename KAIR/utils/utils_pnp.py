@@ -66,12 +66,10 @@ def data_term_objective_function(degradation, x, y_obs, z_prev,alpha, sigma_blur
     # calculate objective function at k iteration
     energy_term = torch.norm(y_obs - T_x)**2 
     alpha_term = alpha*torch.norm(x - z_prev)**2
-    if k == 0:
-        print('Energy term at k = {}: {}'.format(k, energy_term))
-        print('Alpha term at k = {}: {}'.format(k, alpha_term))
 
     print('Energy term at k = {}: {}'.format(k, energy_term))
     print('Alpha term at k = {}: {}'.format(k, alpha_term))
+
 
     energy_term_record.append(energy_term.detach())
     alpha_term_record.append(alpha_term.detach())
@@ -129,21 +127,25 @@ def optimize_data_term(degradation, x_gt, z_k_prev, x_0, y_obs, i, sigma_blur, t
     if plot:
         # print initial condition image x_0
         plt.figure(figsize = (10,8))
-        plt.imshow(x_opt.detach(), cmap = 'gray')
+        plt.imshow(x_opt.clone().detach(), cmap = 'gray')
         plt.title('Data term initial condition x_0')
         plt.show()
 
     # define optimizer
     optimizer = torch.optim.Adam([x_opt], lr=lr)
-    scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, 'min', factor = 0.5, eps = 1e-10, verbose = True)
+    scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, 'min', factor = 0.5, 
+                                                           patience = 5, eps = 1e-10, verbose = True)
 
     # store initial learning rate
     lr_0 = lr
 
+    # Init pocket reference
+    objective_func_ref = np.inf
+
     k = 0
     while (k < max_iter) and (lr >= lr_0 / 2**3):
 
-        x_prev = x_opt.detach().clone()
+        x_prev = x_opt.clone().detach()
         # empty gradients
         optimizer.zero_grad()
         # calculate objective function
@@ -155,16 +157,20 @@ def optimize_data_term(degradation, x_gt, z_k_prev, x_0, y_obs, i, sigma_blur, t
         optimizer.step()
         scheduler.step(objective_func)
 
-        OF_record.append(objective_func.detach())
+        OF_record.append(objective_func.clone().detach())
 
-        x_next = x_opt.detach().clone()
+        x_next = x_opt.clone().detach()
+
+        # Keep minimum argument image at the moment
+        if objective_func < objective_func_ref:
+            x_pocket = x_next.clone()
 
         # calculate |x_k+1 - x_k|
-        diff_x = torch.norm(x_next - x_prev).detach()
+        diff_x = torch.norm(x_next - x_prev).clone().detach()
         diff_x_data_term_record.append(diff_x)
 
         # calculate |x_k - x_gt|
-        diff_x_gt = torch.norm(x_next - x_gt).detach()
+        diff_x_gt = torch.norm(x_next - x_gt).clone().detach()
         diff_x_gt_data_term_record.append(diff_x_gt)
 
         print("k: {}".format(k), end="\r", flush=True)
@@ -182,9 +188,9 @@ def optimize_data_term(degradation, x_gt, z_k_prev, x_0, y_obs, i, sigma_blur, t
             print('-----------')
 
             _, axes = plt.subplots(1, 2, figsize=(12, 10))
-            axes[0].imshow(x_opt.detach().numpy(), cmap = 'gray')
+            axes[0].imshow(x_opt.clone().detach().numpy(), cmap = 'gray')
             axes[0].set_title("x_opt. Iteration = {}".format(k))
-            axes[1].imshow(x_gt.detach().numpy(), cmap = 'gray')
+            axes[1].imshow(x_gt.clone().detach().numpy(), cmap = 'gray')
             axes[1].set_title("x_gt")
             plt.tight_layout()
             plt.show()
@@ -203,9 +209,9 @@ def optimize_data_term(degradation, x_gt, z_k_prev, x_0, y_obs, i, sigma_blur, t
             y_obs_show = (y_obs_abs - y_obs_abs.min()) / (y_obs_abs.max() - y_obs_abs.min())
 
             _, axes = plt.subplots(1, 2, figsize=(12, 10))
-            axes[0].imshow(y_opt_show.detach().numpy(), cmap = 'gray')
+            axes[0].imshow(y_opt_show.clone().detach().numpy(), cmap = 'gray')
             axes[0].set_title("T(x_k). Iteration = {}".format(k))
-            axes[1].imshow(y_obs_show.detach().numpy(), cmap = 'gray')
+            axes[1].imshow(y_obs_show.clone().detach().numpy(), cmap = 'gray')
             axes[1].set_title("y_obs")
             plt.tight_layout()
             plt.show()
@@ -242,7 +248,7 @@ def optimize_data_term(degradation, x_gt, z_k_prev, x_0, y_obs, i, sigma_blur, t
         plt.legend()
         plt.show()
     
-    return x_opt, OF_record
+    return x_pocket, OF_record
 
 def observation(degradation, x, noise_level_img, sigma_blur):
     y = apply_degradation(x, degradation, sigma_blur)
@@ -303,7 +309,7 @@ def plug_and_play_optimization(degradation, x_gt, initializacion_from_y, denoise
 
     # print initial condition image z_0
     plt.figure(figsize = (10,8))
-    plt.imshow(z_0.detach(), cmap = 'gray')
+    plt.imshow(z_0.clone().detach(), cmap = 'gray')
     plt.title('Initial condition z_0')
     plt.show()
 
@@ -319,7 +325,7 @@ def plug_and_play_optimization(degradation, x_gt, initializacion_from_y, denoise
         
         print('Plug & Play {} iteration'.format(i))
         
-        z_prev = z_opt.detach().clone()
+        z_prev = z_opt.clone().detach()
 
         # optimize data term
         x_i = optimize_data_term(degradation, x_gt, z_opt, x_0_data_term, y_obs, i, sigma_blur, total_pixels, alpha = alphas[i], max_iter = max_iter_data_term, eps = eps_data_term, lr = lr, k_print = k_print_data_term, plot = True)
@@ -350,14 +356,14 @@ def plug_and_play_optimization(degradation, x_gt, initializacion_from_y, denoise
         plt.title('Output of denoiser at iteration {}'.format(i))
         plt.show()
 
-        z_next = z_opt.detach().clone()
+        z_next = z_opt.clone().detach()
         
         # calculate |z_k+1 - z_k| / total_pixels
-        diff_z = torch.norm(z_next - z_prev).detach()
+        diff_z = torch.norm(z_next - z_prev).clone().detach()
         diff_z_record.append(diff_z)
 
         # calculate |z_k - x_gt| / total_pixels
-        diff_x_gt = torch.norm(z_next - x_gt).detach()
+        diff_x_gt = torch.norm(z_next - x_gt).clone().detach()
         diff_x_gt_record.append(diff_x_gt)
 
 

@@ -170,7 +170,6 @@ def train_model(trial, dataset, metric_dict, denoiser_model=denoiser_model, pnp_
         x_gt = x_gt[center_h-total_height//2 : center_h+total_height//2, center_w-total_width//2 : center_w+total_width//2]
 
         # To tensor float image
-        x_gt = torch.tensor(x_gt)
         x_gt = util.uint2single(x_gt)
         x_gt = torch.tensor(x_gt)
 
@@ -215,17 +214,17 @@ def train_model(trial, dataset, metric_dict, denoiser_model=denoiser_model, pnp_
         alphas, sigmas = torch.tensor(alphas), torch.tensor(sigmas)
 
         # Get initializations z0 and x0 from observation y
-        x_0 = pnp.max_entropy_thresh(y_obs)
-        z_0 = x_0
+        z_0 = pnp.max_entropy_thresh(y_obs)
+        x_0 = z_0.clone()
 
         z_opt = z_0
         x_0_data_term = x_0 
 
         logger.info("Save initialization")
         z0_outpath = os.path.join(zk_images_dir,"z_0.png")
-        Image.fromarray(util.tensor2uint(z_opt)).save(z0_outpath)
+        Image.fromarray(util.tensor2uint(z_0.clone().detach())).save(z0_outpath)
         x0_outpath = os.path.join(xk_images_dir,"x_0.png")
-        Image.fromarray(util.tensor2uint(z_opt)).save(x0_outpath)
+        Image.fromarray(util.tensor2uint(x_0.clone().detach())).save(x0_outpath)
 
         # iterate algorithm num_iter times
         for pnp_iter in range(num_iter):
@@ -243,12 +242,12 @@ def train_model(trial, dataset, metric_dict, denoiser_model=denoiser_model, pnp_
             
             logger.info("Save output of data term optimization")
             xk_outpath = os.path.join(xk_images_dir,f"trial{trial.number}_x_{pnp_iter+1}.png")
-            Image.fromarray(util.tensor2uint(x_i)).save(xk_outpath)
+            Image.fromarray(util.tensor2uint(x_i.clone().detach())).save(xk_outpath)
 
             # Save optimization history of dataterm
             optim_history_outpath = os.path.join(opt_hist_dir,f"trial{trial.number}_dataterm_hist_iter{pnp_iter+1}.pdf")
             plt.figure(figsize = (7,5))
-            plt.plot(np.array(optim_history_i) / total_pixels, 'r*')
+            plt.plot(np.array(optim_history_i) / total_pixels, '*-r')
             plt.xlabel("Data term iterations")
             plt.ylabel("Objective function (norm by size)")
             plt.grid()
@@ -278,7 +277,7 @@ def train_model(trial, dataset, metric_dict, denoiser_model=denoiser_model, pnp_
 
             logger.info("Save output of denoiser model")
             zk_outpath = os.path.join(zk_images_dir,f"trial{trial.number}_z_{pnp_iter+1}.png")
-            Image.fromarray(util.tensor2uint(z_opt)).save(zk_outpath)
+            Image.fromarray(util.tensor2uint(z_opt.clone().detach())).save(zk_outpath)
 
             # z_next = z_opt.detach().clone()
             
@@ -291,7 +290,7 @@ def train_model(trial, dataset, metric_dict, denoiser_model=denoiser_model, pnp_
             # diff_x_gt_record.append(diff_x_gt)
         
             # Compute metric between original and restored images 
-            current_metric,_ = metric(util.tensor2uint(z_opt), util.tensor2uint(x_gt))
+            current_metric,_ = metric(util.tensor2uint(z_opt.clone().detach()), util.tensor2uint(x_gt))
 
             # Update if validation metric is better (lower when minimizing, greater when maximizing)
             maximizing = ( (current_metric > best_metric) and metric_dict['direction'] == 'maximize')
@@ -302,8 +301,8 @@ def train_model(trial, dataset, metric_dict, denoiser_model=denoiser_model, pnp_
             if current_metric_is_better:
                 best_metric = current_metric
             
-            # Report trial epoch and check if should prune
-            trial.report(current_metric, pnp_iter+1) ### cambiar a paso de PnP
+            logger.info(f"Iter {pnp_iter+1} metric: {current_metric}")
+            trial.report(current_metric, pnp_iter+1) 
 
 
     # Whole optuna parameters searching time
@@ -317,17 +316,17 @@ def train_model(trial, dataset, metric_dict, denoiser_model=denoiser_model, pnp_
 def objective(trial):
 
     # Set learning rate suggestions for trial
-    trial_lambda = trial.suggest_float("lambda", 1e-3, 1e2)
+    trial_lambda = trial.suggest_float("lambda", 1e-3, 3)
     opt['plugnplay']['lambda'] = trial_lambda
 
-    trial_iters_pnp = trial.suggest_int("iters_pnp", 2, 3) #TODO must be [3,10]
+    trial_iters_pnp = trial.suggest_int("iters_pnp", 3, 10) #TODO must be [3,10]
     opt['plugnplay']['iters_pnp'] = trial_iters_pnp
 
     trial_sigma1 = trial.suggest_float("sigma1", 10, 50)
     opt['plugnplay']['sigma1'] = trial_sigma1
 
     # sigma2 < sigma1. Force it to be 9 stdev less tops
-    trial_sigma2 = trial.suggest_float("sigma2", 1, trial_sigma1-9)
+    trial_sigma2 = trial.suggest_float("sigma2", 1, 10)
     opt['plugnplay']['sigma2'] = trial_sigma2
 
     message = f'Trial number {trial.number} with parameters:\n'
