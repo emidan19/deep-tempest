@@ -241,28 +241,44 @@ def train_model(trial, dataset, metric_dict, denoiser_model=denoiser_model, pnp_
                                                                     lr = lr, k_print = k_print_data_term, plot = False)
             
             logger.info("Save output of data term optimization")
+            xk_save = x_i.clone().detach()
+            # normalize z_opt between [0, 1]. [H,W]
+            min_xk_save = xk_save.min()
+            max_xk_save = xk_save.max()
+            xk_save = (xk_save - min_xk_save)/(max_xk_save - min_xk_save)
             xk_outpath = os.path.join(xk_images_dir,f"trial{trial.number}_x_{pnp_iter+1}.png")
-            Image.fromarray(util.tensor2uint(x_i.clone().detach())).save(xk_outpath)
+            Image.fromarray(util.tensor2uint(xk_save)).save(xk_outpath)
 
             # Save optimization history of dataterm
             optim_history_outpath = os.path.join(opt_hist_dir,f"trial{trial.number}_dataterm_hist_iter{pnp_iter+1}")
-            _, ax = plt.subplots(1,3,figsize = (15,5))
-            ax[0].plot(np.array(optim_history_i) / total_pixels, '*-r', label='Objective function')
-            ax[0].plot(np.array(energy_history_i) / total_pixels, '--g', label='Energy term')
-            ax[0].plot(np.array(alpha_history_i) / total_pixels, '--b', label='Alpha term')
-            ax[0].set_xlabel("Data term iterations")
-            ax[0].grid()
-            ax[0].legend()
+            _, ax = plt.subplots(2,2,figsize = (12,8))
 
-            ax[1].plot(np.array(energy_history_i) / total_pixels, '--g', label='Energy term')
-            ax[1].set_xlabel("Data term iterations")
-            ax[1].grid()
-            ax[1].legend()
+            iters_array = np.arange(len(optim_history_i)) + 1
+            optim_hist_i_norm = np.array(optim_history_i) / total_pixels
+            energy_hist_i_norm = np.array(energy_history_i) / total_pixels
+            alpha_hist_i_norm = np.array(alpha_history_i) / total_pixels
 
-            ax[2].plot(np.array(alpha_history_i) / total_pixels, '--b', label='Alpha term')
-            ax[2].set_xlabel("Data term iterations")
-            ax[2].grid()
-            ax[2].legend()
+            ax[0,0].plot(iters_array, optim_hist_i_norm, '*-r', label='Objective function')
+            ax[0,0].plot(iters_array, energy_hist_i_norm, '--g', label='Energy term')
+            ax[0,0].plot(iters_array, alpha_hist_i_norm, '--b', label='Alpha term')
+            ax[0,0].set_xlabel("Data term iterations")
+            ax[0,0].grid()
+            ax[0,0].legend()
+
+            ax[0,1].plot(iters_array, optim_hist_i_norm, '--r', label='Objective Function')
+            ax[0,1].set_xlabel("Data term iterations")
+            ax[0,1].grid()
+            ax[0,1].legend()
+
+            ax[1,0].plot(iters_array, energy_hist_i_norm, '--g', label='Energy term')
+            ax[1,0].set_xlabel("Data term iterations")
+            ax[1,0].grid()
+            ax[1,0].legend()
+
+            ax[1,1].plot(iters_array, alpha_hist_i_norm, '--b', label='Alpha term')
+            ax[1,1].set_xlabel("Data term iterations")
+            ax[1,1].grid()
+            ax[1,1].legend()
 
             plt.tight_layout()
             # Save as pdf
@@ -271,17 +287,17 @@ def train_model(trial, dataset, metric_dict, denoiser_model=denoiser_model, pnp_
             plt.savefig(f"{optim_history_outpath}.png", format="png",bbox_inches='tight') 
 
             # initial condition of data term optimization in k'th iteration of plug&play algorithm is the solution of data term optiization in k-1'th iteration of plug&play
-            x_0_data_term = x_i
+            x_0_data_term = xk_save.clone()
 
             # adjust dimensions
-            x_i = x_i.detach().numpy()
+            x_i = xk_save.detach().numpy()
             # [H,W] --> [H, W, 1]
             x_i = np.expand_dims(x_i, axis=2)
             x_i_dim4 = util.single2tensor4(x_i)
             x_i_dim4 = torch.cat((x_i_dim4, torch.FloatTensor([sigmas[pnp_iter]]).repeat(1, 1, x_i_dim4.shape[2], x_i_dim4.shape[3])), dim=1)
 
             # forward denoiser model
-            logger.info('Enter Forward. Sigma = {}. Iteration {}'.format(sigmas[pnp_iter], pnp_iter+1))
+            logger.info('Enter Denoiser. Sigma = {}. Iteration {}'.format(sigmas[pnp_iter], pnp_iter+1))
             z_opt = denoiser_model(x_i_dim4)
             z_opt = z_opt[0,0,:,:]
 
