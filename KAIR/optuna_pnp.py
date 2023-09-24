@@ -235,25 +235,40 @@ def train_model(trial, dataset, metric_dict, denoiser_model=denoiser_model, pnp_
 
             # optimize data term
             logger.info(f"Executing data-term optimization at iter {pnp_iter+1}")
-            x_i, optim_history_i = pnp.optimize_data_term(degradation, x_gt, z_opt, x_0_data_term, y_obs, pnp_iter, 
-                                         sigma_blur, total_pixels, alpha = alphas[pnp_iter], 
-                                         max_iter = max_iter_data_term, eps = eps_data_term, 
-                                         lr = lr, k_print = k_print_data_term, plot = False)
+            x_i, optim_history_i, energy_history_i, alpha_history_i = pnp.optimize_data_term(degradation, x_gt, z_opt, x_0_data_term, y_obs, pnp_iter, 
+                                                                    sigma_blur, total_pixels, alpha = alphas[pnp_iter], 
+                                                                    max_iter = max_iter_data_term, eps = eps_data_term, 
+                                                                    lr = lr, k_print = k_print_data_term, plot = False)
             
             logger.info("Save output of data term optimization")
             xk_outpath = os.path.join(xk_images_dir,f"trial{trial.number}_x_{pnp_iter+1}.png")
             Image.fromarray(util.tensor2uint(x_i.clone().detach())).save(xk_outpath)
 
             # Save optimization history of dataterm
-            optim_history_outpath = os.path.join(opt_hist_dir,f"trial{trial.number}_dataterm_hist_iter{pnp_iter+1}.pdf")
-            plt.figure(figsize = (7,5))
-            plt.plot(np.array(optim_history_i) / total_pixels, '*-r')
-            plt.xlabel("Data term iterations")
-            plt.ylabel("Objective function (norm by size)")
-            plt.grid()
-            plt.title("Objective Function")
-            plt.savefig(optim_history_outpath, format="pdf",bbox_inches='tight') 
-            # plt.show()
+            optim_history_outpath = os.path.join(opt_hist_dir,f"trial{trial.number}_dataterm_hist_iter{pnp_iter+1}")
+            _, ax = plt.subplots(1,3,figsize = (15,5))
+            ax[0].plot(np.array(optim_history_i) / total_pixels, '*-r', label='Objective function')
+            ax[0].plot(np.array(energy_history_i) / total_pixels, '--g', label='Energy term')
+            ax[0].plot(np.array(alpha_history_i) / total_pixels, '--b', label='Alpha term')
+            ax[0].set_xlabel("Data term iterations")
+            ax[0].grid()
+            ax[0].legend()
+
+            ax[1].plot(np.array(energy_history_i) / total_pixels, '--g', label='Energy term')
+            ax[1].set_xlabel("Data term iterations")
+            ax[1].grid()
+            ax[1].legend()
+
+            ax[2].plot(np.array(alpha_history_i) / total_pixels, '--b', label='Alpha term')
+            ax[2].set_xlabel("Data term iterations")
+            ax[2].grid()
+            ax[2].legend()
+
+            plt.tight_layout()
+            # Save as pdf
+            # plt.savefig(f"{optim_history_outpath}.pdf", format="pdf",bbox_inches='tight') 
+            # Save as png
+            plt.savefig(f"{optim_history_outpath}.png", format="png",bbox_inches='tight') 
 
             # initial condition of data term optimization in k'th iteration of plug&play algorithm is the solution of data term optiization in k-1'th iteration of plug&play
             x_0_data_term = x_i

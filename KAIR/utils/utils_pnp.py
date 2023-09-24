@@ -59,6 +59,8 @@ def data_term_objective_function(degradation, x, y_obs, z_prev,alpha, sigma_blur
     #x_max = torch.max(x_copy)
     #x = (x_copy - x_min) / (x_max - x_min)
     
+    x_heigh, x_width = x.size()
+    total_pixels = x_heigh * x_width
 
     # apply degradation function
     T_x = apply_degradation(x, degradation, sigma_blur)
@@ -67,17 +69,12 @@ def data_term_objective_function(degradation, x, y_obs, z_prev,alpha, sigma_blur
     energy_term = torch.norm(y_obs - T_x)**2 
     alpha_term = alpha*torch.norm(x - z_prev)**2
 
-    print('Energy term at k = {}: {}'.format(k, energy_term))
-    print('Alpha term at k = {}: {}'.format(k, alpha_term))
+    print('Energy term at k = {}: {}'.format(k, energy_term/total_pixels))
+    print('Alpha term at k = {}: {}'.format(k, alpha_term/total_pixels))
 
-
-    energy_term_record.append(energy_term.detach())
-    alpha_term_record.append(alpha_term.detach())
     obj_function = energy_term + alpha_term 
-    #obj_function = torch.norm(y_obs - T_x)**2 + alpha*torch.norm(x - z_prev)**2
-    #print('En la iteracion k = {}, el termino de energia vale: {} y el termino alpha vale: {}'.format(k, termino_energia, termino_alpha))
 
-    return obj_function
+    return obj_function, energy_term, alpha_term
 
 def optimize_data_term(degradation, x_gt, z_k_prev, x_0, y_obs, i, sigma_blur, total_pixels, alpha, max_iter = 5000, eps = 1e-4, lr = 0.1, k_print = 1, plot = True):
     """
@@ -149,15 +146,17 @@ def optimize_data_term(degradation, x_gt, z_k_prev, x_0, y_obs, i, sigma_blur, t
         # empty gradients
         optimizer.zero_grad()
         # calculate objective function
-        objective_func = data_term_objective_function(degradation, x_opt, y_obs, z_k_prev, alpha, sigma_blur, k, energy_term_record, alpha_term_record)
+        objective_func, energy_term, alpha_term = data_term_objective_function(degradation, x_opt, y_obs, z_k_prev, alpha, sigma_blur, k, energy_term_record, alpha_term_record)
         # backpropagation of gradients
         objective_func.backward(retain_graph=True)
-        #print(x_opt.grad)
+        
         # update x_opt
         optimizer.step()
         scheduler.step(objective_func)
 
         OF_record.append(objective_func.clone().detach())
+        energy_term_record.append(energy_term.clone().detach())        
+        alpha_term_record.append(alpha_term.clone().detach())
 
         x_next = x_opt.clone().detach()
 
@@ -176,79 +175,8 @@ def optimize_data_term(degradation, x_gt, z_k_prev, x_0, y_obs, i, sigma_blur, t
         print("k: {}".format(k), end="\r", flush=True)
         k = k + 1
 
-        if (k % k_print == 0):
-            
-            print("k: {}".format(k), end="\r", flush=True)
-            print('Objective function = {}'.format(objective_func / total_pixels))
-            print('diff_x_gt: {}'.format(diff_x_gt / total_pixels))
-            print('diff_x: {}'.format(diff_x / total_pixels))
-            # print('Jaccard score between x_gt and x_opt: {}'.format(jaccard_score))
-            print('Energy term: {}'.format(energy_term_record[-1]))
-            print('Alpha term: {}'.format(alpha_term_record[-1]))
-            print('-----------')
-
-            _, axes = plt.subplots(1, 2, figsize=(12, 10))
-            axes[0].imshow(x_opt.clone().detach().numpy(), cmap = 'gray')
-            axes[0].set_title("x_opt. Iteration = {}".format(k))
-            axes[1].imshow(x_gt.clone().detach().numpy(), cmap = 'gray')
-            axes[1].set_title("x_gt")
-            plt.tight_layout()
-            plt.show()
-
-            # normalize x input
-            x_copy = x_opt.clone() 
-            x_min = torch.min(x_copy)
-            x_max = torch.max(x_copy)
-            x_copy = (x_copy - x_min) / (x_max - x_min)
-
-            y_opt = apply_degradation(x_copy, degradation, sigma_blur)
-            y_opt_abs = y_opt.abs()
-            y_obs_abs = y_obs.abs()
-            y_opt_show = (y_opt_abs - y_opt_abs.min()) / (y_opt_abs.max() - y_opt_abs.min())
-            
-            y_obs_show = (y_obs_abs - y_obs_abs.min()) / (y_obs_abs.max() - y_obs_abs.min())
-
-            _, axes = plt.subplots(1, 2, figsize=(12, 10))
-            axes[0].imshow(y_opt_show.clone().detach().numpy(), cmap = 'gray')
-            axes[0].set_title("T(x_k). Iteration = {}".format(k))
-            axes[1].imshow(y_obs_show.clone().detach().numpy(), cmap = 'gray')
-            axes[1].set_title("y_obs")
-            plt.tight_layout()
-            plt.show()
-        
-            plt.tight_layout()
-            plt.show()
     
-    if plot:
-        inicio = 0
-
-        plt.figure(figsize = (7,5))
-        plt.plot(OF_record[inicio:] / total_pixels, 'r')
-        plt.grid()
-        plt.title('Objective Function/total_pixels at iteration i = {}'.format(i))
-        plt.show()
-
-        plt.figure(figsize = (7,5))
-        plt.plot(diff_x_gt_data_term_record[inicio:]/ total_pixels, 'b')
-        plt.grid()
-        plt.title('|x_k - x_gt|/total_pixels, at iteration i = {}'.format(i))
-        plt.show()
-
-        plt.figure(figsize = (7,5))
-        plt.plot(diff_x_data_term_record[inicio:]/ total_pixels, 'g')
-        plt.grid()
-        plt.title('|x_k+1 - x_k|/total_pixels, at iteration i = {}'.format(i))
-        plt.show()
-
-        plt.figure(figsize = (7,5))
-        plt.plot(energy_term_record[inicio:] / total_pixels, 'g', label = 'energy term')
-        plt.plot(alpha_term_record[inicio:] / total_pixels, 'r', label = 'alpha term')
-        plt.grid()
-        plt.title('|y - T(x_k)|^2 and alpha*|x - z_prev|^2 at iteration i = {}'.format(i))
-        plt.legend()
-        plt.show()
-    
-    return x_pocket, OF_record
+    return x_pocket, OF_record, energy_term_record, alpha_term_record
 
 def observation(degradation, x, noise_level_img, sigma_blur):
     y = apply_degradation(x, degradation, sigma_blur)

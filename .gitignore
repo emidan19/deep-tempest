@@ -5,3 +5,14 @@
 *.make
 *.cmake
 *.pth
+*/*/dncnn25/options
+*/*/drunet/options
+KAIR/*/*/images/*
+KAIR/*/drunet/inferences
+KAIR/trainsets
+KAIR/testsets
+KAIR/valsets
+KAIR/finetuning_images
+KAIR/train_val
+KAIR/web_subset
+*optuna_plot*
