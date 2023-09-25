@@ -16,3 +16,4 @@ KAIR/finetuning_images
 KAIR/train_val
 KAIR/web_subset
 *optuna_plot*
+*pnp_optuna_hparams*

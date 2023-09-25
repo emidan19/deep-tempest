@@ -214,7 +214,7 @@ def train_model(trial, dataset, metric_dict, denoiser_model=denoiser_model, pnp_
         alphas, sigmas = torch.tensor(alphas), torch.tensor(sigmas)
 
         # Get initializations z0 and x0 from observation y
-        z_0 = pnp.max_entropy_thresh(y_obs)
+        z_0 = torch.zeros_like(x_gt)
         x_0 = z_0.clone()
 
         z_opt = z_0
@@ -259,18 +259,18 @@ def train_model(trial, dataset, metric_dict, denoiser_model=denoiser_model, pnp_
             alpha_hist_i_norm = np.array(alpha_history_i) / total_pixels
 
             ax[0,0].plot(iters_array, optim_hist_i_norm, '*-r', label='Objective function')
-            ax[0,0].plot(iters_array, energy_hist_i_norm, '--g', label='Energy term')
-            ax[0,0].plot(iters_array, alpha_hist_i_norm, '--b', label='Alpha term')
+            ax[0,0].plot(iters_array, energy_hist_i_norm, '*--g', label='Energy term')
+            ax[0,0].plot(iters_array, alpha_hist_i_norm, '*--b', label='Alpha term')
             ax[0,0].set_xlabel("Data term iterations")
             ax[0,0].grid()
             ax[0,0].legend()
 
-            ax[0,1].plot(iters_array, optim_hist_i_norm, '--r', label='Objective Function')
+            ax[0,1].plot(iters_array, optim_hist_i_norm, '*--r', label='Objective Function')
             ax[0,1].set_xlabel("Data term iterations")
             ax[0,1].grid()
             ax[0,1].legend()
 
-            ax[1,0].plot(iters_array, energy_hist_i_norm, '--g', label='Energy term')
+            ax[1,0].plot(iters_array, energy_hist_i_norm, '*--g', label='Energy term')
             ax[1,0].set_xlabel("Data term iterations")
             ax[1,0].grid()
             ax[1,0].legend()
@@ -287,7 +287,7 @@ def train_model(trial, dataset, metric_dict, denoiser_model=denoiser_model, pnp_
             plt.savefig(f"{optim_history_outpath}.png", format="png",bbox_inches='tight') 
 
             # initial condition of data term optimization in k'th iteration of plug&play algorithm is the solution of data term optiization in k-1'th iteration of plug&play
-            x_0_data_term = xk_save.clone()
+            x_0_data_term = x_i.clone()
 
             # adjust dimensions
             x_i = xk_save.detach().numpy()
@@ -321,7 +321,8 @@ def train_model(trial, dataset, metric_dict, denoiser_model=denoiser_model, pnp_
             # diff_x_gt_record.append(diff_x_gt)
         
             # Compute metric between original and restored images 
-            current_metric,_ = metric(util.tensor2uint(z_opt.clone().detach()), util.tensor2uint(x_gt))
+            cer_metric, wer_metric = metric(util.tensor2uint(z_opt.clone().detach()), util.tensor2uint(x_gt))
+            current_metric = cer_metric
 
             # Update if validation metric is better (lower when minimizing, greater when maximizing)
             maximizing = ( (current_metric > best_metric) and metric_dict['direction'] == 'maximize')
