@@ -283,7 +283,7 @@ def train_model(trial, dataset, metric_dict, denoiser_model=denoiser_model, pnp_
             ax[1,0].grid()
             ax[1,0].legend()
 
-            ax[1,1].plot(iters_array, alpha_hist_i_norm, '--b', label='Alpha term')
+            ax[1,1].plot(iters_array, alpha_hist_i_norm, '*--b', label='Alpha term')
             ax[1,1].set_xlabel("Data term iterations")
             ax[1,1].grid()
             ax[1,1].legend()
