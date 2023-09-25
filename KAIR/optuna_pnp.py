@@ -161,16 +161,22 @@ def train_model(trial, dataset, metric_dict, denoiser_model=denoiser_model, pnp_
         idx += 1
 
         # Load original image red channel
-        x_gt = imread(H_path)[:,:,0]
+        x_gt_np = imread(H_path)[:,:,0]
 
-        height, width = x_gt.shape
+        # Crear 4 cuadrados
+        # x_gt_np = np.zeros((400,500),dtype='uint8')
+        # x_gt_np[150:250,200:300] = 255
+        # x_gt_np = np.hstack([x_gt_np,x_gt_np])
+        # x_gt_np = np.vstack([x_gt_np,x_gt_np])
+
+        height, width = x_gt_np.shape
         center_h, center_w = height//2, width//2
 
         # Crop image to size (total_height, total_width)
-        x_gt = x_gt[center_h-total_height//2 : center_h+total_height//2, center_w-total_width//2 : center_w+total_width//2]
+        x_gt_np = x_gt_np[center_h-total_height//2 : center_h+total_height//2, center_w-total_width//2 : center_w+total_width//2]
 
         # To tensor float image
-        x_gt = util.uint2single(x_gt)
+        x_gt = util.uint2single(x_gt_np)
         x_gt = torch.tensor(x_gt)
 
         # TODO: Run PNP with pnp_opt
@@ -214,7 +220,9 @@ def train_model(trial, dataset, metric_dict, denoiser_model=denoiser_model, pnp_
         alphas, sigmas = torch.tensor(alphas), torch.tensor(sigmas)
 
         # Get initializations z0 and x0 from observation y
-        z_0 = torch.zeros_like(x_gt)
+        
+        # Real part of observation
+        z_0 = torch.tensor(y_real_np/255.)
         x_0 = z_0.clone()
 
         z_opt = z_0
@@ -287,7 +295,7 @@ def train_model(trial, dataset, metric_dict, denoiser_model=denoiser_model, pnp_
             plt.savefig(f"{optim_history_outpath}.png", format="png",bbox_inches='tight') 
 
             # initial condition of data term optimization in k'th iteration of plug&play algorithm is the solution of data term optiization in k-1'th iteration of plug&play
-            x_0_data_term = x_i.clone()
+            x_0_data_term = xk_save.clone()
 
             # adjust dimensions
             x_i = xk_save.detach().numpy()
@@ -347,25 +355,26 @@ def train_model(trial, dataset, metric_dict, denoiser_model=denoiser_model, pnp_
 # Define optuna objective function
 def objective(trial):
 
-    # Set learning rate suggestions for trial
-    trial_lambda = trial.suggest_float("lambda", 1e-3, 3)
-    opt['plugnplay']['lambda'] = trial_lambda
+    # Set suggestions for trial
 
-    trial_iters_pnp = trial.suggest_int("iters_pnp", 3, 10) #TODO must be [3,10]
-    opt['plugnplay']['iters_pnp'] = trial_iters_pnp
+    # trial_lambda = trial.suggest_float("lambda", 1e-3, 3)
+    # opt['plugnplay']['lambda'] = trial_lambda
 
-    trial_sigma1 = trial.suggest_float("sigma1", 10, 50)
-    opt['plugnplay']['sigma1'] = trial_sigma1
+    # trial_iters_pnp = trial.suggest_int("iters_pnp", 2, 3) #TODO: between 3 and 10
+    # opt['plugnplay']['iters_pnp'] = trial_iters_pnp
+
+    # trial_sigma1 = trial.suggest_float("sigma1", 10, 50)
+    # opt['plugnplay']['sigma1'] = trial_sigma1
 
     # sigma2 < sigma1. Force it to be 9 stdev less tops
-    trial_sigma2 = trial.suggest_float("sigma2", 1, 10)
-    opt['plugnplay']['sigma2'] = trial_sigma2
+    # trial_sigma2 = trial.suggest_float("sigma2", 1, 10)
+    # opt['plugnplay']['sigma2'] = trial_sigma2
 
     message = f'Trial number {trial.number} with parameters:\n'
-    message = message+f'lambda = {trial_lambda}\n'
-    message = message+f'iters_pnp = {trial_iters_pnp}\n'
-    message = message+f'sigma1 = {trial_sigma1}\n'
-    message = message+f'sigma2 = {trial_sigma2}'
+    # message = message+f'lambda = {trial_lambda}\n'
+    # message = message+f'iters_pnp = {trial_iters_pnp}\n'
+    # message = message+f'sigma1 = {trial_sigma1}\n'
+    # message = message+f'sigma2 = {trial_sigma2}'
 
     logger.info(message)
 

@@ -2,23 +2,23 @@
   "task": ""  //  root/task/images-models-options
  
   , "path": {
-    "root": "optuna_hparams"            // "denoising" | "superresolution"
-    , "pretrained_netG": "denoising/drunet/models/28_G.pth"    // path of pretrained model, if model from scratch type: null
+    "root": "pnp_optuna_hparams_articulo_lambda1000_obsreal"            // "denoising" | "superresolution"
+    , "pretrained_netG": "denoising/drunet-gray/28_G.pth"    // path of pretrained model, if model from scratch type: null
   }
   , "n_channels": 1  // broadcast to "datasets", 1 for grayscale, 3 for color
   , "gpu_ids": [0]
 
   , "plugnplay":{
-     "lambda": 0.07
-    ,"noise_sigma": 10      // Default 10
-    ,"sigma1": 1
-    ,"sigma2": 50
+     "lambda": 1000
+    ,"noise_sigma": 5      // Default 10
+    ,"sigma1": 50
+    ,"sigma2": 20
     ,"lr_data_term": 1e-4   // Default 1e-4
-    ,"iters_data_term": 30  // Default 30
+    ,"iters_data_term": 20  // Default 30
     ,"iters_pnp": 8
     }
   , "optuna":{
-     "n_trials": 10
+     "n_trials": 1
     ,"metric": "CER"   // "edgeJaccard" | "PSNR" | "SSIM" | "CER" | "MSE"
     
   }
