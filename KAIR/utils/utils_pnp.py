@@ -67,7 +67,7 @@ def data_term_objective_function(degradation, x, y_obs, z_prev,alpha, sigma_blur
 
     # calculate objective function at k iteration
     energy_term = torch.norm(y_obs - T_x)**2 
-    alpha_term = alpha*torch.norm(x - z_prev)**2
+    alpha_term = torch.norm(x - z_prev)**2
 
     print('Energy term at k = {}: {}'.format(k, energy_term/total_pixels))
     print('Alpha term at k = {}: {}'.format(k, alpha_term/total_pixels))
@@ -116,6 +116,9 @@ def optimize_data_term(degradation, x_gt, z_k_prev, x_0, y_obs, i, sigma_blur, t
 
     # store objective function values at step k
     OF_record = []
+
+    # store gradient norm at step k
+    grad_norm_record = []
     
     x_opt = x_0.detach()
 
@@ -130,7 +133,7 @@ def optimize_data_term(degradation, x_gt, z_k_prev, x_0, y_obs, i, sigma_blur, t
 
     # define optimizer
     optimizer = torch.optim.Adam([x_opt], lr=lr)
-    scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, 'min', factor = 0.5, 
+    scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, 'min', factor = 0.1, 
                                                            patience = 5, eps = 1e-10, verbose = True)
 
     # store initial learning rate
@@ -140,7 +143,7 @@ def optimize_data_term(degradation, x_gt, z_k_prev, x_0, y_obs, i, sigma_blur, t
     objective_func_ref = np.inf
 
     k = 0
-    while (k < max_iter) and (lr >= lr_0 / 2**3):
+    while (k < max_iter) and (lr >= lr_0 / 10**3):
 
         x_prev = x_opt.clone().detach()
         # empty gradients
@@ -149,7 +152,8 @@ def optimize_data_term(degradation, x_gt, z_k_prev, x_0, y_obs, i, sigma_blur, t
         objective_func, energy_term, alpha_term = data_term_objective_function(degradation, x_opt, y_obs, z_k_prev, alpha, sigma_blur, k, energy_term_record, alpha_term_record)
         # backpropagation of gradients
         objective_func.backward(retain_graph=True)
-        
+        # Backprop gradient of x, take l2 norm
+        grad_norm_record.append(torch.norm(x_opt.grad) / total_pixels)
         # update x_opt
         optimizer.step()
         scheduler.step(objective_func)
@@ -176,7 +180,7 @@ def optimize_data_term(degradation, x_gt, z_k_prev, x_0, y_obs, i, sigma_blur, t
         k = k + 1
 
     
-    return x_pocket, OF_record, energy_term_record, alpha_term_record
+    return x_pocket, energy_term_record, alpha_term_record, grad_norm_record
 
 def observation(degradation, x, noise_level_img, sigma_blur):
     y = apply_degradation(x, degradation, sigma_blur)

@@ -133,10 +133,6 @@ def train_model(trial, dataset, metric_dict, denoiser_model=denoiser_model, pnp_
     best_metric = -1e6*(metric_direction=='maximize') + 1e6*(metric_direction=='minimize')
 
     idx = 0
-
-    # Fixing image shape as 800x1000 for faster computation
-    total_height, total_width = 800, 1000
-
     # Plug and Play options
     noise_level_model = pnp_opt["noise_sigma"]/255.0
     modelSigma1 = pnp_opt["sigma1"]
@@ -154,195 +150,193 @@ def train_model(trial, dataset, metric_dict, denoiser_model=denoiser_model, pnp_
     # Time tracker
     since = time.time()
 
-    for i, H_path in enumerate(dataset):
+    H_path = pnp_opt["image_path"]
+    init_img_path = pnp_opt["init_image_path"]
 
-        logger.info(f"Running Plug and Play {i+1}/{len(dataset)}\nImage {H_path}")
+    logger.info(f"Running Plug and Play with image {H_path}")
+    
+    idx += 1
+
+    # Load original image
+    x_gt = imread(H_path)
+    if len(x_gt.shape) > 2:
+        # If RGB, keep only red channel
+        x_gt = x_gt[:,:,0]
+
+    # # Crear 4 cuadrados, comentar el imread de arriba en caso de usar
+    # total_height, total_width = 800, 1000
+    # x_gt = np.zeros((400,500),dtype='uint8')
+    # x_gt[150:250,200:300] = 255
+    # x_gt = np.hstack([x_gt,x_gt])
+    # x_gt = np.vstack([x_gt,x_gt])
+
+    # To tensor float image
+    x_gt = util.uint2single(x_gt)
+    x_gt = torch.tensor(x_gt)
+    
+    total_pixels = x_gt.shape[0] * x_gt.shape[1]
+
+    y_obs = pnp.observation(degradation, x_gt, noise_level_model, sigma_blur)
+    
+    logger.info("Save observation y")
+    # Absolute value
+    y_abs_np = util.tensor2single(torch.abs(y_obs))
+    y_abs_np = (255*(y_abs_np-y_abs_np.min())/(y_abs_np.max()-y_abs_np.min())).astype('uint8')
+    y_abs_outpath = os.path.join(out_dir,"y_abs.png")
+    Image.fromarray(y_abs_np).save(y_abs_outpath)
+    # Real value
+    y_real_np = util.tensor2single(torch.real(y_obs))
+    y_real_np = (255*(y_real_np-y_real_np.min())/(y_real_np.max()-y_real_np.min())).astype('uint8')
+    y_real_outpath = os.path.join(out_dir,"y_real.png")
+    Image.fromarray(y_real_np).save(y_real_outpath)
+    # Imag value
+    y_imag_np = util.tensor2single(torch.imag(y_obs))
+    y_imag_np = (255*(y_imag_np-y_imag_np.min())/(y_imag_np.max()-y_imag_np.min())).astype('uint8')
+    y_imag_outpath = os.path.join(out_dir,"y_imag.png")
+    Image.fromarray(y_imag_np).save(y_imag_outpath)
+
+    # precalculation of parameters for each iteration
+    alphas, sigmas = pnp.get_alpha_sigma(sigma=max(0.255/255., noise_level_model), 
+                                            iter_num = num_iter, modelSigma1 = modelSigma1, modelSigma2 = modelSigma2, 
+                                            w = 1.0, lam = lam)
+    
+    logger.info(f"Alphas\n{alphas}")
+
+    logger.info(f"Sigmas\n{sigmas}")
+
+    alphas, sigmas = torch.tensor(alphas), torch.tensor(sigmas)
+
+    # Get initializations z0 and x0 from image of from observation y
+    if init_img_path:
+        z_0 = imread(init_img_path)
+        if z_0.max() > 1:
+            z_0 = util.uint2single(z_0)
+        z_0 = torch.tensor(z_0)
+    else:
+        # if no image specified, use initialization as 
+        # real part of observation
+        z_0 = torch.real(y_obs.clone())
+
+    x_0 = z_0.clone()
+
+    z_opt = z_0
+    x_0_data_term = x_0 
+
+    min_z_0 = z_0.min()
+    max_z_0 = z_0.max()
+    z_save = (z_0 - min_z_0)/(max_z_0 - min_z_0)
+
+    logger.info("Save initialization")
+    z0_outpath = os.path.join(zk_images_dir,"z_0.png")
+    Image.fromarray(util.tensor2uint(z_save.detach())).save(z0_outpath)
+    x0_outpath = os.path.join(xk_images_dir,"x_0.png")
+    Image.fromarray(util.tensor2uint(z_save.detach())).save(x0_outpath)
+
+    # iterate algorithm num_iter times
+    for pnp_iter in range(num_iter):
         
-        idx += 1
-
-        # Load original image red channel
-        x_gt_np = imread(H_path)[:,:,0]
-
-        # Crear 4 cuadrados
-        # x_gt_np = np.zeros((400,500),dtype='uint8')
-        # x_gt_np[150:250,200:300] = 255
-        # x_gt_np = np.hstack([x_gt_np,x_gt_np])
-        # x_gt_np = np.vstack([x_gt_np,x_gt_np])
-
-        height, width = x_gt_np.shape
-        center_h, center_w = height//2, width//2
-
-        # Crop image to size (total_height, total_width)
-        x_gt_np = x_gt_np[center_h-total_height//2 : center_h+total_height//2, center_w-total_width//2 : center_w+total_width//2]
-
-        # To tensor float image
-        x_gt = util.uint2single(x_gt_np)
-        x_gt = torch.tensor(x_gt)
-
-        # TODO: Run PNP with pnp_opt
+        logger.info('Plug & Play iteration {}'.format(pnp_iter+1))
         
-        total_pixels = x_gt.shape[0] * x_gt.shape[1]
+        # z_prev = z_opt.detach().clone()
 
-        # store |z_k+1 - z^k| 
-        # diff_z_record = []
+        # optimize data term
+        logger.info(f"Executing data-term optimization at iter {pnp_iter+1}")
+        x_i, energy_history_i, alpha_history_i, grad_norm_history_i = pnp.optimize_data_term(degradation, x_gt, z_opt, x_0_data_term, y_obs, pnp_iter, 
+                                                                                        sigma_blur, total_pixels, alpha = alphas[pnp_iter], 
+                                                                                        max_iter = max_iter_data_term, eps = eps_data_term, 
+                                                                                        lr = lr, k_print = k_print_data_term, plot = False)
         
-        # # store |z_k - x_gt| 
-        # diff_x_gt_record = []
+        logger.info("Save output of data term optimization")
+        xk_save = x_i.clone().detach()
+        # normalize z_opt between [0, 1]. [H,W]
+        min_xk_save = xk_save.min()
+        max_xk_save = xk_save.max()
+        xk_save = (xk_save - min_xk_save)/(max_xk_save - min_xk_save)
+        xk_outpath = os.path.join(xk_images_dir,f"trial{trial.number}_x_{pnp_iter+1}.png")
+        Image.fromarray(util.tensor2uint(xk_save)).save(xk_outpath)
 
-        y_obs = pnp.observation(degradation, x_gt, noise_level_model, sigma_blur)
-        # y_obs_save = y_obs.detach()
-        logger.info("Save observation y")
-        # Absolute value
-        y_abs_np = util.tensor2single(torch.abs(y_obs))
-        y_abs_np = (255*(y_abs_np-y_abs_np.min())/(y_abs_np.max()-y_abs_np.min())).astype('uint8')
-        y_abs_outpath = os.path.join(out_dir,"y_abs.png")
-        Image.fromarray(y_abs_np).save(y_abs_outpath)
-        # Real value
-        y_real_np = util.tensor2single(torch.real(y_obs))
-        y_real_np = (255*(y_real_np-y_real_np.min())/(y_real_np.max()-y_real_np.min())).astype('uint8')
-        y_real_outpath = os.path.join(out_dir,"y_real.png")
-        Image.fromarray(y_real_np).save(y_real_outpath)
-        # Imag value
-        y_imag_np = util.tensor2single(torch.imag(y_obs))
-        y_imag_np = (255*(y_imag_np-y_imag_np.min())/(y_imag_np.max()-y_imag_np.min())).astype('uint8')
-        y_imag_outpath = os.path.join(out_dir,"y_imag.png")
-        Image.fromarray(y_imag_np).save(y_imag_outpath)
+        # Save optimization history of dataterm
+        optim_history_outpath = os.path.join(opt_hist_dir,f"trial{trial.number}_dataterm_hist_iter{pnp_iter+1}")
+        _, ax = plt.subplots(2,2,figsize = (12,8))
 
-        # precalculation of parameters for each iteration
-        alphas, sigmas = pnp.get_alpha_sigma(sigma=max(0.255/255., noise_level_model), 
-                                             iter_num = num_iter, modelSigma1 = modelSigma1, modelSigma2 = modelSigma2, 
-                                             w = 1.0, lam = lam)
+        energy_hist_i_norm = np.array(energy_history_i) / total_pixels
+        alpha_hist_i_norm = np.array(alpha_history_i) / total_pixels
+        optim_hist_i_norm = energy_hist_i_norm + float(alphas[pnp_iter]) * alpha_hist_i_norm
+        iters_array = np.arange(len(optim_hist_i_norm)) + 1
+
+        plt.suptitle(f'argmin_x [ ||y-T(x)||² + alpha ||x-zk||² ] with k = {pnp_iter}\n'+'alpha = {:.3e}'.format(alphas[pnp_iter]))
+
+        ax[0,0].plot(iters_array, optim_hist_i_norm, '*-r', label='Objective function')
+        ax[0,0].plot(iters_array, energy_hist_i_norm, '*--g', label='Energy term')
+        ax[0,0].plot(iters_array, alphas[pnp_iter] * alpha_hist_i_norm, '*--b', label='Alpha term')
+        ax[0,0].set_xlabel("Data term iterations")
+        ax[0,0].set_title('Objective Function')
+        ax[0,0].grid()
+        ax[0,0].legend()
+
+        ax[0,1].set_title('||grad x||')
+        ax[0,1].plot(iters_array, grad_norm_history_i, '*--m')
+        ax[0,1].set_xlabel("Data term iterations")
+        ax[0,1].grid()
+        ax[0,1].legend()
+
+        ax[1,0].set_title('||y-T(x)||²')
+        ax[1,0].plot(iters_array, energy_hist_i_norm, '*--g')
+        ax[1,0].set_xlabel("Data term iterations")
+        ax[1,0].grid()
+        ax[1,0].legend()
+
+        ax[1,1].set_title('||x-zk||²')
+        ax[1,1].plot(iters_array, alpha_hist_i_norm, '*--b')
+        ax[1,1].set_xlabel("Data term iterations")
+        ax[1,1].grid()
+        ax[1,1].legend()
+
+        plt.tight_layout()
+        # Save as pdf
+        # plt.savefig(f"{optim_history_outpath}.pdf", format="pdf",bbox_inches='tight') 
+        # Save as png
+        plt.savefig(f"{optim_history_outpath}.png", format="png",bbox_inches='tight') 
+
+        # initial condition of data term optimization in k'th iteration of plug&play algorithm is the solution of data term optiization in k-1'th iteration of plug&play
+        x_0_data_term = x_i.clone()
+
+        # adjust dimensions
+        x_i = xk_save.detach().numpy()
+        # [H,W] --> [H, W, 1]
+        x_i = np.expand_dims(x_i, axis=2)
+        x_i_dim4 = util.single2tensor4(x_i)
+        x_i_dim4 = torch.cat((x_i_dim4, torch.FloatTensor([sigmas[pnp_iter]]).repeat(1, 1, x_i_dim4.shape[2], x_i_dim4.shape[3])), dim=1)
+
+        # forward denoiser model
+        logger.info('Enter Denoiser. Sigma = {}. Iteration {}'.format(sigmas[pnp_iter], pnp_iter+1))
+        z_opt = denoiser_model(x_i_dim4)
+        z_opt = z_opt[0,0,:,:]
+
+        # normalize z_opt between [0, 1]. [H,W]
+        min_z_opt = z_opt.min()
+        max_z_opt = z_opt.max()
+        z_save = (z_opt - min_z_opt)/(max_z_opt - min_z_opt)
+
+        logger.info("Save output of denoiser model")
+        zk_outpath = os.path.join(zk_images_dir,f"trial{trial.number}_z_{pnp_iter+1}.png")
+        Image.fromarray(util.tensor2uint(z_save.detach())).save(zk_outpath)
+    
+        # Compute metric between original and restored images 
+        cer_metric, wer_metric = metric(util.tensor2uint(z_opt.clone().detach()), util.tensor2uint(x_gt))
+        current_metric = cer_metric
+
+        # Update if validation metric is better (lower when minimizing, greater when maximizing)
+        maximizing = ( (current_metric > best_metric) and metric_dict['direction'] == 'maximize')
+        minimizing = ( (current_metric < best_metric) and metric_dict['direction'] == 'minimize') 
+
+        current_metric_is_better = maximizing or minimizing                       
+
+        if current_metric_is_better:
+            best_metric = current_metric
         
-        logger.info(f"Alphas\n{alphas}")
-
-        logger.info(f"Sigmas\n{sigmas}")
-
-        alphas, sigmas = torch.tensor(alphas), torch.tensor(sigmas)
-
-        # Get initializations z0 and x0 from observation y
-        
-        # Real part of observation
-        z_0 = torch.tensor(y_real_np/255.)
-        x_0 = z_0.clone()
-
-        z_opt = z_0
-        x_0_data_term = x_0 
-
-        logger.info("Save initialization")
-        z0_outpath = os.path.join(zk_images_dir,"z_0.png")
-        Image.fromarray(util.tensor2uint(z_0.clone().detach())).save(z0_outpath)
-        x0_outpath = os.path.join(xk_images_dir,"x_0.png")
-        Image.fromarray(util.tensor2uint(x_0.clone().detach())).save(x0_outpath)
-
-        # iterate algorithm num_iter times
-        for pnp_iter in range(num_iter):
-            
-            logger.info('Plug & Play iteration {}'.format(pnp_iter+1))
-            
-            # z_prev = z_opt.detach().clone()
-
-            # optimize data term
-            logger.info(f"Executing data-term optimization at iter {pnp_iter+1}")
-            x_i, optim_history_i, energy_history_i, alpha_history_i = pnp.optimize_data_term(degradation, x_gt, z_opt, x_0_data_term, y_obs, pnp_iter, 
-                                                                    sigma_blur, total_pixels, alpha = alphas[pnp_iter], 
-                                                                    max_iter = max_iter_data_term, eps = eps_data_term, 
-                                                                    lr = lr, k_print = k_print_data_term, plot = False)
-            
-            logger.info("Save output of data term optimization")
-            xk_save = x_i.clone().detach()
-            # normalize z_opt between [0, 1]. [H,W]
-            min_xk_save = xk_save.min()
-            max_xk_save = xk_save.max()
-            xk_save = (xk_save - min_xk_save)/(max_xk_save - min_xk_save)
-            xk_outpath = os.path.join(xk_images_dir,f"trial{trial.number}_x_{pnp_iter+1}.png")
-            Image.fromarray(util.tensor2uint(xk_save)).save(xk_outpath)
-
-            # Save optimization history of dataterm
-            optim_history_outpath = os.path.join(opt_hist_dir,f"trial{trial.number}_dataterm_hist_iter{pnp_iter+1}")
-            _, ax = plt.subplots(2,2,figsize = (12,8))
-
-            iters_array = np.arange(len(optim_history_i)) + 1
-            optim_hist_i_norm = np.array(optim_history_i) / total_pixels
-            energy_hist_i_norm = np.array(energy_history_i) / total_pixels
-            alpha_hist_i_norm = np.array(alpha_history_i) / total_pixels
-
-            ax[0,0].plot(iters_array, optim_hist_i_norm, '*-r', label='Objective function')
-            ax[0,0].plot(iters_array, energy_hist_i_norm, '*--g', label='Energy term')
-            ax[0,0].plot(iters_array, alpha_hist_i_norm, '*--b', label='Alpha term')
-            ax[0,0].set_xlabel("Data term iterations")
-            ax[0,0].grid()
-            ax[0,0].legend()
-
-            ax[0,1].plot(iters_array, optim_hist_i_norm, '*--r', label='Objective Function')
-            ax[0,1].set_xlabel("Data term iterations")
-            ax[0,1].grid()
-            ax[0,1].legend()
-
-            ax[1,0].plot(iters_array, energy_hist_i_norm, '*--g', label='Energy term')
-            ax[1,0].set_xlabel("Data term iterations")
-            ax[1,0].grid()
-            ax[1,0].legend()
-
-            ax[1,1].plot(iters_array, alpha_hist_i_norm, '*--b', label='Alpha term')
-            ax[1,1].set_xlabel("Data term iterations")
-            ax[1,1].grid()
-            ax[1,1].legend()
-
-            plt.tight_layout()
-            # Save as pdf
-            # plt.savefig(f"{optim_history_outpath}.pdf", format="pdf",bbox_inches='tight') 
-            # Save as png
-            plt.savefig(f"{optim_history_outpath}.png", format="png",bbox_inches='tight') 
-
-            # initial condition of data term optimization in k'th iteration of plug&play algorithm is the solution of data term optiization in k-1'th iteration of plug&play
-            x_0_data_term = xk_save.clone()
-
-            # adjust dimensions
-            x_i = xk_save.detach().numpy()
-            # [H,W] --> [H, W, 1]
-            x_i = np.expand_dims(x_i, axis=2)
-            x_i_dim4 = util.single2tensor4(x_i)
-            x_i_dim4 = torch.cat((x_i_dim4, torch.FloatTensor([sigmas[pnp_iter]]).repeat(1, 1, x_i_dim4.shape[2], x_i_dim4.shape[3])), dim=1)
-
-            # forward denoiser model
-            logger.info('Enter Denoiser. Sigma = {}. Iteration {}'.format(sigmas[pnp_iter], pnp_iter+1))
-            z_opt = denoiser_model(x_i_dim4)
-            z_opt = z_opt[0,0,:,:]
-
-            # normalize z_opt between [0, 1]. [H,W]
-            min_z_opt = z_opt.min()
-            max_z_opt = z_opt.max()
-            z_opt = (z_opt - min_z_opt)/(max_z_opt - min_z_opt)
-
-            logger.info("Save output of denoiser model")
-            zk_outpath = os.path.join(zk_images_dir,f"trial{trial.number}_z_{pnp_iter+1}.png")
-            Image.fromarray(util.tensor2uint(z_opt.clone().detach())).save(zk_outpath)
-
-            # z_next = z_opt.detach().clone()
-            
-            # # calculate |z_k+1 - z_k| / total_pixels
-            # diff_z = torch.norm(z_next - z_prev).detach()
-            # diff_z_record.append(diff_z)
-
-            # # calculate |z_k - x_gt| / total_pixels
-            # diff_x_gt = torch.norm(z_next - x_gt).detach()
-            # diff_x_gt_record.append(diff_x_gt)
-        
-            # Compute metric between original and restored images 
-            cer_metric, wer_metric = metric(util.tensor2uint(z_opt.clone().detach()), util.tensor2uint(x_gt))
-            current_metric = cer_metric
-
-            # Update if validation metric is better (lower when minimizing, greater when maximizing)
-            maximizing = ( (current_metric > best_metric) and metric_dict['direction'] == 'maximize')
-            minimizing = ( (current_metric < best_metric) and metric_dict['direction'] == 'minimize') 
-
-            current_metric_is_better = maximizing or minimizing                       
-
-            if current_metric_is_better:
-                best_metric = current_metric
-            
-            logger.info(f"Iter {pnp_iter+1} metric: {current_metric}")
-            trial.report(current_metric, pnp_iter+1) 
+        logger.info(f"Iter {pnp_iter+1} metric: {current_metric}")
+        trial.report(current_metric, pnp_iter+1) 
 
 
     # Whole optuna parameters searching time
@@ -355,22 +349,21 @@ def train_model(trial, dataset, metric_dict, denoiser_model=denoiser_model, pnp_
 # Define optuna objective function
 def objective(trial):
 
-    # Set suggestions for trial
-
+    # Set learning rate suggestions for trial
     # trial_lambda = trial.suggest_float("lambda", 1e-3, 3)
     # opt['plugnplay']['lambda'] = trial_lambda
 
-    # trial_iters_pnp = trial.suggest_int("iters_pnp", 2, 3) #TODO: between 3 and 10
+    # trial_iters_pnp = trial.suggest_int("iters_pnp", 3, 10) #TODO must be [3,10]
     # opt['plugnplay']['iters_pnp'] = trial_iters_pnp
 
     # trial_sigma1 = trial.suggest_float("sigma1", 10, 50)
     # opt['plugnplay']['sigma1'] = trial_sigma1
 
-    # sigma2 < sigma1. Force it to be 9 stdev less tops
+    # # sigma2 < sigma1. Force it to be 9 stdev less tops
     # trial_sigma2 = trial.suggest_float("sigma2", 1, 10)
     # opt['plugnplay']['sigma2'] = trial_sigma2
 
-    message = f'Trial number {trial.number} with parameters:\n'
+    # message = f'Trial number {trial.number} with parameters:\n'
     # message = message+f'lambda = {trial_lambda}\n'
     # message = message+f'iters_pnp = {trial_iters_pnp}\n'
     # message = message+f'sigma1 = {trial_sigma1}\n'
