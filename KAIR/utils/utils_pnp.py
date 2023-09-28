@@ -163,6 +163,7 @@ def optimize_data_term(degradation, x_gt, z_k_prev, x_0, y_obs, i, sigma_blur, t
         # Keep minimum argument image at the moment
         if objective_func < objective_func_ref:
             x_pocket = x_next.clone()
+            objective_func_ref = objective_func.clone().detach()
 
         # calculate |x_k+1 - x_k|
         diff_x = torch.norm(x_next - x_prev).clone().detach()
