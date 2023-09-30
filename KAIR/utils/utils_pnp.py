@@ -38,7 +38,7 @@ def apply_degradation(x, degradation = 'hdmi', sigma_blur = 10/255):
     return print('not hdmi or blur')
 
 # calculate objective function
-def data_term_objective_function(degradation, x, y_obs, z_prev,alpha, sigma_blur, k, energy_term_record, alpha_term_record):
+def data_term_objective_function(degradation, x, y_obs, z_prev, alpha,sigma_blur, k):
     """
     Inputs:
     degradation (char): 'hdmi' for HDMI degradation function. 'blur' for gaussian blur degradation function.
@@ -67,7 +67,7 @@ def data_term_objective_function(degradation, x, y_obs, z_prev,alpha, sigma_blur
 
     # calculate objective function at k iteration
     energy_term = torch.norm(y_obs - T_x)**2 
-    alpha_term = torch.norm(x - z_prev)**2
+    alpha_term = alpha*torch.norm(x - z_prev)**2
 
     print('Energy term at k = {}: {}'.format(k, energy_term/total_pixels))
     print('Alpha term at k = {}: {}'.format(k, alpha_term/total_pixels))
@@ -76,7 +76,7 @@ def data_term_objective_function(degradation, x, y_obs, z_prev,alpha, sigma_blur
 
     return obj_function, energy_term, alpha_term
 
-def optimize_data_term(degradation, x_gt, z_k_prev, x_0, y_obs, i, sigma_blur, total_pixels, alpha, max_iter = 5000, eps = 1e-4, lr = 0.1, k_print = 1, plot = True):
+def optimize_data_term(degradation, x_gt, z_k_prev, x_0, y_obs, sigma_blur, total_pixels, alpha, max_iter = 5000, lr = 0.1, plot = True):
     """
     Inputs:
     degradation (char): 'hdmi' for HDMI degradation function. 'blur' for gaussian blur degradation function.
@@ -84,14 +84,11 @@ def optimize_data_term(degradation, x_gt, z_k_prev, x_0, y_obs, i, sigma_blur, t
     z_i_prev (torch tensor shape [H,W]): output of denoiser prior. [0, 1] Dynamic Range.
     x_0 (torch tensor shape [H,W]): initial condition image with parameter 'requires_grad = True'. [0,1] Dynamic range.
     y_obs (torch tensor shape [H,W]): output of degradation function with added noise when input is x_gt.
-    i (int): iteration number of Plug and Play optimization.
     sigma_blur (float): standard deviation of gaussian blur when degradation is set to 'blur'.
     total_pixels (float): the total number of pixels in the image.
     alpha (float): hyperparameter of data term optimization.
     max_iter (int): maximum number of iterations.
-    eps (float): minimum tolerance for algorithm to stop.
     lr (float): learning rate of iterative algorithm.
-    k_print (int): print results for multiples of k_print iterations.
     plot (boolean): if True, plot OF_record, diff_x_record and diff_x_gt_record.
 
     Output:
@@ -101,9 +98,6 @@ def optimize_data_term(degradation, x_gt, z_k_prev, x_0, y_obs, i, sigma_blur, t
 
     # store |x^{k+1} - x^{k}| 
     diff_x_data_term_record = []
-
-    # store jaccard score between x_gt and x_opt 
-    jacc_score_data_term_record = []
     
     # store |x^{k} - x_gt| 
     diff_x_gt_data_term_record = []
@@ -133,7 +127,7 @@ def optimize_data_term(degradation, x_gt, z_k_prev, x_0, y_obs, i, sigma_blur, t
 
     # define optimizer
     optimizer = torch.optim.Adam([x_opt], lr=lr)
-    scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, 'min', factor = 0.1, 
+    scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, 'min', factor = 0.5, 
                                                            patience = 5, eps = 1e-10, verbose = True)
 
     # store initial learning rate
@@ -149,7 +143,7 @@ def optimize_data_term(degradation, x_gt, z_k_prev, x_0, y_obs, i, sigma_blur, t
         # empty gradients
         optimizer.zero_grad()
         # calculate objective function
-        objective_func, energy_term, alpha_term = data_term_objective_function(degradation, x_opt, y_obs, z_k_prev, alpha, sigma_blur, k, energy_term_record, alpha_term_record)
+        objective_func, energy_term, alpha_term = data_term_objective_function(degradation, x_opt, y_obs, z_k_prev,alpha, sigma_blur, k)
         # backpropagation of gradients
         objective_func.backward(retain_graph=True)
         # Backprop gradient of x, take l2 norm
@@ -192,8 +186,8 @@ def observation(degradation, x, noise_level_img, sigma_blur):
 
 def plug_and_play_optimization(degradation, x_gt, initializacion_from_y, denoiser_prior, noise_level_img, 
                                modelSigma1, modelSigma2, lam, sigma_blur = 3,
-                               num_iter = 5000, max_iter_data_term = 1000,  eps_data_term = 1e-4, 
-                               lr = 0.1, k_print_data_term = 10):
+                               num_iter = 5000, max_iter_data_term = 1000, 
+                               lr = 0.1):
     """
     Inputs:
     degradation (char): 'hdmi' for HDMI degradation function. 'blur' for gaussian blur degradation function.
@@ -223,11 +217,6 @@ def plug_and_play_optimization(degradation, x_gt, initializacion_from_y, denoise
     # store |z_k - x_gt| 
     diff_x_gt_record = []
     
-    # store jaccard score between x_gt and z_opt 
-    #jacc_score_record = []
-    
-
-
     noise_level_model = noise_level_img   
     # generate observation y_obs
     y_obs = observation(degradation, x_gt, noise_level_model, sigma_blur)
@@ -261,7 +250,7 @@ def plug_and_play_optimization(degradation, x_gt, initializacion_from_y, denoise
         z_prev = z_opt.clone().detach()
 
         # optimize data term
-        x_i = optimize_data_term(degradation, x_gt, z_opt, x_0_data_term, y_obs, i, sigma_blur, total_pixels, alpha = alphas[i], max_iter = max_iter_data_term, eps = eps_data_term, lr = lr, k_print = k_print_data_term, plot = True)
+        x_i = optimize_data_term(degradation, x_gt, z_opt, x_0_data_term, y_obs, sigma_blur, total_pixels, alpha = alphas[i], max_iter = max_iter_data_term, lr = lr, plot = True)[0]
         
         # initial condition of data term optimization in k'th iteration of plug&play algorithm is the solution of data term optiization in k-1'th iteration of plug&play
         x_0_data_term = x_i

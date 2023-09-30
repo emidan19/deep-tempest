@@ -141,8 +141,6 @@ def train_model(trial, dataset, metric_dict, denoiser_model=denoiser_model, pnp_
     max_iter_data_term = pnp_opt["iters_data_term"]
     lr = pnp_opt["lr_data_term"]
     lam = pnp_opt["lambda"]
-    eps_data_term = 1e-4
-    k_print_data_term = 50
     sigma_blur = 5
 
     degradation = 'hdmi'
@@ -241,10 +239,10 @@ def train_model(trial, dataset, metric_dict, denoiser_model=denoiser_model, pnp_
 
         # optimize data term
         logger.info(f"Executing data-term optimization at iter {pnp_iter+1}")
-        x_i, energy_history_i, alpha_history_i, grad_norm_history_i = pnp.optimize_data_term(degradation, x_gt, z_opt, x_0_data_term, y_obs, pnp_iter, 
+        x_i, energy_history_i, alpha_history_i, grad_norm_history_i = pnp.optimize_data_term(degradation, x_gt, z_opt, x_0_data_term, y_obs, 
                                                                                         sigma_blur, total_pixels, alpha = alphas[pnp_iter], 
-                                                                                        max_iter = max_iter_data_term, eps = eps_data_term, 
-                                                                                        lr = lr, k_print = k_print_data_term, plot = False)
+                                                                                        max_iter = max_iter_data_term, 
+                                                                                        lr = lr, plot = False)
         
         logger.info("Save output of data term optimization")
         xk_save = x_i.clone().detach()
@@ -261,7 +259,7 @@ def train_model(trial, dataset, metric_dict, denoiser_model=denoiser_model, pnp_
 
         energy_hist_i_norm = np.array(energy_history_i) / total_pixels
         alpha_hist_i_norm = np.array(alpha_history_i) / total_pixels
-        optim_hist_i_norm = energy_hist_i_norm + float(alphas[pnp_iter]) * alpha_hist_i_norm
+        optim_hist_i_norm = energy_hist_i_norm  + alpha_hist_i_norm
         iters_array = np.arange(len(optim_hist_i_norm)) + 1
 
         plt.suptitle(f'argmin_x [ ||y-T(x)||² + alpha ||x-zk||² ] with k = {pnp_iter}\n'+'alpha = {:.3e}'.format(alphas[pnp_iter]))
@@ -280,13 +278,13 @@ def train_model(trial, dataset, metric_dict, denoiser_model=denoiser_model, pnp_
         ax[0,1].grid()
         ax[0,1].legend()
 
-        ax[1,0].set_title('||y-T(x)||²')
-        ax[1,0].plot(iters_array, energy_hist_i_norm, '*--g')
+        ax[1,0].set_title('||y-T(x)||')
+        ax[1,0].plot(iters_array, np.sqrt(np.array(energy_history_i)) / total_pixels, '*--g')
         ax[1,0].set_xlabel("Data term iterations")
         ax[1,0].grid()
         ax[1,0].legend()
 
-        ax[1,1].set_title('||x-zk||²')
+        ax[1,1].set_title('||x-zk||')
         ax[1,1].plot(iters_array, alpha_hist_i_norm, '*--b')
         ax[1,1].set_xlabel("Data term iterations")
         ax[1,1].grid()
