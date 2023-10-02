@@ -67,12 +67,12 @@ def data_term_objective_function(degradation, x, y_obs, z_prev, alpha,sigma_blur
 
     # calculate objective function at k iteration
     energy_term = torch.norm(y_obs - T_x)**2 
-    alpha_term = alpha*torch.norm(x - z_prev)**2
+    alpha_term = torch.norm(x - z_prev)**2
 
     print('Energy term at k = {}: {}'.format(k, energy_term/total_pixels))
     print('Alpha term at k = {}: {}'.format(k, alpha_term/total_pixels))
 
-    obj_function = energy_term + alpha_term 
+    obj_function = energy_term + alpha * alpha_term 
 
     return obj_function, energy_term, alpha_term
 
@@ -105,7 +105,7 @@ def optimize_data_term(degradation, x_gt, z_k_prev, x_0, y_obs, sigma_blur, tota
     # store |y - T(x_k)|^2 
     energy_term_record = []
     
-    # store alpha*|x - z_prev|^2 
+    # store |x - z_prev|^2 
     alpha_term_record = []
 
     # store objective function values at step k

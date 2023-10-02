@@ -2,21 +2,21 @@
   "task": ""  //  root/task/images-models-options
  
   , "path": {
-    "root": "pnp_optuna_hparams_output_dir" // Change for output directory
+    "root": "pnp_optuna_TMDS_test" // Change for output directory
     , "pretrained_netG": "denoising/drunet-gray/28_G.pth"    // path of pretrained model, if model from scratch type: null
   }
   , "n_channels": 1  // broadcast to "datasets", 1 for grayscale, 3 for color
   , "gpu_ids": [0]
 
   , "plugnplay":{
-     "image_path": "pnp_images/square_800x1000.png" // Path to image to load (needed)
+     "image_path": "pnp_images/paper.png" // Path to image to load (needed)
     ,"init_image_path": ""// Path to initialization image (optional)
                           // If not using init use "" or null
     ,"lambda": 0
     ,"noise_sigma": 2   // Observation stdev noise. Default 10
     ,"sigma1": 50       // Prior's first sigma
     ,"sigma2": 10       // Prior's last sigma, smaller than sigma1
-    ,"lr_data_term": 1e-4   // Default 1e-4
+    ,"lr_data_term": 1   // Default 1e-4
     ,"iters_data_term": 20  // Default 30
     ,"iters_pnp": 1
     }

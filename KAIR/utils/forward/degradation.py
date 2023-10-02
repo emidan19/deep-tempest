@@ -290,14 +290,16 @@ def forward(img):
     pixel_column_bits = torch.zeros((rows,8),dtype = torch.float32)
     bits_cod_column =  torch.zeros((rows,10), dtype = torch.float32)
     # codification of all the image
-    img_cod = torch.zeros((rows,columns*10),dtype = torch.complex64)
+    img_cod = torch.zeros((rows,(columns//8)*10),dtype = torch.complex64)
     #output image definition (complex)
     img_out = torch.zeros((rows,columns),dtype=torch.complex64)
     # TMDS codification of all the image doing it by columns
-    for j in range(columns):
-        pixels_column = img[:,j]
-        pixel_column_bits = Pixel2Bit_diff(pixels_column)
-        bits_cod_column,cnt_column = TMDS_diff(pixel_column_bits, cnt_column)
+    for j in range(columns//8):
+        # pixels_column = img[:,j]
+        # pixel_column_bits = Pixel2Bit_diff(pixels_column)
+        bits_cod_column,cnt_column = TMDS_diff(img[:,j*8:(j+1)*8], cnt_column)
         img_cod[:,j*10:(j+1)*10] = bits_cod_column
-    img_out = image_degradation(img_cod, h_total=columns, v_total=rows, N_harmonic=3, sdr_rate = 50e6, fps=60)
-    return img_out
+
+    # img_out = image_degradation(img_cod, h_total=columns, v_total=rows, N_harmonic=3, sdr_rate = 50e6, fps=60)
+    # return img_out
+    return img_cod

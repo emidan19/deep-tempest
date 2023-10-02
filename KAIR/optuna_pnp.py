@@ -17,7 +17,7 @@ from utils import utils_logger
 from utils import utils_image as util
 from utils import utils_option as option
 from utils import utils_pnp as pnp
-from models.drunet.network_unet import UNetRes as net
+# from models.drunet.network_unet import UNetRes as net
 
 '''
 # ----------------------------------------
@@ -73,25 +73,6 @@ except Exception as e:
 message = f'Dataset loaded.'
 logger.info(message)
 
-"""  
-# ----------------------------
-Step--3 load denoiser prior
-# ----------------------------
-"""
-message = 'Loading denoiser model'
-logger.info(message)
-try:
-    # load model
-    denoiser_model_path = os.path.join(opt["path"]["pretrained_netG"])
-    denoiser_model = net(in_nc=1+1, out_nc=1, nc=[64, 128, 256, 512], nb=4, act_mode='R', downsample_mode="strideconv", upsample_mode="convtranspose", bias=False)
-    denoiser_model.load_state_dict(torch.load(denoiser_model_path), strict=True)
-    denoiser_model.eval()
-    for _, v in denoiser_model.named_parameters():
-        v.requires_grad = False
-except Exception as e:
-     logger.info(f"Error loading denoiser model. Exiting with following exception:\n{str(e)}")
-     exit()
-
 
 def define_metric(metric_str):
 
@@ -125,7 +106,7 @@ def define_metric(metric_str):
     
     return metric_dict
 
-def train_model(trial, dataset, metric_dict, denoiser_model=denoiser_model, pnp_opt=opt['plugnplay']):
+def train_model(trial, dataset, metric_dict, denoiser_model=None, pnp_opt=opt['plugnplay']):
 
     metric = metric_dict['func']
     metric_direction = metric_dict['direction']
@@ -213,7 +194,8 @@ def train_model(trial, dataset, metric_dict, denoiser_model=denoiser_model, pnp_
     else:
         # if no image specified, use initialization as 
         # real part of observation
-        z_0 = torch.real(y_obs.clone())
+        z_0 = x_gt + torch.normal(mean = 0, std = 4/255.0, size = (x_gt.shape[0], x_gt.shape[1]))
+        # z_0 = torch.zeros_like(x_gt,dtype=torch.float)
 
     x_0 = z_0.clone()
 
@@ -257,9 +239,9 @@ def train_model(trial, dataset, metric_dict, denoiser_model=denoiser_model, pnp_
         optim_history_outpath = os.path.join(opt_hist_dir,f"trial{trial.number}_dataterm_hist_iter{pnp_iter+1}")
         _, ax = plt.subplots(2,2,figsize = (12,8))
 
-        energy_hist_i_norm = np.array(energy_history_i) / total_pixels
-        alpha_hist_i_norm = np.array(alpha_history_i) / total_pixels
-        optim_hist_i_norm = energy_hist_i_norm  + alpha_hist_i_norm
+        energy_hist_i_norm = np.sqrt(np.array(energy_history_i)) / total_pixels
+        alpha_hist_i_norm = np.sqrt(np.array(alpha_history_i)) / total_pixels
+        optim_hist_i_norm = np.sqrt(np.array(energy_history_i)  + float(alphas[pnp_iter]) * np.array(alpha_history_i)) / total_pixels
         iters_array = np.arange(len(optim_hist_i_norm)) + 1
 
         plt.suptitle(f'argmin_x [ ||y-T(x)||² + alpha ||x-zk||² ] with k = {pnp_iter}\n'+'alpha = {:.3e}'.format(alphas[pnp_iter]))
@@ -279,7 +261,7 @@ def train_model(trial, dataset, metric_dict, denoiser_model=denoiser_model, pnp_
         ax[0,1].legend()
 
         ax[1,0].set_title('||y-T(x)||')
-        ax[1,0].plot(iters_array, np.sqrt(np.array(energy_history_i)) / total_pixels, '*--g')
+        ax[1,0].plot(iters_array, energy_hist_i_norm , '*--g')
         ax[1,0].set_xlabel("Data term iterations")
         ax[1,0].grid()
         ax[1,0].legend()
@@ -298,30 +280,9 @@ def train_model(trial, dataset, metric_dict, denoiser_model=denoiser_model, pnp_
 
         # initial condition of data term optimization in k'th iteration of plug&play algorithm is the solution of data term optiization in k-1'th iteration of plug&play
         x_0_data_term = x_i.clone()
-
-        # adjust dimensions
-        x_i = xk_save.detach().numpy()
-        # [H,W] --> [H, W, 1]
-        x_i = np.expand_dims(x_i, axis=2)
-        x_i_dim4 = util.single2tensor4(x_i)
-        x_i_dim4 = torch.cat((x_i_dim4, torch.FloatTensor([sigmas[pnp_iter]]).repeat(1, 1, x_i_dim4.shape[2], x_i_dim4.shape[3])), dim=1)
-
-        # forward denoiser model
-        logger.info('Enter Denoiser. Sigma = {}. Iteration {}'.format(sigmas[pnp_iter], pnp_iter+1))
-        z_opt = denoiser_model(x_i_dim4)
-        z_opt = z_opt[0,0,:,:]
-
-        # normalize z_opt between [0, 1]. [H,W]
-        min_z_opt = z_opt.min()
-        max_z_opt = z_opt.max()
-        z_save = (z_opt - min_z_opt)/(max_z_opt - min_z_opt)
-
-        logger.info("Save output of denoiser model")
-        zk_outpath = os.path.join(zk_images_dir,f"trial{trial.number}_z_{pnp_iter+1}.png")
-        Image.fromarray(util.tensor2uint(z_save.detach())).save(zk_outpath)
     
         # Compute metric between original and restored images 
-        cer_metric, wer_metric = metric(util.tensor2uint(z_opt.clone().detach()), util.tensor2uint(x_gt))
+        cer_metric, wer_metric = metric(util.tensor2uint(x_i.clone().detach()), util.tensor2uint(x_gt))
         current_metric = cer_metric
 
         # Update if validation metric is better (lower when minimizing, greater when maximizing)
@@ -372,7 +333,7 @@ def objective(trial):
     # Select metric specified at options
     metric_dict = define_metric(opt['optuna']['metric'])
 
-    best_metric = train_model(trial, H_paths, metric_dict, denoiser_model=denoiser_model, pnp_opt=opt['plugnplay'])    
+    best_metric = train_model(trial, H_paths, metric_dict, denoiser_model=None, pnp_opt=opt['plugnplay'])    
 
     # Return metric (Objective Value) of the current trial
 
