@@ -82,7 +82,7 @@ for phase, dataset_opt in opt['datasets'].items():
         patch_size = dataset_opt['H_size']
         train_set = define_Dataset(dataset_opt)
         # Keep only one third of the dataset
-        indexes = torch.randperm(len(train_set))[:len(train_set)//4]
+        indexes = torch.randperm(len(train_set))[:len(train_set)//2]
         train_set = Subset(train_set, indexes)
         train_size = int(math.floor(len(train_set) / batch_size))
         message = f'Training dataset with {train_size} batches (batch size={batch_size}) of {patch_size}x{patch_size} images.'
@@ -301,7 +301,7 @@ def objective(trial):
     trial_lr = trial.suggest_float("lr", 1e-6, 1e-3, log=True)
     opt['train']['G_optimizaer_lr'] = trial_lr
 
-    trial_tvweight = trial.suggest_float("tv_weight", 1e-13, 1e-6, log=True)
+    trial_tvweight = trial.suggest_float("tv_weight", 1e-13, 1e2, log=True)
     opt['train']["G_tvloss_weight"] = trial_tvweight
 
     message = f'Trial number {trial.number} with parameters:\n'
