@@ -12,7 +12,7 @@ import torch
 import torch.nn as nn
 from torch.utils.data import Subset
 import optuna
-import time
+import joblib
 
 from utils import utils_logger
 from utils import utils_image as util
@@ -275,12 +275,16 @@ def train_model(trial, model, dataset, metric_dict, num_epochs=25):
         
         # Report trial epoch and check if should prune
         trial.report(avg_val_metric, epoch)
+
         if trial.should_prune():
             time_elapsed = time.time() - since
             logger.info('Pruning trial number {}. Used {:.0f}hs {:.0f}min {:.0f}s on pruned training ¯\_(ツ)_/¯'.format(
                 trial.number ,time_elapsed // (60*60), (time_elapsed // 60)%60, time_elapsed % 60)
                 )
             raise optuna.TrialPruned()
+        
+        # Save study 
+        joblib.dump(study, study_path)
 
 
     # Whole optuna parameters searching time
@@ -354,14 +358,31 @@ def save_optuna_info(study):
 '''
 metric_dict = define_metric(opt['optuna']['metric'])
 sampler = optuna.samplers.TPESampler()
-study = optuna.create_study(
-        sampler=sampler,
-        pruner=optuna.pruners.MedianPruner( 
-            n_startup_trials=10, n_warmup_steps=4, interval_steps=2
-        ),
-        direction=metric_dict['direction'])
+study_name = opt['optuna']['study_name']  # Unique identifier of the study.
+study_path = os.path.join(opt['path']['log'], f"{study_name}.pkl")
 
-study.optimize(func=objective, n_trials=opt['optuna']['n_trials'])
+# Resume study if already exists
+if os.path.exists(study_path):
+    logger.info(f"Loading study at: {study_path}")
+    study = joblib.load(study_path)
+    df_study = study.trials_dataframe(attrs=("number", "value", "params", "state"))
+    n_trials_completed = len(df_study[df_study["state"]=="COMPLETE"])
+    n_trials = opt['optuna']['n_trials'] - n_trials_completed
+    logger.info(f"Completed {n_trials_completed}, continue study with other {n_trials}")
+
+# Start study
+else:
+    study = optuna.create_study(
+            sampler=sampler,
+            pruner=optuna.pruners.MedianPruner( 
+                n_startup_trials=opt['optuna']['n_startup_trials'],
+                n_warmup_steps=opt['optuna']['n_warmup_steps'], 
+                interval_steps=opt['optuna']['interval_steps']
+            ),
+            direction=metric_dict['direction'])
+    n_trials = opt['optuna']['n_trials']
+
+study.optimize(func=objective, n_trials=n_trials)
 
 message = 'Best trial:\n'+str(study.best_trial)
 logger.info(message)

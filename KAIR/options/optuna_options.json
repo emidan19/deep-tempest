@@ -9,7 +9,7 @@
 
   , "path": {
     "root": "optuna_hparams"            // "denoising" | "superresolution"
-    , "pretrained_netG": "denoising/drunet/models/drunet_gray.pth"    // path of pretrained model, if model from scratch type: null
+    , "pretrained_netG": null    // path of pretrained model, if model from scratch type: null
   }
 
   , "optuna":{
@@ -19,6 +19,7 @@
     ,"n_warmup_steps": 5    // Minimum epochs for each trial
     ,"interval_steps": 1    // Step interval to evaluate pruning
     ,"metric": "edgeJaccard"// "edgeJaccard" | "PSNR" | "SSIM" | "CER" | "MSE"
+    ,"study_name": "hparams_study"
     
   }
 
