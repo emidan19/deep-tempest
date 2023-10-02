@@ -65,7 +65,7 @@ def q_m_diff(input):
     all_ind_mask = torch.ones(input.shape[0], dtype=torch.bool)
     num_1_plus4_mask = (num_1 > 4) 
     num_1_equal4_mask = (num_1 == 4)   
-    data0_equal0_mask = (input[:,0] == 0) 
+    data0_equal0_mask = (input[:,0] < 0.5) 
     intersect_ind_mask = (data0_equal0_mask & num_1_equal4_mask) 
     intersect_ind_mask = (intersect_ind_mask | num_1_plus4_mask)
 
@@ -114,9 +114,9 @@ def TMDS_diff(pixel_column_bits,cnt_column):
     
     #masks used to calculate indexes for assignations in the final output
     all_ind_mask = torch.ones(q_m.shape[0], dtype=torch.bool)
-    IndE_mask = (cnt_column == 0) | (num_1 == num_0)
-    IndE_ind = ((cnt_column == 0) | (num_1 == num_0)).nonzero().squeeze()
-    IndC_mask = ((cnt_column > 0) & (num_1 > num_0)) | ((cnt_column < 0) & (num_0 > num_1))
+    IndE_mask = ((cnt_column < 0.5) & (cnt_column > -0.5)) | (num_1 == num_0)
+    IndE_ind = (((cnt_column < 0.5) & (cnt_column > -0.5)) | (num_1 == num_0)).nonzero().squeeze()
+    IndC_mask = ((cnt_column > 0.5) & (num_1 > num_0)) | ((cnt_column < -0.5) & (num_0 > num_1))
     IndE_and_q_m_0 = ((IndE_mask) & (q_m[:,8] < 0.5)).nonzero().squeeze()
     IndE_and_q_m_1 = ((IndE_mask) & (q_m[:,8] > 0.5)).nonzero().squeeze()
     NotIndE_and_IndC = (torch.logical_not(IndE_mask) & IndC_mask).nonzero().squeeze()
@@ -289,10 +289,9 @@ def forward(img):
     pixels_column = torch.zeros(rows)
     pixel_column_bits = torch.zeros((rows,8),dtype = torch.float32)
     bits_cod_column =  torch.zeros((rows,10), dtype = torch.float32)
-    # codification of all the image
     img_cod = torch.zeros((rows,columns*10),dtype = torch.complex64)
     #output image definition (complex)
-    img_out = torch.zeros((rows,columns),dtype=torch.complex64)
+    img_out = torch.zeros((rows,columns),dtype = torch.complex64)/8
     # TMDS codification of all the image doing it by columns
     for j in range(columns):
         pixels_column = img[:,j]

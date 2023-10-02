@@ -67,12 +67,12 @@ def data_term_objective_function(degradation, x, y_obs, z_prev, alpha,sigma_blur
 
     # calculate objective function at k iteration
     energy_term = torch.norm(y_obs - T_x)**2 
-    alpha_term = alpha*torch.norm(x - z_prev)**2
+    alpha_term = torch.norm(x - z_prev)**2
 
     print('Energy term at k = {}: {}'.format(k, energy_term/total_pixels))
     print('Alpha term at k = {}: {}'.format(k, alpha_term/total_pixels))
 
-    obj_function = energy_term + alpha_term 
+    obj_function = energy_term + alpha*alpha_term 
 
     return obj_function, energy_term, alpha_term
 
@@ -126,9 +126,10 @@ def optimize_data_term(degradation, x_gt, z_k_prev, x_0, y_obs, sigma_blur, tota
         plt.show()
 
     # define optimizer
+    inv_factor = 2
     optimizer = torch.optim.Adam([x_opt], lr=lr)
-    scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, 'min', factor = 0.5, 
-                                                           patience = 5, eps = 1e-10, verbose = True)
+    scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, 'min', factor = 1/inv_factor, 
+                                                           patience = 10, eps = 1e-10, verbose = True)
 
     # store initial learning rate
     lr_0 = lr
@@ -137,7 +138,7 @@ def optimize_data_term(degradation, x_gt, z_k_prev, x_0, y_obs, sigma_blur, tota
     objective_func_ref = np.inf
 
     k = 0
-    while (k < max_iter) and (lr >= lr_0 / 10**3):
+    while (k < max_iter) and (lr >= lr_0 / inv_factor**3):
 
         x_prev = x_opt.clone().detach()
         # empty gradients
@@ -151,6 +152,8 @@ def optimize_data_term(degradation, x_gt, z_k_prev, x_0, y_obs, sigma_blur, tota
         # update x_opt
         optimizer.step()
         scheduler.step(objective_func)
+        #update lr variable for stopping condition after changes of optimizer
+        lr = optimizer.param_groups[0]['lr']  
 
         OF_record.append(objective_func.clone().detach())
         energy_term_record.append(energy_term.clone().detach())        
