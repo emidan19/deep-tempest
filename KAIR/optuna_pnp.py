@@ -258,7 +258,7 @@ def train_model(trial, dataset, metric_dict, denoiser_model=denoiser_model, pnp_
         _, ax = plt.subplots(2,2,figsize = (12,8))
 
         energy_hist_i_norm = np.array(energy_history_i) / total_pixels
-        alpha_hist_i_norm = np.array(alphas[pnp_iter]*alpha_history_i) / total_pixels
+        alpha_hist_i_norm = (float(alphas[pnp_iter]) * np.array(alpha_history_i)) / total_pixels
         optim_hist_i_norm = energy_hist_i_norm  + alpha_hist_i_norm
         iters_array = np.arange(len(optim_hist_i_norm)) + 1
 
@@ -266,7 +266,7 @@ def train_model(trial, dataset, metric_dict, denoiser_model=denoiser_model, pnp_
 
         ax[0,0].plot(iters_array, optim_hist_i_norm, '*-r', label='Objective function')
         ax[0,0].plot(iters_array, energy_hist_i_norm, '*--g', label='Energy term')
-        ax[0,0].plot(iters_array, alphas[pnp_iter] * alpha_hist_i_norm, '*--b', label='Alpha term')
+        ax[0,0].plot(iters_array, float(alphas[pnp_iter]) * alpha_hist_i_norm, '*--b', label='Alpha term')
         ax[0,0].set_xlabel("Data term iterations")
         ax[0,0].set_title('Objective Function')
         ax[0,0].grid()
