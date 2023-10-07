@@ -160,6 +160,12 @@ def optimize_data_term(degradation, x_gt, z_k_prev, x_0, y_obs, sigma_blur, tota
         alpha_term_record.append(alpha_term.clone().detach())
 
         x_next = x_opt.clone().detach()
+        # normalize x_next between [0, 1]
+        min_x_next = x_next.min()
+        max_x_next = x_next.max()
+        x_next = (x_next - min_x_next)/(max_x_next - min_x_next)
+        # Detach grad graph (just in case)
+        x_next.detach()
 
         # Keep minimum argument image at the moment
         if objective_func < objective_func_ref:
