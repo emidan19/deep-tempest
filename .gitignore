@@ -17,5 +17,8 @@ KAIR/train_val
 KAIR/web_subset
 *optuna_plot*
 *pnp_optuna_hparams*
+*opt_history
+*xk
+*zk
 !*q_m_XNOR.pth
 !*q_m_XOR.pth
