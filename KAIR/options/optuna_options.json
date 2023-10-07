@@ -2,28 +2,33 @@
   "task": ""  //  root/task/images-models-options
  
   , "path": {
-    "root": "pnp_optuna_hparams_output_dir" // Change for output directory
+    "root": "optuna_test" // Change for output directory
     , "pretrained_netG": "denoising/drunet-gray/28_G.pth"    // path of pretrained model, if model from scratch type: null
   }
   , "n_channels": 1  // broadcast to "datasets", 1 for grayscale, 3 for color
   , "gpu_ids": [0]
 
   , "plugnplay":{
-     "image_path": "pnp_images/square_800x1000.png" // Path to image to load (needed)
+     "image_path": "pnp_images/paper.png" // Path to image to load (needed)
+    ,"y_path": "pnp_images/paper_captura.png" // Path to observation image (optional)
     ,"init_image_path": ""// Path to initialization image (optional)
                           // If not using init use "" or null
     ,"lambda": 0
-    ,"noise_sigma": 2   // Observation stdev noise. Default 10
+    ,"noise_sigma": 30   // Observation stdev noise. Default 10
     ,"sigma1": 50       // Prior's first sigma
-    ,"sigma2": 10       // Prior's last sigma, smaller than sigma1
+    ,"sigma2": 10       // Prior's last sigma, smaller than sigma1    
     ,"lr_data_term": 1e-4   // Default 1e-4
-    ,"iters_data_term": 20  // Default 30
+    ,"iters_data_term": 100  // Default 30
     ,"iters_pnp": 1
     }
   , "optuna":{
-     "n_trials": 1
+     "n_trials": 30
     ,"metric": "CER"   // "edgeJaccard" | "PSNR" | "SSIM" | "CER" | "MSE"
-    
+    ,"hparams":{
+       "lambda_range": [1e-2, 1]
+      ,"lr_data_term_range": [1e-7,1e-2]
+      ,"iters_pnp_range": [3,8]
+     }
   }
 
   , "datasets": {

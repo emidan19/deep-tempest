@@ -149,6 +149,7 @@ def train_model(trial, dataset, metric_dict, denoiser_model=denoiser_model, pnp_
     since = time.time()
 
     H_path = pnp_opt["image_path"]
+    observation_img_path = pnp_opt["y_path"]
     init_img_path = pnp_opt["init_image_path"]
 
     logger.info(f"Running Plug and Play with image {H_path}")
@@ -174,7 +175,12 @@ def train_model(trial, dataset, metric_dict, denoiser_model=denoiser_model, pnp_
     
     total_pixels = x_gt.shape[0] * x_gt.shape[1]
 
-    y_obs = pnp.observation(degradation, x_gt, noise_level_model, sigma_blur)
+    if observation_img_path:
+        y_obs = imread(observation_img_path)[:,:,:2]
+        y_obs = util.uint2single(y_obs)
+        y_obs = torch.tensor(y_obs[:,:,0] + 1j*y_obs[:,:,1])
+    else:
+        y_obs = pnp.observation(degradation, x_gt, noise_level_model, sigma_blur)
     
     logger.info("Save observation y")
     # Absolute value
@@ -211,9 +217,13 @@ def train_model(trial, dataset, metric_dict, denoiser_model=denoiser_model, pnp_
             z_0 = util.uint2single(z_0)
         z_0 = torch.tensor(z_0)
     else:
-        # if no image specified, use initialization as 
+        # if no image specified, use initialization as: 
+
         # real part of observation
-        z_0 = torch.real(y_obs.clone())
+        # z_0 = torch.real(y_obs.clone())   #(uncomment to use)
+
+        # zeros image
+        z_0 = torch.zeros_like(x_gt)    #(uncomment to use)
 
     x_0 = z_0.clone()
 
@@ -347,12 +357,19 @@ def train_model(trial, dataset, metric_dict, denoiser_model=denoiser_model, pnp_
 # Define optuna objective function
 def objective(trial):
 
-    # Set learning rate suggestions for trial
-    # trial_lambda = trial.suggest_float("lambda", 1e-3, 3)
-    # opt['plugnplay']['lambda'] = trial_lambda
+    # Set learning rate suggestion for trial
+    lr_min, lr_max = opt['optuna']['hparams']["lr_data_term_range"]
+    trial_lr = trial.suggest_float("lr", lr_min, lr_max)
+    opt['plugnplay']['lr_data_term'] = trial_lr
 
-    # trial_iters_pnp = trial.suggest_int("iters_pnp", 3, 10) #TODO must be [3,10]
-    # opt['plugnplay']['iters_pnp'] = trial_iters_pnp
+    # Set lambda suggestion for trial
+    lamb_min, lamb_max = opt['optuna']['hparams']["lambda_range"]
+    trial_lambda = trial.suggest_float("lambda", lamb_min, lamb_max)
+    opt['plugnplay']['lambda'] = trial_lambda
+
+    pnp_iter_min, pnp_iter_max = opt['optuna']['hparams']["iters_pnp_range"]
+    trial_iters_pnp = trial.suggest_int("iters_pnp", pnp_iter_min, pnp_iter_max)
+    opt['plugnplay']['iters_pnp'] = trial_iters_pnp
 
     # trial_sigma1 = trial.suggest_float("sigma1", 10, 50)
     # opt['plugnplay']['sigma1'] = trial_sigma1
@@ -361,11 +378,12 @@ def objective(trial):
     # trial_sigma2 = trial.suggest_float("sigma2", 1, 10)
     # opt['plugnplay']['sigma2'] = trial_sigma2
 
-    # message = f'Trial number {trial.number} with parameters:\n'
-    # message = message+f'lambda = {trial_lambda}\n'
-    # message = message+f'iters_pnp = {trial_iters_pnp}\n'
+    message = f'Trial number {trial.number} with parameters:\n'
+    message = message+f'lambda = {trial_lambda}\n'
+    message = message+f'lr = {trial_lr}\n'
     # message = message+f'sigma1 = {trial_sigma1}\n'
-    # message = message+f'sigma2 = {trial_sigma2}'
+    # message = message+f'sigma2 = {trial_sigma2}\n'
+    message = message+f'iters_pnp = {trial_iters_pnp}'
 
     logger.info(message)
 
