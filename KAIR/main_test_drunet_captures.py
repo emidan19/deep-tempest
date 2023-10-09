@@ -149,23 +149,23 @@ def main(json_path='options/train_drunet_finetuning.json'):
         # Inference
 
         ## With abs value/max-entropy thresholding
-        L_visual = test_data['L']
-        L_img = util.tensor2uint(L_visual)
+        # L_visual = test_data['L']
+        # L_img = util.tensor2uint(L_visual)
         # E_img = np.abs(L_img[:,:,0] + 1j*L_img[:,:,1])
         # E_img = (255 * (E_img/np.max(E_img))).astype("uint8")
-        E_img = util.max_entropy_init(L_img) # using global thresholding
+        # E_img = util.max_entropy_init(L_img) # using global thresholding
         
 
         H_visual = test_data['H']
         H_img = util.tensor2uint(H_visual)
-        ## With drunet
+        # With drunet
         # Load image
 
-        # E_visual = model(test_data['L'].cuda())
-        # E_img = util.tensor2uint(E_visual)
+        E_visual = model(test_data['L'].cuda())
+        E_img = util.tensor2uint(E_visual)
 
-        # H_visual = test_data['H']
-        # H_img = util.tensor2uint(H_visual)
+        H_visual = test_data['H']
+        H_img = util.tensor2uint(H_visual)
 
         # -----------------------
         # save estimated image E
