@@ -19,6 +19,20 @@ from utils import utils_option as option
 from utils import utils_pnp as pnp
 from models.drunet.network_unet import UNetRes as net
 
+def apply_denoiser_prior(x, denoiser, sigma, device):
+    # adjust dimensions
+    x = x.clone().detach().numpy()
+    # [H,W] --> [H, W, 1]
+    x = np.expand_dims(x, axis=2)
+    x_dim4 = util.single2tensor4(x)
+    x_dim4 = torch.cat((x_dim4, torch.FloatTensor([sigma]).repeat(1, 1, x_dim4.shape[2], x_dim4.shape[3])), dim=1)
+
+    # forward denoiser model
+    x_dim4_device = x_dim4.clone().to(device)
+    z = denoiser(x_dim4_device)
+    z = z[0,0,:,:].clone().cpu()
+
+    return z
 '''
 # ----------------------------------------
 # Step--1 (prepare opt and create dict)
@@ -78,13 +92,17 @@ logger.info(message)
 Step--3 load denoiser prior
 # ----------------------------
 """
-message = 'Loading denoiser model'
+
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+message = f'Loading denoiser model Using device: {device}'
 logger.info(message)
 try:
     # load model
     denoiser_model_path = os.path.join(opt["path"]["pretrained_netG"])
     denoiser_model = net(in_nc=1+1, out_nc=1, nc=[64, 128, 256, 512], nb=4, act_mode='R', downsample_mode="strideconv", upsample_mode="convtranspose", bias=False)
     denoiser_model.load_state_dict(torch.load(denoiser_model_path), strict=True)
+    denoiser_model.to(device)
     denoiser_model.eval()
     for _, v in denoiser_model.named_parameters():
         v.requires_grad = False
@@ -220,10 +238,11 @@ def train_model(trial, dataset, metric_dict, denoiser_model=denoiser_model, pnp_
         # if no image specified, use initialization as: 
 
         # real part of observation
-        # z_0 = torch.real(y_obs.clone())   #(uncomment to use)
+        z_0 = torch.imag(y_obs.clone())   #(uncomment to use)
+        z_0 = apply_denoiser_prior(z_0, denoiser_model, noise_level_model, device)
 
         # zeros image
-        z_0 = torch.zeros_like(x_gt)    #(uncomment to use)
+        # z_0 = torch.zeros_like(x_gt)    #(uncomment to use)
 
     x_0 = z_0.clone()
 
@@ -309,22 +328,14 @@ def train_model(trial, dataset, metric_dict, denoiser_model=denoiser_model, pnp_
         # initial condition of data term optimization in k'th iteration of plug&play algorithm is the solution of data term optiization in k-1'th iteration of plug&play
         x_0_data_term = x_i.clone()
 
-        # adjust dimensions
-        x_i = xk_save.detach().numpy()
-        # [H,W] --> [H, W, 1]
-        x_i = np.expand_dims(x_i, axis=2)
-        x_i_dim4 = util.single2tensor4(x_i)
-        x_i_dim4 = torch.cat((x_i_dim4, torch.FloatTensor([sigmas[pnp_iter]]).repeat(1, 1, x_i_dim4.shape[2], x_i_dim4.shape[3])), dim=1)
-
-        # forward denoiser model
         logger.info('Enter Denoiser. Sigma = {}. Iteration {}'.format(sigmas[pnp_iter], pnp_iter+1))
-        z_opt = denoiser_model(x_i_dim4)
-        z_opt = z_opt[0,0,:,:]
+        z_opt = apply_denoiser_prior(x_i, denoiser_model, sigmas[pnp_iter], device)
 
         # normalize z_opt between [0, 1]. [H,W]
         min_z_opt = z_opt.min()
         max_z_opt = z_opt.max()
         z_save = (z_opt - min_z_opt)/(max_z_opt - min_z_opt)
+        z_save = z_opt.clone()
 
         logger.info("Save output of denoiser model")
         zk_outpath = os.path.join(zk_images_dir,f"trial{trial.number}_z_{pnp_iter+1}.png")
