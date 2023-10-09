@@ -126,10 +126,11 @@ def optimize_data_term(degradation, x_gt, z_k_prev, x_0, y_obs, sigma_blur, tota
         plt.show()
 
     # define optimizer
-    inv_factor = 2
+    inv_factor = 10
     optimizer = torch.optim.Adam([x_opt], lr=lr)
     scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, 'min', factor = 1/inv_factor, 
-                                                           patience = 10, eps = 1e-10, verbose = True)
+                                                           threshold= 1e-4,
+                                                           patience = 3, eps = 1e-10, verbose = True)
 
     # store initial learning rate
     lr_0 = lr
@@ -161,11 +162,11 @@ def optimize_data_term(degradation, x_gt, z_k_prev, x_0, y_obs, sigma_blur, tota
 
         x_next = x_opt.clone().detach()
         # normalize x_next between [0, 1]
-        min_x_next = x_next.min()
-        max_x_next = x_next.max()
-        x_next = (x_next - min_x_next)/(max_x_next - min_x_next)
-        # Detach grad graph (just in case)
-        x_next.detach()
+        # min_x_next = x_next.min()
+        # max_x_next = x_next.max()
+        # x_next = (x_next - min_x_next)/(max_x_next - min_x_next)
+        # # Detach grad graph (just in case)
+        # x_next.detach()
 
         # Keep minimum argument image at the moment
         if objective_func < objective_func_ref:
