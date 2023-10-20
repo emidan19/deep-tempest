@@ -8,15 +8,15 @@
   , "n_channels_datasetload": 3 // broadcast to image training set
 
   , "path": {
-    "root": "max_entropy_thrs_test"  // "finetuning_{border, middle}"
-    , "pretrained_netG": "finetuning_down2_down3_up3_up2/drunet/models/100_G.pth"    // path of pretrained model, if model from scratch type: null
+    "root": "finetuning"  // "finetuning_{border, middle}"
+    , "pretrained_netG": "path/to/model"    // path of pretrained model, if model from scratch type: null
   }
 
   , "datasets": {
     "train": {
       "name": "train_dataset"           // just name
       , "dataset_type": "drunet_finetune"         // "dncnn" | "dnpatch" for dncnn,  | "fdncnn" | "ffdnet" | "sr" | "srmd" | "dpsr" | "plain" | "plainpatch"
-      , "dataroot_H": null // path of H training dataset
+      , "dataroot_H": "path/to/train_original" // path of H training dataset
       , "dataroot_L": null // path of L training dataset, not used for finetuning
       , "sigma": [0, 0]      // 15, 25, 50 for DnCNN | [0, 75] for FFDNet and FDnCNN
       , "use_all_patches": true     // use or not all image patches
@@ -30,7 +30,7 @@
     , "test": {
       "name": "test_dataset"            // just name
       , "dataset_type": "drunet_finetune"         // "drunet" | "drunet_finetune" | "dncnn" | "dnpatch" for dncnn,  | "fdncnn" | "ffdnet" | "sr" | "srmd" | "dpsr" | "plain" | "plainpatch"
-      , "dataroot_H": "finetuning_images/test"  // path of H testing dataset
+      , "dataroot_H": "path/to/val_original"  // path of H testing dataset
       , "dataroot_L": null   // path of L testing dataset, not used for finetuning
       , "sigma_test": 0 // 15, 25, 50 for DnCNN and ffdnet
     }

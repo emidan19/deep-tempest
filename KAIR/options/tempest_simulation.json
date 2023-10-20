@@ -1,9 +1,9 @@
 {
     "paths": {
-        "folder_original_images": "web_imgs_tmp/test",    
+        "folder_original_images": "path/to/folder",    
         "__comment1__": "Insert input folder (original images)",
 
-        "folder_simulated_images": "testsets/simulations",
+        "folder_simulated_images": "path/to/new_folder",
         "__comment2__": "Insert output folder (tempest degraded images)"
     },
     
