@@ -20,6 +20,13 @@ Tutores:
 ## Resultados
 **Acá van tablas e imagenes de resultados de los metodos (reutilizar de los del overleaf)**
 
+## Datos
+
+Los datos utilizados [este enlace](https://finguy-my.sharepoint.com/:u:/g/personal/emilio_martinez_fing_edu_uy/EZ8KpQHJ7GZBvMRsBMtNj6gBkC3Fvivuz87-1fiQS6WKiw?e=LVjajm) dentro de un archivo ZIP (~7GB). Al descomprimirlo se pueden encontrar las imágenes sintéticas y capturadas realizadas para los experimentos, entrenamiento y evaluación durante el trabajo.
+
+La estructura de los directorios es diferente para los datos sintéticos es diferente al de los capturados. 
+**describir bien cómo es**
+
 ## Código y requerimientos
 
 En cada una de los directorios se tiene una guía de cómo ejecutar las pruebas/entrenamiento/experimentos correspondientes. 
