@@ -27,7 +27,7 @@ En cada una de los directorios se tiene una guía de cómo ejecutar las pruebas/
 El código esta escrito en lenguaje Python versión 3.10, donde se utilizó ambientes de Anaconda. Para replicar el ambiente de trabajo crear uno nuevo con las bibliotecas del _requirements.txt_:
 
 ```shell
-conda create --deeptempest --file requirements.txt
+conda create --name deeptempest --file requirements.txt
 ```
 
 Activarlo con:
