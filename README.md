@@ -15,17 +15,26 @@ Tutores:
 
 ## Resumen
 
-**Acá va el resumen ya corregido**
+**ACÁ VA el resumen ya corregido**
 
 ## Resultados
-**Acá van tablas e imagenes de resultados de los metodos (reutilizar de los del overleaf)**
+**ACÁ VAN tablas e imagenes de resultados de los metodos (reutilizar de los del overleaf)**
+
+Más ejemplos se pueden ver en el directorio [deep-tempest_ejemplos](deep-tempest_ejemplos). 
+
+También se pueden visualizar desde [este enlace](https://finguy-my.sharepoint.com/:f:/g/personal/emilio_martinez_fing_edu_uy/Eo_2mmNwq0lHguqmzjq7MyABb9pBbuDV3_EPOA9xGC-7vg?e=kevSbM) *(no estable)*. Aquí las imágenes están estructuradas con el siguiente orden:
+
+1. Imagen original
+2. Imagen espiada (_gr-tempest2.0_)
+3. Imagen inferida por método _End-to-End_
+4. Imagen inferida por método de _umbralización por máxima entropía_
 
 ## Datos
 
 Los datos utilizados [este enlace](https://finguy-my.sharepoint.com/:u:/g/personal/emilio_martinez_fing_edu_uy/EZ8KpQHJ7GZBvMRsBMtNj6gBkC3Fvivuz87-1fiQS6WKiw?e=LVjajm) dentro de un archivo ZIP (~7GB). Al descomprimirlo se pueden encontrar las imágenes sintéticas y capturadas realizadas para los experimentos, entrenamiento y evaluación durante el trabajo.
 
 La estructura de los directorios es diferente para los datos sintéticos es diferente al de los capturados. 
-**describir bien cómo es**
+**ACA DESCRIBIR BIEN COMO ES**
 
 ## Código y requerimientos
 
@@ -44,7 +53,7 @@ conda activate deeptempest
 
 ## Referencias
 
-**Referencia a códigos que reutilizamos**
+**ACA PONER: Referencia a códigos que reutilizamos**
 - gr-tempest
 - KAIR
     - DRUNet
