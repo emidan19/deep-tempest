@@ -1,0 +1,33 @@
+id: tempest_normalize_flow
+label: Normalize Flow
+category: '[Tempest]'
+templates:
+  imports: import tempest
+  make: tempest.normalize_flow(${min}, ${max}, ${window}, ${alpha_avg}, ${update_proba})
+  callbacks:
+  - set_min_max(${min},${max}) 
+parameters:
+- id: min
+  label: Minimum
+  dtype: float
+- id: max
+  label: Maximum
+  dtype: float
+- id: window
+  label: Window
+  dtype: int
+- id: alpha_avg
+  label: Alpha avg
+  dtype: float
+- id: update_proba
+  label: Update proba
+  dtype: float
+inputs:
+- label: in
+  domain: stream
+  dtype: float
+outputs:
+- label: out
+  domain: stream
+  dtype: float
+file_format: 1

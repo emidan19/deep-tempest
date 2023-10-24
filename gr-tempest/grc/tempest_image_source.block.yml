@@ -1,0 +1,36 @@
+id: tempest_image_source
+label: Image Source
+category: '[Tempest]'
+
+templates:
+  imports: import tempest
+  make: tempest.image_source(${image_file}, ${Hvisible}, ${Vvisible}, ${Htotal}, ${Vtotal}, ${repeatmode})
+
+parameters:
+- id: image_file
+  label: Image File
+  dtype: file_open
+- id: Htotal
+  label: Horizontal px (total)
+  dtype: int
+- id: Vtotal
+  label: Vertical px (total)
+  dtype: int
+- id: Hvisible
+  label: Horizontal px (visible)
+  dtype: int
+- id: Vvisible
+  label: Vertical px (visible)
+  dtype: int
+- id: repeatmode
+  label: Repeat
+  dtype: enum
+  options: ['1', '2']
+  option_labels: ['Yes', 'Yes, with file re-read']
+
+outputs:
+- domain: stream
+  dtype: float
+
+
+file_format: 1

@@ -1,0 +1,61 @@
+id: tempest_buttonToFileSink
+label: Save Capture
+category: '[Tempest]'
+
+templates:
+  imports: import tempest
+  make: tempest.buttonToFileSink(${Filename}, ${input_width}, ${H_size}, ${V_size}, ${remove_blanking}, ${enhance_image})
+
+#  Make one 'parameters' list entry for every parameter you want settable from the GUI.
+#     Keys include:
+#     * id (makes the value accessible as keyname, e.g. in the make entry)
+#     * label (label shown in the GUI)
+#     * dtype (e.g. int, float, complex, byte, short, xxx_vector, ...)
+#     * default
+parameters:
+- id: Filename
+  label: Output directory
+  dtype: file_save
+- id: input_width
+  label: Input width
+  dtype: int
+  default: "740"
+- id: H_size
+  label: Horizontal pixels
+  dtype: int
+  default: "2200"
+- id: V_size
+  label: Vertical pixels
+  dtype: int
+  default: "1125"
+- id: remove_blanking
+  label: Remove Blanking
+  dtype: bool
+  default: False
+  options: [False, True]
+  option_labels: ['No', 'Yes']
+- id: enhance_image
+  label: Enhance Image
+  dtype: bool
+  default: False
+  options: [False, True]
+  option_labels: ['No', 'Yes']
+
+#  Make one 'inputs' list entry per input and one 'outputs' list entry per output.
+#  Keys include:
+#      * label (an identifier for the GUI)
+#      * domain (optional - stream or message. Default is stream)
+#      * dtype (e.g. int, float, complex, byte, short, xxx_vector, ...)
+#      * vlen (optional - data stream vector length. Default is 1)
+#      * optional (optional - set to 1 for optional inputs. Default is 0)
+inputs:
+- label: in
+  domain: stream
+  dtype: complex
+- label: en
+  domain: message
+
+
+#  'file_format' specifies the version of the GRC yml format used in the file
+#  and should usually not be changed.
+file_format: 1
