@@ -1,0 +1,37 @@
+{
+    "paths": {
+        "folder_original_images": "path/to/folder",    
+        "__comment1__": "Insert input folder (original images)",
+
+        "folder_simulated_images": "path/to/new_folder",
+        "__comment2__": "Insert output folder (tempest degraded images)"
+    },
+    
+    "options": {
+        "blanking": true,   
+        "__comment1__": "Use blanking or not (NOTE: if TRUE, images must respect VESA resolutions)",
+
+        "frames_per_second": 60, 
+        "__comment2__": "fps of video",
+
+        "sdr_rate": 50e6, 
+        "__comment3__": "sampling rate of SDR",
+
+        "random": {
+
+            "harmonics": [3],
+            "__comment1__":"Possible pixel harmonic for capture synchronization frequencies",
+
+            "sigma": null,          
+            "__comment2__":"Gaussian noise with random sigma over specified range [sigma1, simga2]",
+
+            "freq_error": [0,50],   
+            "__comment3__": "Random frequency error (Hz) over specified range [f1, f2]",
+
+            "phase_error": [-1,1],
+            "__comment4__": "Random phase error over specified range (normalized by pi~3.1415...)"
+        }
+
+
+    }
+}

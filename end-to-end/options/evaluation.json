@@ -1,0 +1,5 @@
+{
+    "logpath": "./"                    
+    , "dataroot_H": "path/to/images/ground-truth"   
+    , "dataroot_E": "path/to/images/estimation"   
+}
