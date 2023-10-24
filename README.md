@@ -34,7 +34,36 @@ También se pueden visualizar desde [este enlace](https://finguy-my.sharepoint.c
 Los datos utilizados [este enlace](https://finguy-my.sharepoint.com/:u:/g/personal/emilio_martinez_fing_edu_uy/EZ8KpQHJ7GZBvMRsBMtNj6gBkC3Fvivuz87-1fiQS6WKiw?e=LVjajm) dentro de un archivo ZIP (~7GB). Al descomprimirlo se pueden encontrar las imágenes sintéticas y capturadas realizadas para los experimentos, entrenamiento y evaluación durante el trabajo.
 
 La estructura de los directorios es diferente para los datos sintéticos es diferente al de los capturados. 
-**ACA DESCRIBIR BIEN COMO ES**
+
+### Datos sintéticos
+
+* *ground-truth* (directorio con imágenes de referencia/vistas del monitor)
+    - imagen1.png
+    - ...
+    - imagenN.png
+
+* *simulations* (directorio con imágenes sintéticas de degradación/captura)
+    - imagen1.png
+    - ...
+    - imagenN.png
+
+### Datos reales
+
+* *Imagen 1* (directorio con capturas de imagen1.png)
+    - captura1_imagen1.png
+    - ...
+    - capturaM_imagen1.png
+
+* ...
+
+* *Imagen N* (directorio con capturas de imagenN.png)
+    - captura1_imagenN.png
+    - ...
+    - capturaM_imagenN.png
+
+- imagen1.png
+- ...
+- imagenN.png
 
 ## Código y requerimientos
 
