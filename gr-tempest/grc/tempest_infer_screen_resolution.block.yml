@@ -1,0 +1,31 @@
+id: tempest_infer_screen_resolution
+label: Infers Screen Resolution
+category: '[Tempest]'
+templates:
+  imports: import tempest
+  make: tempest.infer_screen_resolution(${sample_rate}, ${fft_size}, ${refresh_rate},
+    ${automatic_mode})
+  callbacks: 
+  - set_refresh_rate(${refresh_rate})
+parameters:
+- id: sample_rate
+  label: Sample rate
+  dtype: int
+- id: fft_size
+  label: Fft size
+  dtype: int
+- id: refresh_rate
+  label: Refresh rate
+  dtype: float
+- id: automatic_mode
+  label: Automatic_mode
+  dtype: raw
+inputs:
+- label: in
+  domain: stream
+  dtype: float
+outputs:
+- label: out
+  domain: stream
+  dtype: float
+file_format: 1

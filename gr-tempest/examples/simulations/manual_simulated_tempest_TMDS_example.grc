@@ -1,0 +1,941 @@
+options:
+  parameters:
+    author: ''
+    category: '[GRC Hier Blocks]'
+    cmake_opt: ''
+    comment: ''
+    copyright: ''
+    description: ''
+    gen_cmake: 'On'
+    gen_linking: dynamic
+    generate_options: qt_gui
+    hier_block_src_path: '.:'
+    id: manual_simulated_tempest_TMDS_example
+    max_nouts: '0'
+    output_language: python
+    placement: (0,0)
+    qt_qss_theme: ''
+    realtime_scheduling: ''
+    run: 'True'
+    run_command: '{python} -u {filename}'
+    run_options: prompt
+    sizing_mode: fixed
+    thread_safe_setters: ''
+    title: Manual  Simulated Tempest TMDS Example
+    window_size: ''
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [8, 8]
+    rotation: 0
+    state: enabled
+
+blocks:
+- name: Hdisplay
+  id: variable
+  parameters:
+    comment: ''
+    value: Hsize
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [448, 148.0]
+    rotation: 0
+    state: enabled
+- name: Hsize
+  id: variable
+  parameters:
+    comment: ''
+    value: '1800'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [440, 20]
+    rotation: 0
+    state: enabled
+- name: Hvisible
+  id: variable
+  parameters:
+    comment: ''
+    value: '1600'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [352, 20]
+    rotation: 0
+    state: enabled
+- name: Vdisplay
+  id: variable
+  parameters:
+    comment: ''
+    value: Vsize
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [352, 148.0]
+    rotation: 0
+    state: enabled
+- name: Vsize
+  id: variable
+  parameters:
+    comment: ''
+    value: '1000'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [440, 84]
+    rotation: 0
+    state: enabled
+- name: Vvisible
+  id: variable
+  parameters:
+    comment: ''
+    value: '900'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [352, 84]
+    rotation: 0
+    state: enabled
+- name: decim
+  id: variable
+  parameters:
+    comment: ''
+    value: inter
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [280, 148.0]
+    rotation: 0
+    state: enabled
+- name: epsilon_channel
+  id: variable_qtgui_range
+  parameters:
+    comment: ''
+    gui_hint: 1,0,1,1
+    label: Sampling error
+    min_len: '200'
+    orient: Qt.Horizontal
+    rangeType: float
+    start: '-0.1'
+    step: 10e-6
+    stop: '0.1'
+    value: '0'
+    widget: counter_slider
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [904, 180]
+    rotation: 0
+    state: enabled
+- name: freq
+  id: variable_qtgui_range
+  parameters:
+    comment: ''
+    gui_hint: 0,0,1,1
+    label: Frequency Error (normalized)
+    min_len: '200'
+    orient: Qt.Horizontal
+    rangeType: float
+    start: -1e-5
+    step: 1e-6
+    stop: 1e-5
+    value: '0'
+    widget: counter_slider
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [584, 180]
+    rotation: 0
+    state: enabled
+- name: harmonic
+  id: variable_qtgui_range
+  parameters:
+    comment: ''
+    gui_hint: 1,1,1,1
+    label: Harmonic
+    min_len: '200'
+    orient: Qt.Horizontal
+    rangeType: float
+    start: '1'
+    step: '1'
+    stop: '10'
+    value: '1'
+    widget: counter_slider
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1048, 180]
+    rotation: 0
+    state: enabled
+- name: horizontal_offset
+  id: variable_qtgui_range
+  parameters:
+    comment: ''
+    gui_hint: 3,0,1,1
+    label: Horizontal offset
+    min_len: '200'
+    orient: Qt.Horizontal
+    rangeType: int
+    start: '0'
+    step: '1'
+    stop: interpolatedHsize
+    value: '0'
+    widget: counter_slider
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [728, 12]
+    rotation: 0
+    state: enabled
+- name: inter
+  id: variable
+  parameters:
+    comment: ''
+    value: '10'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [216, 148.0]
+    rotation: 0
+    state: enabled
+- name: interpolatedHsize
+  id: variable
+  parameters:
+    comment: ''
+    value: int(Hsize/float(px_rate)*usrp_rate)
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1008, 20]
+    rotation: 0
+    state: enabled
+- name: inverted
+  id: variable_qtgui_chooser
+  parameters:
+    comment: ''
+    gui_hint: 2,1,1,1
+    label: Inverted colors?
+    label0: 'Yes'
+    label1: 'No'
+    label2: ''
+    label3: ''
+    label4: ''
+    labels: '[]'
+    num_opts: '2'
+    option0: '0'
+    option1: '1'
+    option2: '2'
+    option3: '3'
+    option4: '4'
+    options: '[0, 1, 2]'
+    orient: Qt.QHBoxLayout
+    type: real
+    value: '1'
+    widget: radio_buttons
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [592, 12]
+    rotation: 0
+    state: enabled
+- name: lines_offset
+  id: variable_qtgui_range
+  parameters:
+    comment: ''
+    gui_hint: 3,1,1,1
+    label: Vertical offset
+    min_len: '200'
+    orient: Qt.Horizontal
+    rangeType: int
+    start: '0'
+    step: '1'
+    stop: Vsize
+    value: int(Vsize/2)
+    widget: counter_slider
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [872, 12]
+    rotation: 0
+    state: enabled
+- name: noise
+  id: variable_qtgui_range
+  parameters:
+    comment: ''
+    gui_hint: 0,1,1,1
+    label: Noise Power
+    min_len: '200'
+    orient: Qt.Horizontal
+    rangeType: float
+    start: '0'
+    step: 1e-3
+    stop: '2'
+    value: '0'
+    widget: counter_slider
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [768, 180]
+    rotation: 0
+    state: enabled
+- name: px_rate
+  id: variable
+  parameters:
+    comment: ''
+    value: Hsize*Vsize*refresh_rate/100
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [8, 76.0]
+    rotation: 0
+    state: enabled
+- name: rectangular_pulse
+  id: variable
+  parameters:
+    comment: ''
+    value: '[0.7/255]*inter'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [216, 84.0]
+    rotation: 0
+    state: enabled
+- name: refresh_rate
+  id: variable
+  parameters:
+    comment: ''
+    value: '60'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [248, 20]
+    rotation: 0
+    state: enabled
+- name: samp_rate
+  id: variable
+  parameters:
+    comment: ''
+    value: int(px_rate*inter)
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [8, 196.0]
+    rotation: 0
+    state: enabled
+- name: usrp_rate
+  id: variable
+  parameters:
+    comment: ''
+    value: int(50e6/100)
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [8, 140]
+    rotation: 0
+    state: enabled
+- name: analog_sig_source_x_0
+  id: analog_sig_source_x
+  parameters:
+    affinity: ''
+    alias: ''
+    amp: '4'
+    comment: ''
+    freq: px_rate*harmonic
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    offset: '0'
+    phase: '0'
+    samp_rate: samp_rate
+    type: complex
+    waveform: analog.GR_COS_WAVE
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [560, 492.0]
+    rotation: 0
+    state: enabled
+- name: binary_serializer_0
+  id: binary_serializer
+  parameters:
+    M: '10'
+    N: '16'
+    affinity: ''
+    alias: ''
+    comment: ''
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    offset: '0'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [216, 220.0]
+    rotation: 0
+    state: enabled
+- name: binary_serializer_0_0
+  id: binary_serializer
+  parameters:
+    M: '10'
+    N: '16'
+    affinity: ''
+    alias: ''
+    comment: ''
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    offset: '0'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [216, 268.0]
+    rotation: 0
+    state: enabled
+- name: binary_serializer_0_0_0
+  id: binary_serializer
+  parameters:
+    M: '10'
+    N: '16'
+    affinity: ''
+    alias: ''
+    comment: ''
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    offset: '0'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [216, 308.0]
+    rotation: 0
+    state: enabled
+- name: blocks_add_xx_0
+  id: blocks_add_xx
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    num_inputs: '3'
+    type: float
+    vlen: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [160, 408.0]
+    rotation: 0
+    state: enabled
+- name: blocks_complex_to_float_0
+  id: blocks_complex_to_float
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    vlen: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [824, 712.0]
+    rotation: 180
+    state: true
+- name: blocks_complex_to_mag_0
+  id: blocks_complex_to_mag
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    vlen: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [832, 568.0]
+    rotation: 180
+    state: disabled
+- name: blocks_delay_0
+  id: blocks_delay
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    delay: interpolatedHsize*lines_offset+horizontal_offset
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    num_ports: '1'
+    type: complex
+    vlen: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1016, 740.0]
+    rotation: 180
+    state: enabled
+- name: blocks_float_to_complex_0
+  id: blocks_float_to_complex
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    vlen: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [304, 448.0]
+    rotation: 0
+    state: true
+- name: blocks_float_to_short_0
+  id: blocks_float_to_short
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    scale: inverted
+    vlen: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [288, 700.0]
+    rotation: 180
+    state: enabled
+- name: blocks_float_to_short_0_0
+  id: blocks_float_to_short
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    scale: inverted
+    vlen: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [224, 1068.0]
+    rotation: 180
+    state: disabled
+- name: blocks_multiply_xx_0
+  id: blocks_multiply_xx
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    num_inputs: '2'
+    type: complex
+    vlen: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [856, 472.0]
+    rotation: 0
+    state: enabled
+- name: blocks_null_sink_0
+  id: blocks_null_sink
+  parameters:
+    affinity: ''
+    alias: ''
+    bus_structure_sink: '[[0,],]'
+    comment: ''
+    num_inputs: '2'
+    type: float
+    vlen: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [488, 256.0]
+    rotation: 0
+    state: disabled
+- name: blocks_throttle_0_0
+  id: blocks_throttle
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    ignoretag: 'True'
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    samples_per_second: samp_rate
+    type: complex
+    vlen: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [504, 372.0]
+    rotation: 0
+    state: enabled
+- name: channels_channel_model_0
+  id: channels_channel_model
+  parameters:
+    affinity: ''
+    alias: ''
+    block_tags: 'False'
+    comment: ''
+    epsilon: epsilon_channel+1
+    freq_offset: freq
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    noise_voltage: noise
+    seed: '0'
+    taps: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1208, 428.0]
+    rotation: 0
+    state: enabled
+- name: interp_fir_filter_xxx_0
+  id: interp_fir_filter_xxx
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: genero la forma de onda en el cable
+    interp: inter
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    samp_delay: '0'
+    taps: rectangular_pulse
+    type: fcc
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [288, 628.0]
+    rotation: 0
+    state: disabled
+- name: qtgui_freq_sink_x_0
+  id: qtgui_freq_sink_x
+  parameters:
+    affinity: ''
+    alias: ''
+    alpha1: '1.0'
+    alpha10: '1.0'
+    alpha2: '1.0'
+    alpha3: '1.0'
+    alpha4: '1.0'
+    alpha5: '1.0'
+    alpha6: '1.0'
+    alpha7: '1.0'
+    alpha8: '1.0'
+    alpha9: '1.0'
+    autoscale: 'False'
+    average: '1.0'
+    axislabels: 'True'
+    bw: samp_rate
+    color1: '"blue"'
+    color10: '"dark blue"'
+    color2: '"red"'
+    color3: '"green"'
+    color4: '"black"'
+    color5: '"cyan"'
+    color6: '"magenta"'
+    color7: '"yellow"'
+    color8: '"dark red"'
+    color9: '"dark green"'
+    comment: ''
+    ctrlpanel: 'False'
+    fc: '0'
+    fftsize: '1024'
+    freqhalf: 'True'
+    grid: 'False'
+    gui_hint: ''
+    label: Relative Gain
+    label1: ''
+    label10: ''''''
+    label2: ''''''
+    label3: ''''''
+    label4: ''''''
+    label5: ''''''
+    label6: ''''''
+    label7: ''''''
+    label8: ''''''
+    label9: ''''''
+    legend: 'True'
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    name: '""'
+    nconnections: '1'
+    showports: 'False'
+    tr_chan: '0'
+    tr_level: '0.0'
+    tr_mode: qtgui.TRIG_MODE_FREE
+    tr_tag: '""'
+    type: complex
+    units: dB
+    update_time: '0.10'
+    width1: '1'
+    width10: '1'
+    width2: '1'
+    width3: '1'
+    width4: '1'
+    width5: '1'
+    width6: '1'
+    width7: '1'
+    width8: '1'
+    width9: '1'
+    wintype: firdes.WIN_BLACKMAN_hARRIS
+    ymax: '10'
+    ymin: '-140'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [768, 356.0]
+    rotation: 0
+    state: true
+- name: rational_resampler_xxx_0
+  id: rational_resampler_xxx
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    decim: samp_rate
+    fbw: '0.4'
+    interp: usrp_rate
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    taps: ''
+    type: ccc
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [992, 364.0]
+    rotation: 0
+    state: enabled
+- name: tempest_TMDS_image_source_0
+  id: tempest_TMDS_image_source
+  parameters:
+    affinity: ''
+    alias: ''
+    blanking: 'True'
+    comment: ''
+    image_file: /home/emidan19/Desktop/deep-tempest/capturas/fine-tuning-images/159.png
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    mode: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [8, 256.0]
+    rotation: 0
+    state: enabled
+- name: tempest_buttonToFileSink_0
+  id: tempest_buttonToFileSink
+  parameters:
+    Filename: /home/emidan19/Desktop/captura_simulada_shiftfix
+    H_size: Hsize
+    V_size: Vsize
+    affinity: ''
+    alias: ''
+    comment: ''
+    enhance_image: 'True'
+    input_width: interpolatedHsize
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [752, 900.0]
+    rotation: 180
+    state: true
+- name: tempest_fine_sampling_synchronization_0
+  id: tempest_fine_sampling_synchronization
+  parameters:
+    Htotal: interpolatedHsize
+    Vtotal: Vsize
+    affinity: ''
+    alias: ''
+    comment: ''
+    correct_sampling: '1'
+    max_deviation: 100.0/interpolatedHsize
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    update_proba: 1.0/(interpolatedHsize*Vsize)
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1176, 708.0]
+    rotation: 180
+    state: enabled
+- name: tempest_framing_0
+  id: tempest_framing
+  parameters:
+    Hdisplay: Hdisplay
+    Htotal: interpolatedHsize
+    Vdisplay: Vdisplay
+    Vtotal: Vsize
+    affinity: ''
+    alias: ''
+    comment: ''
+    maxoutbuf: '0'
+    minoutbuf: '0'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [368, 1044.0]
+    rotation: 180
+    state: disabled
+- name: tempest_normalize_flow_0
+  id: tempest_normalize_flow
+  parameters:
+    affinity: ''
+    alias: ''
+    alpha_avg: 1e-2
+    comment: ''
+    max: '245'
+    maxoutbuf: '0'
+    min: '10'
+    minoutbuf: '0'
+    update_proba: '0.1'
+    window: interpolatedHsize
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [616, 708.0]
+    rotation: 180
+    state: enabled
+- name: tempest_tempest_msgbtn_0
+  id: tempest_tempest_msgbtn
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    gui_hint: ''
+    label: Take screenshot
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    msgName: pressed
+    relBackgroundColor: default
+    relFontColor: default
+    type: bool
+    value: 'True'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1048, 964.0]
+    rotation: 180
+    state: true
+- name: video_sdl_sink_0_0
+  id: video_sdl_sink
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: "Enable this path when you are not sure what the \nresolution is and\
+      \ you want to try several ones \non run-time. Then, enable the other path."
+    display_height: Vdisplay
+    display_width: Hdisplay
+    fps: '0'
+    height: Vdisplay
+    num_channels: '1'
+    type: short
+    width: Hdisplay
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [40, 1036.0]
+    rotation: 180
+    state: disabled
+- name: video_sdl_sink_0_0_0
+  id: video_sdl_sink
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: "Enable this path when you are sure what the \nresolution is (and defaut\
+      \ to those values on \nthe chooser)."
+    display_height: Vsize
+    display_width: Hsize
+    fps: '0'
+    height: Vsize
+    num_channels: '1'
+    type: short
+    width: interpolatedHsize
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [48, 668.0]
+    rotation: 180
+    state: enabled
+
+connections:
+- [analog_sig_source_x_0, '0', blocks_multiply_xx_0, '1']
+- [binary_serializer_0, '0', blocks_add_xx_0, '0']
+- [binary_serializer_0_0, '0', blocks_add_xx_0, '1']
+- [binary_serializer_0_0_0, '0', blocks_add_xx_0, '2']
+- [blocks_add_xx_0, '0', blocks_float_to_complex_0, '0']
+- [blocks_add_xx_0, '0', interp_fir_filter_xxx_0, '0']
+- [blocks_complex_to_float_0, '0', tempest_normalize_flow_0, '0']
+- [blocks_complex_to_mag_0, '0', tempest_normalize_flow_0, '0']
+- [blocks_delay_0, '0', blocks_complex_to_float_0, '0']
+- [blocks_delay_0, '0', blocks_complex_to_mag_0, '0']
+- [blocks_delay_0, '0', tempest_buttonToFileSink_0, '0']
+- [blocks_float_to_complex_0, '0', blocks_throttle_0_0, '0']
+- [blocks_float_to_short_0, '0', video_sdl_sink_0_0_0, '0']
+- [blocks_float_to_short_0_0, '0', video_sdl_sink_0_0, '0']
+- [blocks_multiply_xx_0, '0', rational_resampler_xxx_0, '0']
+- [blocks_throttle_0_0, '0', blocks_multiply_xx_0, '0']
+- [blocks_throttle_0_0, '0', qtgui_freq_sink_x_0, '0']
+- [channels_channel_model_0, '0', tempest_fine_sampling_synchronization_0, '0']
+- [interp_fir_filter_xxx_0, '0', blocks_throttle_0_0, '0']
+- [rational_resampler_xxx_0, '0', channels_channel_model_0, '0']
+- [tempest_TMDS_image_source_0, '0', binary_serializer_0, '0']
+- [tempest_TMDS_image_source_0, '1', binary_serializer_0_0, '0']
+- [tempest_TMDS_image_source_0, '1', blocks_null_sink_0, '0']
+- [tempest_TMDS_image_source_0, '2', binary_serializer_0_0_0, '0']
+- [tempest_TMDS_image_source_0, '2', blocks_null_sink_0, '1']
+- [tempest_fine_sampling_synchronization_0, '0', blocks_delay_0, '0']
+- [tempest_framing_0, '0', blocks_float_to_short_0_0, '0']
+- [tempest_normalize_flow_0, '0', blocks_float_to_short_0, '0']
+- [tempest_normalize_flow_0, '0', tempest_framing_0, '0']
+- [tempest_tempest_msgbtn_0, pressed, tempest_buttonToFileSink_0, en]
+
+metadata:
+  file_format: 1

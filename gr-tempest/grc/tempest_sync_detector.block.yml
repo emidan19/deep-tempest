@@ -1,0 +1,32 @@
+id: tempest_sync_detector
+label: Sync Detector
+category: '[Tempest]'
+templates:
+  imports: import tempest
+  make: tempest.sync_detector(${hscreen}, ${vscreen}, ${hblanking}, ${vblanking})
+parameters:
+- id: hscreen
+  label: Hscreen
+  dtype: int
+- id: vscreen
+  label: Vscreen
+  dtype: int
+- id: hblanking
+  label: Hblanking
+  dtype: int
+- id: vblanking
+  label: Vblanking
+  dtype: int
+inputs:
+- label: in
+  domain: stream
+  dtype: complex
+- label: en
+  domain: message
+  optional: true
+outputs:
+- label: out
+  domain: stream
+  dtype: complex
+file_format: 1
+
