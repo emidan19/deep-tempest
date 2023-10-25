@@ -1,5 +1,7 @@
 # Uso de gr-tempest con deep-tempest
 
+<img src="sistema.png"/>
+
 Actualmente el único método integrado en GNU Radio es el End-to-End. 
 
 Para cambiar el modelo a usar durante la inferencia editar el archivo [KAIR/options/test_drunet.json](../KAIR/options/test_drunet.json).
