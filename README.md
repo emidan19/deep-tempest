@@ -2,7 +2,7 @@
 
 <img src="deep-tempest.png"/>
 
-Este trabajo corresponde al Proyecto de Fin de Carrera en Ingeniería Eléctrica para la Facultad de Ingeniería de la Universidad de la República.
+Este trabajo corresponde al Proyecto de Fin de Carrera titulado *deep-tempest* de la carrera Ingeniería Eléctrica para la Facultad de Ingeniería de la Universidad de la República.
 
 Integrantes:
 - Santiago Fernández
@@ -15,10 +15,16 @@ Tutores:
 
 ## Resumen
 
-**ACÁ VA el resumen ya corregido**
+Se extiende el proyecto [**gr-tempest**](https://github.com/git-artes/gr-tempest) (*espionaje a imágenes de monitores en GNU Radio*) utilizando *deep learning* para mejorar la calidad de las imágenes espiadas. El objetivo principal es recuperar el texto presente en la imagen capturada por el sistema espía.
+
 
 ## Resultados
-**ACÁ VAN tablas e imagenes de resultados de los metodos (reutilizar de los del overleaf)**
+
+<img src="resultados.png"/>
+
+Se evalúan las métricas **PSNR**, **SSIM**, **edgeJaccard** (*índice Jaccard entre los bordes de la referencia y de la reconstrucción*), **CER** y **WER** (*tasa de error en caracteres y palabras*) sobre la base de datos de capturas reales (1302 imágenes) son los de la siguiente tabla:
+
+<img src="tabla_resultados.png" width="500px"/>
 
 Más ejemplos se pueden ver en el directorio [deep-tempest_ejemplos](deep-tempest_ejemplos). 
 
@@ -33,7 +39,7 @@ También se pueden visualizar desde [este enlace](https://finguy-my.sharepoint.c
 
 Los datos utilizados [este enlace](https://finguy-my.sharepoint.com/:u:/g/personal/emilio_martinez_fing_edu_uy/EZ8KpQHJ7GZBvMRsBMtNj6gBkC3Fvivuz87-1fiQS6WKiw?e=LVjajm) dentro de un archivo ZIP (~7GB). Al descomprimirlo se pueden encontrar las imágenes sintéticas y capturadas realizadas para los experimentos, entrenamiento y evaluación durante el trabajo.
 
-La estructura de los directorios es diferente para los datos sintéticos es diferente al de los capturados. 
+La **estructura** de los directorios es **diferente** para los **datos sintéticos** es diferente al de los **capturados**:
 
 ### Datos sintéticos
 
@@ -47,7 +53,7 @@ La estructura de los directorios es diferente para los datos sintéticos es dife
     - ...
     - imagenN.png
 
-### Datos reales
+### Datos reales 
 
 * *Imagen 1* (directorio con capturas de imagen1.png)
     - captura1_imagen1.png
@@ -66,6 +72,12 @@ La estructura de los directorios es diferente para los datos sintéticos es dife
 - imagenN.png
 
 ## Código y requerimientos
+
+Clonar el repositorio (solicitar acceso al mismo):
+
+```shell
+git clone https://gitlab.fing.edu.uy/jorge.varela/deep-tempest.git
+```
 
 En cada una de los directorios se tiene una guía de cómo ejecutar las pruebas/entrenamiento/experimentos correspondientes. 
 
