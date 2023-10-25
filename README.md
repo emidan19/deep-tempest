@@ -24,7 +24,7 @@ Se extiende el proyecto [**gr-tempest**](https://github.com/git-artes/gr-tempest
 
 Se evalúan las métricas **PSNR**, **SSIM**, **edgeJaccard** (*índice Jaccard entre los bordes de la referencia y de la reconstrucción*), **CER** y **WER** (*tasa de error en caracteres y palabras*) sobre la base de datos de capturas reales (1302 imágenes) son los de la siguiente tabla:
 
-<img src="tabla_resultados.png" width="500px"/>
+<img src="tabla_resultados.png" width="720px"/>
 
 Más ejemplos se pueden ver en el directorio [deep-tempest_ejemplos](deep-tempest_ejemplos). 
 
