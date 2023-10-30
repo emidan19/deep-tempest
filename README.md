@@ -94,9 +94,6 @@ conda activate deeptempest
 
 ## Referencias
 
-**ACA PONER: Referencia a códigos que reutilizamos**
-- gr-tempest
-- KAIR
-    - DRUNet
-    - PnP
-- Maxima entropia (https://github.com/imadtoubal/Maximum-Entropy-Thresholding-Implementation-in-Python/blob/master/entropy_thresholding.ipynb)
+- [gr-tempest](https://github.com/git-artes/gr-tempest)
+- [Deep Plug and Play Image Restoration](https://github.com/cszn/DPIR/tree/master) (DPIR)
+- Maxima entropía [código en Python](https://github.com/imadtoubal/Maximum-Entropy-Thresholding-Implementation-in-Python/blob/master/entropy_thresholding.ipynb)
