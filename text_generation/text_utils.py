@@ -11,7 +11,7 @@ def generate_random_txt_img(text, img_shape, text_size, text_color, background_c
     # Compute amount of lines depending on image shape and number of characters
     N_total = len(text)
     N_lines = N_total//img_shape[1]
-    N_horizontal = img_shape[0]//(text_size)
+    N_horizontal = int(1.6 * img_shape[0] // (text_size))
 
     # Get system font types
     system_fonts = font_manager.findSystemFonts()
@@ -36,7 +36,7 @@ def generate_random_txt_img(text, img_shape, text_size, text_color, background_c
 
         # Adjust text position
         posicion_texto = ((imagen.width - fuente.getsize(texto_linea)[0]) // 2, 
-                          int(1.5* iter * text_size)
+                          int(1.25* iter * text_size)
                           )
 
         # Write text

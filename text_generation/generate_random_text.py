@@ -5,7 +5,7 @@ import string
 from text_utils import generate_random_txt_img
 
 NUM_IMAGES = 10
-NUM_CHARACTERS = 25000
+NUM_CHARACTERS = 29000
 IMG_SHAPE = (1600,900)
 TEXT_SIZE = 22
 
