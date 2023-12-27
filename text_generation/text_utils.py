@@ -25,7 +25,12 @@ def generate_random_txt_img(text, img_shape, text_size, text_color, background_c
         # print(f"Font N {iter}: {random_font}")
 
         # Load text font and set size
-        fuente = ImageFont.truetype(font=random_font, size=text_size)
+        try:
+            fuente = ImageFont.truetype(font=random_font, size=text_size)
+        except:
+            # Load a fixed font when crashes
+            fuente = ImageFont.truetype("/usr/share/fonts/truetype/liberation2/LiberationSans-BoldItalic.ttf", size=text_size)
+
         # Get line text
         texto_linea = text[iter * N_horizontal : (iter+1) * N_horizontal]
 
