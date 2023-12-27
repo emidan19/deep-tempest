@@ -31,7 +31,7 @@ for i in range(NUM_IMAGES):
                                 string.digits, k=NUM_CHARACTERS))
     
     text_color = random.choices(["black","white"], weights=(70, 30), k=1)[0]
-    background_color = random.choices(["black","white"], weights=(30, 70), k=1)[0]
+    background_color = "black"*(text_color=="white") + "white"*(text_color=="black")
 
     generate_random_txt_img(text, 
                             IMG_SHAPE, 
