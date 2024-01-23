@@ -41,7 +41,7 @@ class DatasetDrunetFineTune(data.Dataset):
         contains one or more L representations of the H image.
         """
 
-        assert os.path.isdir(opt['dataroot_H']), "No es dir"
+        assert os.path.isdir(opt['dataroot_H']), f"{opt['dataroot_H']} is not a directory"
         self.paths_H = [f for f in os.listdir(opt['dataroot_H']) if os.path.isfile(os.path.join(opt['dataroot_H'],f))]
         #------------------------------------------------------------------------------------------------------
         # For the above step you can use util.get_image_paths(), but it goes recursevely throught the tree dirs
