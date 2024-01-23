@@ -46,21 +46,30 @@ def image_transmition_simulation(I, blanking=False):
     return I_TMDS_Tx, I_TMDS.shape
 
 def image_capture_simulation(I_Tx, h_total, v_total, N_harmonic, sdr_rate = 50e6,
-                             noise_std=0, fps=60, freq_error=0, phase_error=0):
+                             noise_std=0, fps=60, freq_error=0, phase_error=0, 
+                             interpolator=None, diff_signaling=False):
     
     # Compute pixelrate and bitrate
     px_rate = h_total*v_total*fps
     bit_rate = 10*px_rate
 
     # Continuous samples (interpolate)
-    interpolator = int(np.ceil(N_harmonic/5)) # Condition for sampling rate and
-    sample_rate = interpolator*bit_rate
-    Nsamples = interpolator*(10*h_total*v_total)
+    if interpolator:
+        sample_rate = interpolator*bit_rate
+    else:
+        interpolator = int(np.ceil(N_harmonic/5)) # Condition for sampling rate
+
     if interpolator > 1:
         I_Tx_continuous = np.repeat(I_Tx,interpolator)
     else:
         I_Tx_continuous = I_Tx
+
+    # Differential signaling
+    if (diff_signaling) and (interpolator != 1):
+        I_Tx_continuous = np.diff(I_Tx_continuous)
     
+    Nsamples = len(I_Tx_continuous)
+
     # Add Gaussian noise
     if noise_std > 0:
         noise_sigma = noise_std/15.968719423 # sqrt(255)~15.968719423
@@ -142,6 +151,8 @@ def main(simulation_options_path = 'options/tempest_simulation.json'):
     blanking = options['options']['blanking']
     fps = options['options']['frames_per_second']
     sdr_rate = options['options']['sdr_rate']
+    interpolator = options['options']['interpolator']
+    differential_signaling = options['options']['differential_signaling']
     harmonics = options['options']['random']['harmonics']
     freq_error_range = options['options']['random']['freq_error']
     phase_error_range = options['options']['random']['phase_error']
@@ -155,11 +166,19 @@ def main(simulation_options_path = 'options/tempest_simulation.json'):
 
     # Get images and subfolders names
     images = get_images_names_from_folder(input_folder)
+
+    # Get images names from output folder
+    output_existing_images = get_images_names_from_folder(output_folder)
     
     # Initialize processing time
     t_all_images = 0
 
     for image in images:
+
+        # Check if image already simulated
+        if image in output_existing_images:
+            output_existing_images.remove(image)
+            continue
         
         # timestamp for simulation starting
         t1_image = time.time()
@@ -184,7 +203,8 @@ def main(simulation_options_path = 'options/tempest_simulation.json'):
         v_res, h_res, _ = resolution
 
         I_capture = image_capture_simulation(I_Tx, h_res, v_res, N_harmonic, sdr_rate,
-                                             sigma, fps, freq_error, phase_error)
+                                             sigma, fps, freq_error, phase_error,
+                                             interpolator, differential_signaling)
         
         path = os.path.join(output_folder,image)
         

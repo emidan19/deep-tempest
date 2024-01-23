@@ -1,9 +1,9 @@
 {
     "paths": {
-        "folder_original_images": "path/to/folder",    
+        "folder_original_images": "/home/ceibal-anii/emilio/pfc/deep-tempest/end-to-end/sinteticas/trainsets/ground-truth",    
         "__comment1__": "Insert input folder (original images)",
 
-        "folder_simulated_images": "path/to/new_folder",
+        "folder_simulated_images": "/home/ceibal-anii/emilio/pfc/deep-tempest/end-to-end/imgs_diff_signaling/trainsets",
         "__comment2__": "Insert output folder (tempest degraded images)"
     },
     
@@ -17,6 +17,12 @@
         "sdr_rate": 50e6, 
         "__comment3__": "sampling rate of SDR",
 
+        "interpolator": 10, 
+        "__comment4__": "Interpolation for analog pulse simulation",
+
+        "differential_signaling": true, 
+        "__comment5__": "Use diferential signaling. Epsilon delay as one interpolation unit",
+
         "random": {
 
             "harmonics": [3],
@@ -25,7 +31,7 @@
             "sigma": null,          
             "__comment2__":"Gaussian noise with random sigma over specified range [sigma1, simga2]",
 
-            "freq_error": [0,50],   
+            "freq_error": [0,15],   
             "__comment3__": "Random frequency error (Hz) over specified range [f1, f2]",
 
             "phase_error": [-1,1],
