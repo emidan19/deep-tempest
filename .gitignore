@@ -10,4 +10,5 @@ gr-tempest/examples/simulations/*.py
 scripts/__pycache__
 scripts/*.jpg
 scripts/*.png
+*.log
 
