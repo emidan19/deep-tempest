@@ -6,6 +6,7 @@
   , "scale": 0       // broadcast to "netG" if SISR
   , "n_channels": 1  // broadcast to "datasets", 1 for grayscale, 3 for color
   , "n_channels_datasetload": 3 // broadcast to image training set
+  , "use_abs_value": true // use absolute value of capture (true) or use real and complex values (false)
 
   , "path": {
     "root": "drunet_training"            // "denoising" | "superresolution"

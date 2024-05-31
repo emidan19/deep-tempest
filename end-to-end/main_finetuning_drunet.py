@@ -8,6 +8,7 @@ from collections import OrderedDict
 import logging
 from torch.utils.data import DataLoader
 from torch.utils.data.distributed import DistributedSampler
+from torch.utils.data import Subset
 import torch
 
 from utils import utils_logger
@@ -110,8 +111,16 @@ def main(json_path='options/train_drunet_finetuning.json'):
     # ----------------------------------------
     for phase, dataset_opt in opt['datasets'].items():
         if phase == 'train':
+            # train_set = define_Dataset(dataset_opt)
+            # train_size = int(math.floor(len(train_set) / dataset_opt['dataloader_batch_size']))
+            batch_size = dataset_opt['dataloader_batch_size']
+            patch_size = dataset_opt['H_size']
+            train_percent = dataset_opt['dataset_percentage']
             train_set = define_Dataset(dataset_opt)
-            train_size = int(math.floor(len(train_set) / dataset_opt['dataloader_batch_size']))
+            # Keep only one third of the dataset
+            indexes = torch.randperm(len(train_set))[:train_percent * len(train_set) // 100]
+            train_set = Subset(train_set, indexes)
+            train_size = int(math.floor(len(train_set) / batch_size))
             if opt['rank'] == 0:
                 logger.info('Number of train images: {:,d}, iters: {:,d}'.format(len(train_set), train_size))
             if opt['dist']:

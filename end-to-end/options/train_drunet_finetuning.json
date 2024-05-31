@@ -6,6 +6,7 @@
   , "scale": 0       // broadcast to "netG" if SISR
   , "n_channels": 1  // broadcast to "datasets", 1 for grayscale, 3 for color
   , "n_channels_datasetload": 3 // broadcast to image training set
+  , "use_abs_value": false // use absolute value of capture (true) or use real and complex values (false)
 
   , "path": {
     "root": "finetuning"  // "finetuning_{border, middle}"
@@ -25,7 +26,8 @@
       , "H_size": 256                    // patch size 40 | 64 | 96 | 128 | 192
       , "dataloader_shuffle": true
       , "dataloader_num_workers": 8
-      , "dataloader_batch_size": 36     // batch size 1 | 16 | 32 | 48 | 64 | 128
+      , "dataloader_batch_size": 32     // batch size 1 | 16 | 32 | 48 | 64 | 128
+      , "dataset_percentage": 100        // percentage of the whole dataset to train
     }
     , "test": {
       "name": "test_dataset"            // just name
@@ -52,7 +54,7 @@
     , "init_type": "kaiming_normal"         // "orthogonal" | "normal" | "uniform" | "xavier_normal" | "xavier_uniform" | "kaiming_normal" | "kaiming_uniform"
     , "init_bn_type": "uniform"         // "uniform" | "constant"
     , "init_gain": 0.2
-    , "frozen_layers": ["m_head", "m_down1", "m_down2", "m_down3", "m_body", "m_up1", "m_tail"]   // ["m_down3", "m_body", "m_up3"] for border layers finetuning
+    , "frozen_layers": []   // ["m_down3", "m_body", "m_up3"] for border layers finetuning
                                                                                       // ["m_head", "m_down1", "m_down2", "m_up2", "m_up1", "m_tail"] for middle layers
                                                                                       // ["m_head", "m_down1", "m_body", "m_up1", "m_tail"] for halfway layers
   }

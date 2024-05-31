@@ -30,6 +30,7 @@ class DatasetDrunetFineTune(data.Dataset):
         self.use_all_patches = opt['use_all_patches'] if opt['use_all_patches'] else False
         self.num_patches_per_image = opt['num_patches_per_image'] if opt['num_patches_per_image'] else 100
         self.skip_natural_patches = opt['skip_natural_patches'] if opt['skip_natural_patches'] else False
+        self.use_abs_value = opt['use_abs_value'] if opt['use_abs_value'] else False
 
         # -------------------------------------
         # Dataset path contains all H images and subfolders for every single one with one or more
@@ -91,10 +92,10 @@ class DatasetDrunetFineTune(data.Dataset):
           img_L  = img_L[(1000-900)//2:-(1000-900)//2,(1800-1600)//2:-(1800-1600)//2,:]
 
         # Get module of complex image, stretch and to uint8
-        # img_L = img_L.astype('float')
-        # img_L = np.abs(img_L[:,:,0]+1j*img_L[:,:,1])
-        # img_L = 255*(img_L - img_L.min())/(img_L.max() - img_L.min())
-        # img_L = img_L.astype('uint8')
+        if self.use_abs_value:
+            img_L = img_L.astype('float')
+            img_L = np.abs(img_L[:,:,0]+1j*img_L[:,:,1])
+            img_L = 255*(img_L - img_L.min())/(img_L.max() - img_L.min())
 
         if self.opt['phase'] == 'train':
             """
@@ -146,7 +147,10 @@ class DatasetDrunetFineTune(data.Dataset):
             patch_H = np.mean(img_H[h_index:h_index + self.patch_size, w_index:w_index + self.patch_size, :],axis=2)
             
             # Get the patch from the simulation
-            patch_L = img_L[h_index:h_index + self.patch_size, w_index:w_index + self.patch_size,:]
+            if self.use_abs_value:
+                patch_L = img_L[h_index:h_index + self.patch_size, w_index:w_index + self.patch_size]
+            else:
+                patch_L = img_L[h_index:h_index + self.patch_size, w_index:w_index + self.patch_size,:]
 
             # ---------------------------------
             # HWC to CHW, numpy(uint) to tensor
@@ -158,7 +162,7 @@ class DatasetDrunetFineTune(data.Dataset):
             # get noise level
             # ---------------------------------
             noise_level = torch.FloatTensor([int(np.random.uniform(self.sigma_min, self.sigma_max))])/255.0
-            # noise_level = torch.FloatTensor([np.random.randint(self.sigma_min, self.sigma_max)])/255.0
+
             if (self.sigma_max != 0):
                 # ---------------------------------
                 # add noise
@@ -183,10 +187,6 @@ class DatasetDrunetFineTune(data.Dataset):
             img_H = util.uint2tensor3(img_H)
             img_L = util.uint2tensor3(img_L)
 
-            # img_H = util.uint2single(img_H)
-
-            # img_L = util.uint2single(img_L)
-
             
             # ---------------------------------
             # get noise level
@@ -194,8 +194,6 @@ class DatasetDrunetFineTune(data.Dataset):
 
             noise_level = torch.FloatTensor([int(self.sigma_test)])/255.0
             if self.sigma_test != 0:
-
-                # noise_level = torch.FloatTensor([np.random.randint(self.sigma_min, self.sigma_max)])/255.0
             
                 # ---------------------------------
                 # add noise
