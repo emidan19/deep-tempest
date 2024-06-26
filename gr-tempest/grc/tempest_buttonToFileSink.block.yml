@@ -4,7 +4,7 @@ category: '[Tempest]'
 
 templates:
   imports: import tempest
-  make: tempest.buttonToFileSink(${Filename}, ${input_width}, ${H_size}, ${V_size}, ${remove_blanking}, ${enhance_image})
+  make: tempest.buttonToFileSink(${Filename}, ${input_width}, ${H_size}, ${V_size}, ${remove_blanking}, ${enhance_image}, ${option_path})
 
 #  Make one 'parameters' list entry for every parameter you want settable from the GUI.
 #     Keys include:
@@ -40,6 +40,9 @@ parameters:
   default: False
   options: [False, True]
   option_labels: ['No', 'Yes']
+- id: option_path
+  label: Model's option path
+  dtype: file_open
 
 #  Make one 'inputs' list entry per input and one 'outputs' list entry per output.
 #  Keys include:

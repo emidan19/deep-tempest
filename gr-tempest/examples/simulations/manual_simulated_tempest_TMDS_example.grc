@@ -752,7 +752,7 @@ blocks:
     alias: ''
     blanking: 'True'
     comment: ''
-    image_file: /home/emidan19/Desktop/deep-tempest/capturas/fine-tuning-images/159.png
+    image_file: ''
     maxoutbuf: '0'
     minoutbuf: '0'
     mode: '1'
@@ -766,7 +766,7 @@ blocks:
 - name: tempest_buttonToFileSink_0
   id: tempest_buttonToFileSink
   parameters:
-    Filename: /home/emidan19/Desktop/captura_simulada_shiftfix
+    Filename: ''
     H_size: Hsize
     V_size: Vsize
     affinity: ''
@@ -774,6 +774,8 @@ blocks:
     comment: ''
     enhance_image: 'True'
     input_width: interpolatedHsize
+    option_path: ''
+    remove_blanking: 'True'
   states:
     bus_sink: false
     bus_source: false

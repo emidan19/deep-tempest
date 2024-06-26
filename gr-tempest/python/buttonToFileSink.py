@@ -20,23 +20,16 @@ import argparse
 import torch
 import sys
 
-# Adding gr-tempest/python folder to system path
-# TODO fix path to utils
-dtutils_path = '/home/emidan19/deep-tempest/gr-tempest/python'
-sys.path.insert(0,dtutils_path)
-from DTutils import apply_blanking_shift, remove_outliers, adjust_dynamic_range
+from .DTutils import apply_blanking_shift, remove_outliers, adjust_dynamic_range
 
-# Adding KAIR folder to the system path
-# TODO fix path to KAIR library
-kair_path = '/home/emidan19/deep-tempest/KAIR'
-sys.path.insert(0,kair_path)
-from utils import utils_option as option
-from utils import utils_image as util
-from utils.utils_dist import get_dist_info, init_dist
-from models.select_model import define_Model
-from models.network_unet import UNetRes as net
+from . import utils_option as option
+from . import utils_image as util
+from .utils_dist import get_dist_info, init_dist
+from .select_model import define_Model
+from . import basicblock as B
+from .network_unet import UNetRes as net
 
-def load_enhancement_model(json_path='/home/emidan19/deep-tempest/KAIR/options/test_drunet.json'):
+def load_enhancement_model(json_path=None):
     '''
     # ----------------------------------------
     # Step - 1 Prepare options
@@ -69,7 +62,7 @@ def load_enhancement_model(json_path='/home/emidan19/deep-tempest/KAIR/options/t
     # ---------------------------------------- 
     """
 
-    model_path = os.path.join(kair_path,opt['path']['pretrained_netG'])
+    model_path = opt['path']['pretrained_netG']
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
     opt_netG = opt['netG']
@@ -95,7 +88,8 @@ class buttonToFileSink(gr.sync_block):
     f"""
     Block that saves num_samples of complex samples after recieving a TRUE boolean message in the 'en' port
     """
-    def __init__(self, Filename = "output.png", input_width=740, H_size=2200, V_size=1125, remove_blanking=False, enhance_image=False):
+    def __init__(self, Filename = "output.png", input_width=740, H_size=2200, V_size=1125, 
+                 remove_blanking=False, enhance_image=False, option_path=None):
         gr.sync_block.__init__(self,
             name="buttonToFileSink",
             in_sig=[(np.complex64)],
@@ -106,6 +100,7 @@ class buttonToFileSink(gr.sync_block):
         self.H_size = H_size
         self.V_size = V_size
         self.enhance_image = enhance_image
+        self.option_path = option_path
         self.remove_blanking = remove_blanking
         self.num_samples = int(input_width*V_size)
         self.en = False #default
@@ -124,7 +119,7 @@ class buttonToFileSink(gr.sync_block):
 
         if self.enhance_image:
             # Load model
-            self.model = load_enhancement_model()
+            self.model = load_enhancement_model(self.option_path)
 
     def work(self, input_items, output_items):      
         # Don't process, just save available samples

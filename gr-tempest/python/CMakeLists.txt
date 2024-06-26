@@ -38,6 +38,12 @@ GR_PYTHON_INSTALL(
     TMDS_image_source.py
     DTutils.py
     TMDS_decoder.py 
+    basicblock.py
+    network_unet.py
+    select_model.py
+    utils_dist.py
+    utils_image.py
+    utils_option.py
     buttonToFileSink.py DESTINATION ${GR_PYTHON_DIR}/tempest
 )
 

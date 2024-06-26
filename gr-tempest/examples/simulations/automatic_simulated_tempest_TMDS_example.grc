@@ -98,7 +98,7 @@ blocks:
     start: '0'
     step: '1'
     stop: int(4096*1.5)
-    value: '1800'
+    value: '2200'
     widget: counter
   states:
     bus_sink: false
@@ -111,7 +111,7 @@ blocks:
   id: variable
   parameters:
     comment: ''
-    value: '1600'
+    value: '1920'
   states:
     bus_sink: false
     bus_source: false
@@ -143,7 +143,7 @@ blocks:
     start: '0'
     step: '1'
     stop: int(2160*1.5)
-    value: '1000'
+    value: '1125'
     widget: counter
   states:
     bus_sink: false
@@ -156,7 +156,7 @@ blocks:
   id: variable
   parameters:
     comment: ''
-    value: '900'
+    value: '1080'
   states:
     bus_sink: false
     bus_source: false
@@ -788,7 +788,7 @@ blocks:
     alias: ''
     blanking: 'True'
     comment: ''
-    image_file: /home/emidan19/deep-tempest/images/1600x900_google.png
+    image_file: ''
     maxoutbuf: '0'
     minoutbuf: '0'
     mode: '1'
@@ -797,6 +797,25 @@ blocks:
     bus_source: false
     bus_structure: null
     coordinate: [16, 472.0]
+    rotation: 0
+    state: true
+- name: tempest_buttonToFileSink_0
+  id: tempest_buttonToFileSink
+  parameters:
+    Filename: ''
+    H_size: '2200'
+    V_size: '1125'
+    affinity: ''
+    alias: ''
+    comment: ''
+    enhance_image: 'True'
+    input_width: '740'
+    remove_blanking: 'True'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1728, 364.0]
     rotation: 0
     state: true
 - name: tempest_fft_peak_fine_sampling_sync_0_0
@@ -840,6 +859,28 @@ blocks:
     coordinate: [2048, 924.0]
     rotation: 180
     state: enabled
+- name: tempest_tempest_msgbtn_0
+  id: tempest_tempest_msgbtn
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    gui_hint: ''
+    label: Take screenshot
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    msgName: pressed
+    relBackgroundColor: default
+    relFontColor: default
+    type: bool
+    value: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1488, 588.0]
+    rotation: 0
+    state: true
 - name: uhd_usrp_source_0
   id: uhd_usrp_source
   parameters:
@@ -1238,6 +1279,7 @@ connections:
 - [FFT_autocorrelation_0_0, '0', tempest_fft_peak_fine_sampling_sync_0_0, '0']
 - [Keep_1_in_N_Frames_0, '0', FFT_autocorrelation_0_0, '0']
 - [Keep_1_in_N_Frames_0, '0', blocks_delay_0_0, '0']
+- [Keep_1_in_N_Frames_0, '0', tempest_buttonToFileSink_0, '0']
 - [analog_sig_source_x_0, '0', blocks_multiply_xx_0, '1']
 - [binary_serializer_0, '0', blocks_add_xx_0, '0']
 - [binary_serializer_0, '0', blocks_float_to_complex_0, '0']
@@ -1262,6 +1304,7 @@ connections:
 - [tempest_fft_peak_fine_sampling_sync_0_0, en, FFT_autocorrelation_0_0, en]
 - [tempest_fft_peak_fine_sampling_sync_0_0, rate, uhd_usrp_source_0, command]
 - [tempest_normalize_flow_0, '0', blocks_float_to_short_0, '0']
+- [tempest_tempest_msgbtn_0, pressed, tempest_buttonToFileSink_0, en]
 - [uhd_usrp_source_0, '0', Keep_1_in_N_Frames_0, '0']
 
 metadata:

@@ -593,7 +593,7 @@ blocks:
     affinity: ''
     alias: ''
     comment: ''
-    image_file: /home/emidan19/Downloads/Imagen_800_600.png
+    image_file: ''
     maxoutbuf: '0'
     minoutbuf: '0'
     repeatmode: '1'
