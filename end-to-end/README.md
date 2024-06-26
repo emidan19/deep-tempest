@@ -1,38 +1,47 @@
-# Método End-to-End
+# End-to-End Method
 
 <img src="end-to-end.png"/>
 
-## Guía de uso
+## Usage Guide
 
-A modo general, las opciones a usar (carpetas de imágenes de referencia/degradadas, modelos de la red, directorio de salida, etc) se encuentran en [end-to-end/options](../end-to-end/options).
+In general, the options to use (reference/degraded image folders, network models, output directory, etc.) are located in[end-to-end/options](../end-to-end/options).
 
-### Inferencia y Evaluación
+### Inference and Evaluation
 
-Para ejecutar la inferencia se debe editar el archivo [end-to-end/options/train_drunet.json](../end-to-end/options/train_drunet.json) y, una vez hechos los cambios, ejecutar:
+To run inference, you need to edit the file [end-to-end/options/train_drunet.json](../end-to-end/options/train_drunet.json) and, once the changes are made, execute:
 
 ```shell
 python main_test_drunet.py
 ```
-Este comando dará un directorio nuevo como salida con las inferencias del directorio de entrada.
+This command will output a new directory with the inferences from the input directory.
 
-Para ejecutar la evaluación de un directorio con imágenes se debe editar el archivo [end-to-end/options/evaluation.json](../end-to-end/options/evaluation.json) y, una vez hechos los cambios, ejecutar:
+To evaluate a directory with images (both reference and model's inference), you need to edit the file [end-to-end/options/evaluation.json](../end-to-end/options/evaluation.json) and, once the changes are made, execute:
 ```shell
 python tempest_evaluation.py
 ```
 
-### Entrenamiento
+### Training
 
-**Nota: antes de ejecutar el siguiente comando se debe seleccionar qué tipo de datos usar para el entrenamiento**
+**Note: Before executing the following command, you must select which type of data to use for training**
 
+#### Training with Real Data
+
+To train with real data, the file [end-to-end/options/train_drunet.json](../end-to-end/options/train_drunet.json) must have the value __"drunet_finetune"__ in the *dataset_type* field (datasets-->train).
+
+#### Training with Synthetic Data
+
+To train with synthetic data, the file end-to-end/options/train_drunet.json](../end-to-end/options/train_drunet.json) must have the value __"drunet"__ in the *dataset_type* field (datasets-->train).
+
+Once the data type was selected, use the following command to train the network:
 
 ```shell
 python main_train_drunet.py
 ```
+### Generating Synthetic Captures
 
-#### Entrenamiento con datos reales
+For synthetic captured images generation, first configure the options on [tempest_simulation.json](end-to-end/options/tempest_simulation.json) file. Be sure to include the path to the folder containing the images to run the simulation of direct capturing image from the EME of a monitor. Then run the following command:
 
-Para entrenar con datos reales, el archivo [end-to-end/options/train_drunet.json](../end-to-end/options/train_drunet.json) debe tener en el campo __dataset_type__ (datasets-->train) el valor __"drunet_finetune"__.
-
-#### Entrenamiento con datos sintéticos
-
-Para entrenar con datos sinteticos, el archivo [end-to-end/options/train_drunet.json](../end-to-end/options/train_drunet.json) debe tener en el campo __dataset_type__ (datasets-->train) el valor __"drunet"__.
+```shell
+python folder_simulation.py
+```
+Which outputs the synthetic captured in the specified folder.

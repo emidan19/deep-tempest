@@ -1,99 +1,84 @@
-# Deep-tempest 2023
+# Deep-tempest:  Using Deep Learning to Eavesdrop on HDMI from its Unintended Electromagnetic Emanations
 
 <img src="deep-tempest.png"/>
 
-Este trabajo corresponde al Proyecto de Fin de Carrera titulado *deep-tempest* de la carrera Ingeniería Eléctrica para la Facultad de Ingeniería de la Universidad de la República.
+## Summary
 
-Integrantes:
-- Santiago Fernández
-- Emilio Martínez
-- Gabriel Varela
+The [**gr-tempest**](https://github.com/git-artes/gr-tempest) project (*monitor image espionage in GNU Radio*) is extended using *deep learning* to improve the quality of the spied images. The main goal is to recover the text present in the image captured by the espionage system. 
 
-Tutores:
-- Federico La Rocca
-- Pablo Musé
+## Data
 
-## Resumen
+The data used can be found in [this link](https://www.dropbox.com/scl/fi/7r2o8nbws45q30j5lkxjb/deeptempest_dataset.zip?rlkey=w7jvw275hu8tsyflgdkql7l1c&st=e8rdldz0&dl=0) within a ZIP file (~7GB). After unzipping, you will find synthetic and captured images used for experiments, training, and evaluation during the work.
 
-Se extiende el proyecto [**gr-tempest**](https://github.com/git-artes/gr-tempest) (*espionaje a imágenes de monitores en GNU Radio*) utilizando *deep learning* para mejorar la calidad de las imágenes espiadas. El objetivo principal es recuperar el texto presente en la imagen capturada por el sistema espía.
+The structure of the directories containing the data is **different** for **synthetic data** compared to **captured data**:
 
+### Synthetic data
 
-## Resultados
-
-<img src="resultados.png"/>
-
-Se evalúan las métricas **PSNR**, **SSIM**, **edgeJaccard** (*índice Jaccard entre los bordes de la referencia y de la reconstrucción*), **CER** y **WER** (*tasa de error en caracteres y palabras*) sobre la base de datos de capturas reales (1302 imágenes) son los de la siguiente tabla:
-
-<img src="tabla_resultados.png" width="720px"/>
-
-Más ejemplos se pueden ver en el directorio [deep-tempest_ejemplos](deep-tempest_ejemplos). 
-
-También se pueden visualizar desde [este enlace](https://finguy-my.sharepoint.com/:f:/g/personal/emilio_martinez_fing_edu_uy/Eo_2mmNwq0lHguqmzjq7MyABb9pBbuDV3_EPOA9xGC-7vg?e=kevSbM) *(no estable)*. Aquí las imágenes están estructuradas con el siguiente orden:
-
-1. Imagen original
-2. Imagen espiada (_gr-tempest2.0_)
-3. Imagen inferida por método _End-to-End_
-4. Imagen inferida por método de _umbralización por máxima entropía_
-
-## Datos
-
-Los datos utilizados [este enlace](https://finguy-my.sharepoint.com/:u:/g/personal/emilio_martinez_fing_edu_uy/EZ8KpQHJ7GZBvMRsBMtNj6gBkC3Fvivuz87-1fiQS6WKiw?e=LVjajm) dentro de un archivo ZIP (~7GB). Al descomprimirlo se pueden encontrar las imágenes sintéticas y capturadas realizadas para los experimentos, entrenamiento y evaluación durante el trabajo.
-
-La **estructura** de los directorios es **diferente** para los **datos sintéticos** es diferente al de los **capturados**:
-
-### Datos sintéticos
-
-* *ground-truth* (directorio con imágenes de referencia/vistas del monitor)
-    - imagen1.png
+* *ground-truth* (directory with reference/monitor view images)
+    - image1.png
     - ...
-    - imagenN.png
+    - imageN.png
 
-* *simulations* (directorio con imágenes sintéticas de degradación/captura)
-    - imagen1.png
+* *simulations* (directory with synthetic degradation/capture images)
+    - image1_synthetic.png
     - ...
-    - imagenN.png
+    - imageN_synthetic.png
 
-### Datos reales 
+### Real data
 
-* *Imagen 1* (directorio con capturas de imagen1.png)
-    - captura1_imagen1.png
+- image1.png (*image1 ground-truth*)
+- ...
+- imageN.png (*imageN ground-truth*)
+
+* *Image 1* (directory with captures of *image1.png*)
+    - capture1_image1.png
     - ...
-    - capturaM_imagen1.png
+    - captureM_image1.png
 
 * ...
 
-* *Imagen N* (directorio con capturas de imagenN.png)
-    - captura1_imagenN.png
+* *Image N* (directory with captures of *image1.png*)
+    - capture1_imageN.png
     - ...
-    - capturaM_imagenN.png
+    - captureM_imageN.png
 
-- imagen1.png
-- ...
-- imagenN.png
+## Code and Requirements
 
-## Código y requerimientos
-
-Clonar el repositorio (solicitar acceso al mismo):
+Clone the repository:
 
 ```shell
-git clone https://gitlab.fing.edu.uy/jorge.varela/deep-tempest.git
+git clone https://github.com/emidan19/deep-tempest.git
 ```
 
-En cada una de los directorios se tiene una guía de cómo ejecutar las pruebas/entrenamiento/experimentos correspondientes. 
+Both [gr-tempest](./gr-tempest/) and [end-to-end](./end-to-end/) folders contains a guide on how to execute the corresponding files for image capturing, inference and train the deep learning architecture based on DRUNet from [KAIR](https://github.com/cszn/KAIR/tree/master) image restoration repository.
 
-El código esta escrito en lenguaje Python versión 3.10, donde se utilizó ambientes de Anaconda. Para replicar el ambiente de trabajo crear uno nuevo con las bibliotecas del _requirements.txt_:
+The code is written in Python version 3.10, using Anaconda environments. To replicate the working environment, create a new one with the libraries listed in [*requirements.txt*](./requirements.txt):
 
 ```shell
 conda create --name deeptempest --file requirements.txt
 ```
 
-Activarlo con:
+Activate it with:
 ```shell
 conda activate deeptempest
 ```
 
-## Referencias
+Regarding installations with GNU Radio, **it is necessary to follow the [gr-tempest](https://github.com/git-artes/gr-tempest) instructions** (detailed below) and then run the following flowcharts that activate *hierblocks*:
 
-- [gr-tempest](https://github.com/git-artes/gr-tempest)
-- [Deep Plug and Play Image Restoration](https://github.com/cszn/DPIR/tree/master) (DPIR)
-- Maxima entropía [código en Python](https://github.com/imadtoubal/Maximum-Entropy-Thresholding-Implementation-in-Python/blob/master/entropy_thresholding.ipynb)
+Finally run the flowgraph [deep-tempest_example.grc](~/gr-tempest/examples/deep-tempest_example.grc) to capture the monitor images and be able to recover them with better quality.
+
+## References 
+```BibTex
+@INPROCEEDINGS{larroca2022gr_tempest,
+  author={Larroca, Federico and Bertrand, Pablo and Carrau, Felipe and Severi, Victoria},
+  booktitle={2022 Asian Hardware Oriented Security and Trust Symposium (AsianHOST)}, 
+  title={gr-tempest: an open-source GNU Radio implementation of TEMPEST}, 
+  year={2022},
+  doi={10.1109/AsianHOST56390.2022.10022149}} 
+
+@article{zhang2021plug, % DPIR & DRUNet & IRCNN
+  title={Plug-and-Play Image Restoration with Deep Denoiser Prior},
+  author={Zhang, Kai and Li, Yawei and Zuo, Wangmeng and Zhang, Lei and Van Gool, Luc and Timofte, Radu},
+  journal={IEEE Transactions on Pattern Analysis and Machine Intelligence},
+  year={2021}
+}

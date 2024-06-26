@@ -1,20 +1,3 @@
-# Uso de gr-tempest con deep-tempest
-
-<img src="sistema.png"/>
-
-Actualmente el único método integrado en GNU Radio es el End-to-End. 
-
-Para cambiar el modelo a usar durante la inferencia editar el archivo [KAIR/options/test_drunet.json](../KAIR/options/test_drunet.json).
-
-Respecto a las instalaciones con GNU Radio, **es necesario seguir el instructivo de gr-tempest** (detallado más abajo) y luego correr los siguientes flowgraphs que activan *hierblocks*:
-
-- [binary_serializer.grc](~/gr-tempest/examples/binary_serializer.grc)
-- [FFT_autocorrelate.grc](~/gr-tempest/examples/FFT_autocorrelate.grc)
-- [FFT_crosscorrelate.grc](~/gr-tempest/examples/FFT_crosscorrelate.grc)
-- [Keep_1_in_N_frames.grc](~/gr-tempest/examples/Keep_1_in_N_frames.grc)
-
-Finalemente correr el flowgraph [deep-tempest_example.grc](~/gr-tempest/examples/deep-tempest_example.grc) para capturar las imágenes de monitor y poder recuperarlas con una mejor calidad.
-
 ### gr-tempest
 
 **An implementation of TEMPEST en GNU Radio.** 
