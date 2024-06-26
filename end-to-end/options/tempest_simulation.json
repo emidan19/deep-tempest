@@ -1,9 +1,9 @@
 {
     "paths": {
-        "folder_original_images": "/home/ceibal-anii/emilio/pfc/deep-tempest/end-to-end/sinteticas/trainsets/ground-truth",    
+        "folder_original_images": "path/to/original_images",    
         "__comment1__": "Insert input folder (original images)",
 
-        "folder_simulated_images": "/home/ceibal-anii/emilio/pfc/deep-tempest/end-to-end/imgs_diff_signaling/trainsets",
+        "folder_simulated_images": "path/to/simulated_images",
         "__comment2__": "Insert output folder (tempest degraded images)"
     },
     
