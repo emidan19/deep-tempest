@@ -4,11 +4,11 @@
 
 ## Usage Guide
 
-In general, the options to use (reference/degraded image folders, network models, output directory, etc.) are located in[end-to-end/options](../end-to-end/options).
+In general, the options to use (reference/degraded image folders, network models, output directory, etc.) are located in [end-to-end/options](../end-to-end/options).
 
 ### Inference and Evaluation
 
-To run inference, you need to edit the file [end-to-end/options/train_drunet.json](../end-to-end/options/train_drunet.json) and, once the changes are made, execute:
+To run inference, you need to edit the file [end-to-end/options/train_drunet.json](../end-to-end/options/test_drunet.json) and, once the changes are made, execute:
 
 ```shell
 python main_test_drunet.py
