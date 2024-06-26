@@ -26,11 +26,11 @@ python tempest_evaluation.py
 
 #### Training with Real Data
 
-To train with real data, the file [end-to-end/options/train_drunet.json](../end-to-end/options/train_drunet.json) must have the value __"drunet_finetune"__ in the *dataset_type* field (datasets-->train).
+To train with real data, the file [train_drunet.json](../end-to-end/options/train_drunet.json) must have the value __"drunet_finetune"__ in the *dataset_type* field (datasets-->train).
 
 #### Training with Synthetic Data
 
-To train with synthetic data, the file end-to-end/options/train_drunet.json](../end-to-end/options/train_drunet.json) must have the value __"drunet"__ in the *dataset_type* field (datasets-->train).
+To train with synthetic data, the file [train_drunet.json](../end-to-end/options/train_drunet.json) must have the value __"drunet"__ in the *dataset_type* field (datasets-->train).
 
 Once the data type was selected, use the following command to train the network:
 
@@ -39,7 +39,7 @@ python main_train_drunet.py
 ```
 ### Generating Synthetic Captures
 
-For synthetic captured images generation, first configure the options on [tempest_simulation.json](end-to-end/options/tempest_simulation.json) file. Be sure to include the path to the folder containing the images to run the simulation of direct capturing image from the EME of a monitor. Then run the following command:
+For synthetic captured images generation, first configure the options on [tempest_simulation.json](../end-to-end/options/tempest_simulation.json) file. Be sure to include the path to the folder containing the images to run the simulation of direct capturing image from the EME of a monitor. Then run the following command:
 
 ```shell
 python folder_simulation.py
