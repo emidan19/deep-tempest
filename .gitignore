@@ -1,9 +1,9 @@
-*.jpeg
-*.png
-*.jpg
-*.tif
-*.bmp
-*.pyc
+./*.jpeg
+./*.png
+./*.jpg
+./*.tif
+./*.bmp
+./*.pyc
 gr-tempest/build/
 gr-tempest/examples/*.py
 gr-tempest/examples/simulations/*.py

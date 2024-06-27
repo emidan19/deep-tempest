@@ -6,6 +6,8 @@
 
 The [**gr-tempest**](https://github.com/git-artes/gr-tempest) project (*monitor image espionage in GNU Radio*) is extended using *deep learning* to improve the quality of the spied images. The main goal is to recover the text present in the image captured by the espionage system. 
 
+<img src="examples.png"/>
+
 You can also find a video of the system in operation, [available at this link](https://www.youtube.com/watch?v=ig3NWg_Yzag).
 
 ## Cite this work (TODO)
