@@ -64,12 +64,12 @@ conda activate deeptempest
 ```
 
 Regarding installations with GNU Radio, **it is necessary to follow the [gr-tempest](https://github.com/git-artes/gr-tempest) instructions** (detailed below) and then run the following *grc* files flowgraphs to activate the *hierblocks*:
-- [binary_serializer.grc](~/gr-tempest/examples/binary_serializer.grc)
-- [FFT_autocorrelate.grc](~/gr-tempest/examples/FFT_autocorrelate.grc)
-- [FFT_crosscorrelate.grc](~/gr-tempest/examples/FFT_crosscorrelate.grc)
-- [Keep_1_in_N_frames.grc](~/gr-tempest/examples/Keep_1_in_N_frames.grc)
+- [binary_serializer.grc](./gr-tempest/examples/binary_serializer.grc)
+- [FFT_autocorrelate.grc](./gr-tempest/examples/FFT_autocorrelate.grc)
+- [FFT_crosscorrelate.grc](./gr-tempest/examples/FFT_crosscorrelate.grc)
+- [Keep_1_in_N_frames.grc](./gr-tempest/examples/Keep_1_in_N_frames.grc)
 
-Finally run the flowgraph [deep-tempest_example.grc](~/gr-tempest/examples/deep-tempest_example.grc) to capture the monitor images and be able to recover them with better quality using the *Save Capture* block.
+Finally run the flowgraph [deep-tempest_example.grc](./gr-tempest/examples/deep-tempest_example.grc) to capture the monitor images and be able to recover them with better quality using the *Save Capture* block.
 
 ## References 
 ```BibTex
