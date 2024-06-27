@@ -63,9 +63,13 @@ Activate it with:
 conda activate deeptempest
 ```
 
-Regarding installations with GNU Radio, **it is necessary to follow the [gr-tempest](https://github.com/git-artes/gr-tempest) instructions** (detailed below) and then run the following flowcharts that activate *hierblocks*:
+Regarding installations with GNU Radio, **it is necessary to follow the [gr-tempest](https://github.com/git-artes/gr-tempest) instructions** (detailed below) and then run the following *grc* files flowgraphs to activate the *hierblocks*:
+- [binary_serializer.grc](~/gr-tempest/examples/binary_serializer.grc)
+- [FFT_autocorrelate.grc](~/gr-tempest/examples/FFT_autocorrelate.grc)
+- [FFT_crosscorrelate.grc](~/gr-tempest/examples/FFT_crosscorrelate.grc)
+- [Keep_1_in_N_frames.grc](~/gr-tempest/examples/Keep_1_in_N_frames.grc)
 
-Finally run the flowgraph [deep-tempest_example.grc](~/gr-tempest/examples/deep-tempest_example.grc) to capture the monitor images and be able to recover them with better quality.
+Finally run the flowgraph [deep-tempest_example.grc](~/gr-tempest/examples/deep-tempest_example.grc) to capture the monitor images and be able to recover them with better quality using the *Save Capture* block.
 
 ## References 
 ```BibTex
@@ -76,7 +80,7 @@ Finally run the flowgraph [deep-tempest_example.grc](~/gr-tempest/examples/deep-
   year={2022},
   doi={10.1109/AsianHOST56390.2022.10022149}} 
 
-@article{zhang2021plug, % DPIR & DRUNet & IRCNN
+@article{zhang2021plug,
   title={Plug-and-Play Image Restoration with Deep Denoiser Prior},
   author={Zhang, Kai and Li, Yawei and Zuo, Wangmeng and Zhang, Lei and Van Gool, Luc and Timofte, Radu},
   journal={IEEE Transactions on Pattern Analysis and Machine Intelligence},
