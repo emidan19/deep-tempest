@@ -14,7 +14,7 @@ You can also find a video of the system in operation, [available at this link](h
 
 ## Data
 
-The data used can be found in [this link](https://www.dropbox.com/scl/fi/7r2o8nbws45q30j5lkxjb/deeptempest_dataset.zip?rlkey=w7jvw275hu8tsyflgdkql7l1c&st=e8rdldz0&dl=0) within a ZIP file (~7GB). After unzipping, you will find synthetic and captured images used for experiments, training, and evaluation during the work.
+The data used can is available at [this dropbox link](https://www.dropbox.com/scl/fi/7r2o8nbws45q30j5lkxjb/deeptempest_dataset.zip?rlkey=w7jvw275hu8tsyflgdkql7l1c&st=e8rdldz0&dl=0) within a ZIP file (~7GB). After unzipping, you will find synthetic and real captured images used for experiments, training, and evaluation during the work.
 
 The structure of the directories containing the data is **different** for **synthetic data** compared to **captured data**:
 
