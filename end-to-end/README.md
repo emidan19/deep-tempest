@@ -6,6 +6,8 @@
 
 In general, the options to use (reference/degraded image folders, network models, output directory, etc.) are located in [end-to-end/options](../end-to-end/options).
 
+You can [download at this link](https://www.fing.edu.uy/owncloud/index.php/s/IaZugHCrw5K1AcB) **pre-trained model** with the real image captures detailed at previews the [Data section](../README.md).
+
 ### Inference and Evaluation
 
 To run inference, you need to edit the file [end-to-end/options/train_drunet.json](../end-to-end/options/test_drunet.json) and, once the changes are made, execute:
