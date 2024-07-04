@@ -12,7 +12,7 @@ The [**gr-tempest**](https://github.com/git-artes/gr-tempest) project (*monitor 
 
 Watch a video of the full system in operation below:
 
-[!<img src="https://img.youtube.com/vi/ig3NWg_Yzag/maxresdefault.jpg" width="50%"/> ](https://www.youtube.com/watch?v=ig3NWg_Yzag)
+[<img src="https://img.youtube.com/vi/ig3NWg_Yzag/maxresdefault.jpg" width="50%"/> ](https://www.youtube.com/watch?v=ig3NWg_Yzag)
 
 ## Cite this work (TODO)
 
