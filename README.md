@@ -4,7 +4,7 @@
 
 ## Summary
 
-In this project we have extended the original [**gr-tempest**](https://github.com/git-artes/gr-tempest) (a.k.a. [Van Eck Phreaking](https://en.wikipedia.org/wiki/Van_Eck_phreaking) or simply TEMPEST; i.e. spying on a video display from its unintended electromagnetic emanations) is extended using deep learning to improve the quality of the spied images. See an illustrative diagram above. Some examples of the resulting inference of our system and the original unmodified version of gr-tempest below.
+In this project we have extended the original [**gr-tempest**](https://github.com/git-artes/gr-tempest) (a.k.a. [Van Eck Phreaking](https://en.wikipedia.org/wiki/Van_Eck_phreaking) or simply TEMPEST; i.e. spying on a video display from its unintended electromagnetic emanations) by using deep learning to improve the quality of the spied images. See an illustrative diagram above. Some examples of the resulting inference of our system and the original unmodified version of gr-tempest below.
 
 <img src="examples.png"/>
 
