@@ -4,13 +4,13 @@
 
 ## Summary
 
-The [**gr-tempest**](https://github.com/git-artes/gr-tempest) project (*monitor image espionage in GNU Radio*) is extended using *deep learning* to improve the quality of the spied images. The main goal is to recover the text present in the image captured by the espionage system. 
+In this project we have extended the original [**gr-tempest**](https://github.com/git-artes/gr-tempest) (a.k.a. [Van Eck Phreaking](https://en.wikipedia.org/wiki/Van_Eck_phreaking) or simply TEMPEST; i.e. spying on a video display from its unintended electromagnetic emanations) is extended using deep learning to improve the quality of the spied images. See an illustrative diagram below.
 
 <img src="examples.png"/>
 
 ## Video demo
 
-Watch a video of the full system in operation below:
+We are particularly interested in recovering the text present in the display, and we improve the Character Error Rate from 90% in the unmodified gr-tempest, to less than 30% using our module. Watch a video of the full system in operation:
 
 [<img src="https://img.youtube.com/vi/ig3NWg_Yzag/maxresdefault.jpg" width="50%"/> ](https://www.youtube.com/watch?v=ig3NWg_Yzag)
 
@@ -18,7 +18,7 @@ Watch a video of the full system in operation below:
 
 ## Data
 
-The data used can is available at [this dropbox link](https://www.dropbox.com/scl/fi/7r2o8nbws45q30j5lkxjb/deeptempest_dataset.zip?rlkey=w7jvw275hu8tsyflgdkql7l1c&st=e8rdldz0&dl=0) within a ZIP file (~7GB). After unzipping, you will find synthetic and real captured images used for experiments, training, and evaluation during the work. These images consists of 1600x900 resolution with the SDR's center frequency at the third pixel-rate harmonic (324 MHz).
+In addition to the source code, we are also opne sourcing the whole dataset we used. Follow [this dropbox link](https://www.dropbox.com/scl/fi/7r2o8nbws45q30j5lkxjb/deeptempest_dataset.zip?rlkey=w7jvw275hu8tsyflgdkql7l1c&st=e8rdldz0&dl=0) to download a ZIP file (~7GB). After unzipping, you will find synthetic and real captured images used for experiments, training, and evaluation during the work. These images consists of 1600x900 resolution with the SDR's center frequency at the third pixel-rate harmonic (324 MHz).
 
 The structure of the directories containing the data is **different** for **synthetic data** compared to **captured data**:
 
@@ -73,7 +73,7 @@ Activate it with:
 conda activate deeptempest
 ```
 
-Regarding installations with GNU Radio, **it is necessary to follow the [gr-tempest](./gr-tempest/README.md) instructions in this repository** *(even if you have already installed gr-tempest at a different location)*. After this, run the following *grc* files flowgraphs to activate the *hierblocks*:
+Regarding installations with GNU Radio, **it is necessary to use the [gr-tempest](./gr-tempest/) version in this repository** *(which contains a modified version of the original gr-tempest)*. After this, run the following *grc* files flowgraphs to activate the *hierblocks*:
 - [binary_serializer.grc](./gr-tempest/examples/binary_serializer.grc)
 - [FFT_autocorrelate.grc](./gr-tempest/examples/FFT_autocorrelate.grc)
 - [FFT_crosscorrelate.grc](./gr-tempest/examples/FFT_crosscorrelate.grc)
