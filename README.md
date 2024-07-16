@@ -14,9 +14,9 @@ We are particularly interested in recovering the text present in the display, an
 
 [<img src="https://img.youtube.com/vi/ig3NWg_Yzag/maxresdefault.jpg" width="50%"/> ](https://www.youtube.com/watch?v=ig3NWg_Yzag)
 
-## Cite this work 
+## How does it works? (and how to cite our work or data)
 
-If you found our work useful for your research, please consider citing our work as follows:
+You can find a detailed technical explanation of how deep-tempest works in the reference below. If you found our work or data useful for your research, please consider citing it as follows:
 
 ````
 @misc{fernández2024deeptempestusingdeeplearning,
