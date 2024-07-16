@@ -14,7 +14,22 @@ We are particularly interested in recovering the text present in the display, an
 
 [<img src="https://img.youtube.com/vi/ig3NWg_Yzag/maxresdefault.jpg" width="50%"/> ](https://www.youtube.com/watch?v=ig3NWg_Yzag)
 
-## Cite this work (TODO)
+## Cite this work 
+
+If you found our work useful for your research, please consider citing our work as follows:
+
+````
+@misc{fernández2024deeptempestusingdeeplearning,
+      title={Deep-TEMPEST: Using Deep Learning to Eavesdrop on HDMI from its Unintended Electromagnetic Emanations}, 
+      author={Santiago Fernández and Emilio Martínez and Gabriel Varela and Pablo Musé and Federico Larroca},
+      year={2024},
+      eprint={2407.09717},
+      archivePrefix={arXiv},
+      primaryClass={cs.CR},
+      url={https://arxiv.org/abs/2407.09717},
+      note={Submitted}
+}
+````
 
 ## Data
 
