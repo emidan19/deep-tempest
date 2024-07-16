@@ -1,0 +1,10 @@
+@misc{fernández2024deeptempestusingdeeplearning,
+      title={Deep-TEMPEST: Using Deep Learning to Eavesdrop on HDMI from its Unintended Electromagnetic Emanations}, 
+      author={Santiago Fernández and Emilio Martínez and Gabriel Varela and Pablo Musé and Federico Larroca},
+      year={2024},
+      eprint={2407.09717},
+      archivePrefix={arXiv},
+      primaryClass={cs.CR},
+      url={https://arxiv.org/abs/2407.09717},
+      note={Submitted}
+}
