@@ -40,7 +40,7 @@ namespace gr {
     class TEMPEST_API infer_screen_resolution : virtual public gr::block
     {
      public:
-      typedef boost::shared_ptr<infer_screen_resolution> sptr;
+      typedef std::shared_ptr<infer_screen_resolution> sptr;
 
       virtual void set_refresh_rate(float refresh_rate) = 0;
       

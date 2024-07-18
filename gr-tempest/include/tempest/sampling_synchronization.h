@@ -40,7 +40,7 @@ namespace gr {
     class TEMPEST_API sampling_synchronization : virtual public gr::block
     {
      public:
-      typedef boost::shared_ptr<sampling_synchronization> sptr;
+      typedef std::shared_ptr<sampling_synchronization> sptr;
 
       /*!
        * \brief Return a shared_ptr to a new instance of tempest::sampling_synchronization.

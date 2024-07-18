@@ -40,7 +40,7 @@ namespace gr {
     class TEMPEST_API sync_detector : virtual public gr::block
     {
      public:
-      typedef boost::shared_ptr<sync_detector> sptr;
+      typedef std::shared_ptr<sync_detector> sptr;
 
       /*!
        * \brief Return a shared_ptr to a new instance of tempest::sync_detector.

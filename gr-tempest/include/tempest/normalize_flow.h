@@ -40,7 +40,7 @@ namespace gr {
     class TEMPEST_API normalize_flow : virtual public gr::sync_block
     {
      public:
-      typedef boost::shared_ptr<normalize_flow> sptr;
+      typedef std::shared_ptr<normalize_flow> sptr;
 
       /*!
        * \brief Return a shared_ptr to a new instance of tempest::normalize_flow.

@@ -40,7 +40,7 @@ namespace gr {
     class TEMPEST_API fft_peak_fine_sampling_sync : virtual public gr::block
     {
      public:
-      typedef boost::shared_ptr<fft_peak_fine_sampling_sync> sptr;
+      typedef std::shared_ptr<fft_peak_fine_sampling_sync> sptr;
 
       /*!
        * \brief Return a shared_ptr to a new instance of tempest::fft_peak_fine_sampling_sync.

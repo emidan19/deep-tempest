@@ -41,7 +41,7 @@ namespace gr {
     class TEMPEST_API framing : virtual public gr::block
     {
      public:
-      typedef boost::shared_ptr<framing> sptr;
+      typedef std::shared_ptr<framing> sptr;
 
       /*!
        * \brief Return a shared_ptr to a new instance of tempest::framing.

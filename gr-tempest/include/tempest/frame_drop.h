@@ -40,7 +40,7 @@ namespace gr {
     class TEMPEST_API frame_drop : virtual public gr::block
     {
      public:
-      typedef boost::shared_ptr<frame_drop> sptr;
+      typedef std::shared_ptr<frame_drop> sptr;
 
       /*!
        * \brief Return a shared_ptr to a new instance of tempest::frame_drop.
