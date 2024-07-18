@@ -29,7 +29,16 @@ include(GrPybind)
 ########################################################################
 
 list(APPEND tempest_python_files
-    python_bindings.cc)
+    Hsync_python.cc
+    fft_peak_fine_sampling_sync_python.cc
+    fine_sampling_synchronization_python.cc
+    frame_drop_python.cc
+    framing_python.cc
+    infer_screen_resolution_python.cc
+    normalize_flow_python.cc
+    sampling_synchronization_python.cc
+    ssamp_correction_python.cc
+    sync_detector_python.cc python_bindings.cc)
 
 GR_PYBIND_MAKE_OOT(tempest
    ../../..
