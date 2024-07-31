@@ -14,6 +14,8 @@ The following external webpages provide a nice summary of the work:
 * PC World: [Hackers can wirelessly watch your screen via HDMI radiation](https://www.pcworld.com/article/2413156/hackers-can-wirelessly-watch-your-screen-via-hdmi-radiation.html)
 * Techspot: [AI can see what's on your screen by reading HDMI electromagnetic radiation](https://www.techspot.com/news/104015-ai-can-see-what-screen-reading-hdmi-electromagnetic.html)
 * Futura: [Hallucinant : ce système permet d’afficher et espionner ce qu’il y a sur l’écran d’un ordinateur déconnecté](https://www.futura-sciences.com/tech/actualites/technologie-hallucinant-ce-systeme-permet-afficher-espionner-ce-quil-y-ecran-ordinateur-deconnecte-114883/)
+* hackster.io: [Deep-TEMPEST Reveals All](https://www.hackster.io/news/deep-tempest-reveals-all-c8cb4f0ebd08)
+* Hacker News: [Deep-Tempest: Using Deep Learning to Eavesdrop on HDMI](https://news.ycombinator.com/item?id=41116682)
 
 ## Video demo
 
