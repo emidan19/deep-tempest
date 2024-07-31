@@ -105,6 +105,8 @@ Regarding installations with GNU Radio, **it is necessary to use the [gr-tempest
 
 Finally run the flowgraph [deep-tempest_example.grc](./gr-tempest/examples/deep-tempest_example.grc) to capture the monitor images and be able to recover them with better quality using the *Save Capture* block.
 
+## Credits
+
 IIE Instituto de Ingeniería Eléctrica, 
 Facultad de Ingeniería, 
 Universidad de la República, 
