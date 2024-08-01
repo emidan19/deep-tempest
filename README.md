@@ -16,6 +16,9 @@ The following external webpages provide a nice summary of the work:
 * Futura: [Hallucinant : ce système permet d’afficher et espionner ce qu’il y a sur l’écran d’un ordinateur déconnecté](https://www.futura-sciences.com/tech/actualites/technologie-hallucinant-ce-systeme-permet-afficher-espionner-ce-quil-y-ecran-ordinateur-deconnecte-114883/)
 * hackster.io: [Deep-TEMPEST Reveals All](https://www.hackster.io/news/deep-tempest-reveals-all-c8cb4f0ebd08)
 * Hacker News: [Deep-Tempest: Using Deep Learning to Eavesdrop on HDMI](https://news.ycombinator.com/item?id=41116682)
+* TechXplore: [Security researchers reveal it is possible to eavesdrop on HDMI cables to capture computer screen data](https://techxplore.com/news/2024-07-reveal-eavesdrop-hdmi-cables-capture.html)
+* Tom's Hardware: [AI can snoop on your computer screen using signals leaking from HDMI cables — researchers develop new AI model that enables using antennas for long-range attacks](https://www.tomshardware.com/tech-industry/cyber-security/ai-can-snoop-on-your-computer-screen-using-signals-leaking-from-hdmi-cables)
+* Montevideo Portal: [¿Por qué la inteligencia artificial puede ver una pantalla? Un estudio uruguayo indagó](https://www.montevideo.com.uy/Ciencia-y-Tecnologia/-Por-que-la-inteligencia-artificial-puede-ver-una-pantalla-Un-estudio-uruguayo-indago-uc895790)
 
 ## Video demo
 
