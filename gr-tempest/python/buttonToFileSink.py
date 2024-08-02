@@ -167,7 +167,7 @@ class buttonToFileSink(gr.sync_block):
 
         # Check if removing blanking
         if self.remove_blanking:
-            # Fix shift with blanking redundance information
+            # Fix shift with blanking redundancy information
             captured_image = apply_blanking_shift(captured_image, h_active=self.H_active, v_active=self.V_active,
                                         h_blanking=self.H_blanking, v_blanking=self.V_blanking)
             
