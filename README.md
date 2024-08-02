@@ -19,6 +19,7 @@ The following external webpages provide a nice summary of the work:
 * TechXplore: [Security researchers reveal it is possible to eavesdrop on HDMI cables to capture computer screen data](https://techxplore.com/news/2024-07-reveal-eavesdrop-hdmi-cables-capture.html)
 * Tom's Hardware: [AI can snoop on your computer screen using signals leaking from HDMI cables — researchers develop new AI model that enables using antennas for long-range attacks](https://www.tomshardware.com/tech-industry/cyber-security/ai-can-snoop-on-your-computer-screen-using-signals-leaking-from-hdmi-cables)
 * Montevideo Portal: [¿Por qué la inteligencia artificial puede ver una pantalla? Un estudio uruguayo indagó](https://www.montevideo.com.uy/Ciencia-y-Tecnologia/-Por-que-la-inteligencia-artificial-puede-ver-una-pantalla-Un-estudio-uruguayo-indago-uc895790)
+* El Observador: [Uruguayos interceptan señales del cable HDMI para espiar monitores y asombran al mundo](https://www.elobservador.com.uy/uruguayos-interceptan-senales-del-cable-hdmi-espiar-monitores-y-asombran-al-mundo-n5954308)
 
 ## Video demo
 
