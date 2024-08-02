@@ -25,8 +25,15 @@
 #
 
 from gnuradio import gr, gr_unittest
-from gnuradio import blocks
-from image_source import image_source
+# from gnuradio import blocks
+try:
+  from gnuradio.tempest import fft_peak_fine_sampling_sync
+except ImportError:
+    import os
+    import sys
+    dirname, filename = os.path.split(os.path.abspath(__file__))
+    sys.path.append(os.path.join(dirname, "bindings"))
+    from gnuradio.tempest import fft_peak_fine_sampling_sync
 
 class qa_image_source(gr_unittest.TestCase):
 

@@ -33,6 +33,8 @@ list(APPEND tempest_sources
     fft_peak_fine_sampling_sync_impl.cc
     infer_screen_resolution_impl.cc
     ssamp_correction_impl.cc
+    normalize_flow_impl.cc
+    sampling_synchronization_impl.cc
 )
 
 set(tempest_sources "${tempest_sources}" PARENT_SCOPE)

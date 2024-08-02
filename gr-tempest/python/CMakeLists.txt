@@ -47,6 +47,8 @@ GR_PYTHON_INSTALL(
     buttonToFileSink.py DESTINATION ${GR_PYTHON_DIR}/tempest
 )
 
+add_subdirectory(bindings)
+
 ########################################################################
 # Handle the unit tests
 ########################################################################
