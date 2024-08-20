@@ -25,8 +25,15 @@
 #
 
 from gnuradio import gr, gr_unittest
-from gnuradio import blocks
-import tempest_swig as tempest
+# from gnuradio import blocks
+try:
+  from gnuradio.tempest import fft_peak_fine_sampling_sync
+except ImportError:
+    import os
+    import sys
+    dirname, filename = os.path.split(os.path.abspath(__file__))
+    sys.path.append(os.path.join(dirname, "bindings"))
+    from gnuradio.tempest import fft_peak_fine_sampling_sync
 
 class qa_fine_sampling_synchronization(gr_unittest.TestCase):
 
