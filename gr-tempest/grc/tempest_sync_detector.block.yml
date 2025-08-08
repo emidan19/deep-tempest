@@ -2,7 +2,7 @@ id: tempest_sync_detector
 label: Sync Detector
 category: '[Tempest]'
 templates:
-  imports: import tempest
+  imports: from gnuradio import tempest
   make: tempest.sync_detector(${hscreen}, ${vscreen}, ${hblanking}, ${vblanking})
 parameters:
 - id: hscreen

@@ -2,7 +2,7 @@ id: tempest_sampling_synchronization
 label: Sampling synchronization
 category: '[Tempest]'
 templates:
-  imports: import tempest
+  imports: from gnuradio import tempest
   make: tempest.sampling_synchronization(${Htotal}, ${manual_correction})
   callbacks: 
   - set_Htotal(${Htotal})

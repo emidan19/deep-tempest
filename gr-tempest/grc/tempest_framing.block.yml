@@ -2,7 +2,7 @@ id: tempest_framing
 label: Framing
 category: '[Tempest]'
 templates:
-  imports: import tempest
+  imports: from gnuradio import tempest
   make: tempest.framing(${Htotal}, ${Vtotal}, ${Hdisplay}, ${Vdisplay})
   callbacks: 
   - set_Htotal_and_Vtotal(${Htotal},${Vtotal})

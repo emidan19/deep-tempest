@@ -2,7 +2,7 @@ id: tempest_normalize_flow
 label: Normalize Flow
 category: '[Tempest]'
 templates:
-  imports: import tempest
+  imports: from gnuradio import tempest
   make: tempest.normalize_flow(${min}, ${max}, ${window}, ${alpha_avg}, ${update_proba})
   callbacks:
   - set_min_max(${min},${max}) 

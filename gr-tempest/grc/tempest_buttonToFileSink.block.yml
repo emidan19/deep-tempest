@@ -3,7 +3,7 @@ label: Save Capture
 category: '[Tempest]'
 
 templates:
-  imports: import tempest
+  imports: from gnuradio import tempest
   make: tempest.buttonToFileSink(${Filename}, ${input_width}, ${H_size}, ${V_size}, ${remove_blanking}, ${enhance_image}, ${option_path})
 
 #  Make one 'parameters' list entry for every parameter you want settable from the GUI.

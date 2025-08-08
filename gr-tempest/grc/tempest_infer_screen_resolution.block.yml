@@ -2,7 +2,7 @@ id: tempest_infer_screen_resolution
 label: Infers Screen Resolution
 category: '[Tempest]'
 templates:
-  imports: import tempest
+  imports: from gnuradio import tempest
   make: tempest.infer_screen_resolution(${sample_rate}, ${fft_size}, ${refresh_rate},
     ${automatic_mode})
   callbacks: 

@@ -3,7 +3,7 @@ label: TMDS_decoder
 category: '[Tempest]'
 
 templates:
-  imports: import tempest
+  imports: from gnuradio import tempest
   make: tempest.TMDS_decoder()
 
 

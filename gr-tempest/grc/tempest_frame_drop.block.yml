@@ -2,7 +2,7 @@ id: tempest_frame_drop
 label: Frame Dropper
 category: '[Tempest]'
 templates:
-  imports: import tempest
+  imports: from gnuradio import tempest
   make: tempest.frame_drop(${Htotal}, ${Vtotal}, ${correct_sampling}, ${max_deviation},
     ${update_proba}, ${actual_samp_rate})
 parameters:

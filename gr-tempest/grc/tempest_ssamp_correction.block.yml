@@ -3,7 +3,7 @@ label: Sampling Correction Interpolator
 category: '[Tempest]'
 
 templates:
-  imports: import tempest
+  imports: from gnuradio import tempest
   make: tempest.ssamp_correction(${Htotal}, ${Vtotal}, ${correct_sampling}, ${max_deviation})
 
   callbacks: 

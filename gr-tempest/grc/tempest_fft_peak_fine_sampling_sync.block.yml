@@ -3,7 +3,7 @@ label: fft_peak_fine_sampling_sync
 category: '[Tempest]'
 
 templates:
-  imports: import tempest
+  imports: from gnuradio import tempest
   make: tempest.fft_peak_fine_sampling_sync(${sample_rate}, ${size}, ${refresh_rate}, ${Vvisible}, ${Hvisible}, ${automatic_mode})
 
 #  Make one 'parameters' list entry for every parameter you want settable from the GUI.

@@ -50,7 +50,7 @@ outputs:
     optional: false
 
 templates:
-    imports: import tempest
+    imports: from gnuradio import tempest
     var_make: self.${id} = None
     make: |-
         <%

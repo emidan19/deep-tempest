@@ -2,7 +2,7 @@ id: tempest_fine_sampling_synchronization
 label: Fine sampling synchronization
 category: '[Tempest]'
 templates:
-  imports: import tempest
+  imports: from gnuradio import tempest
   make: tempest.fine_sampling_synchronization(${Htotal}, ${Vtotal}, ${correct_sampling},
     ${max_deviation}, ${update_proba})
   callbacks: 
